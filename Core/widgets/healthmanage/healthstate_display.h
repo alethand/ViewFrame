@@ -48,16 +48,23 @@ class HealthState_Display : public QWidget
     Q_OBJECT
 
 public:
-    static HealthState_Display* getOne();
+    explicit HealthState_Display(QWidget *parent = 0);
     ~HealthState_Display();
 
-    void openDynamicLayout(bool ifOpen);                           //开启动态布局
-    void openRecordData(bool ifRecord);                            //开启数据记录
-    void handleNetData(char *data,int size);                       //处理网络数据
+    void openDynamicLayout(bool ifOpen);
+    void openRecordData(bool ifRecord);
+    void handleNetData(char *data,int size);
+
+public://测试用函数
+     void handleNetData(HealthData &result);
+
+protected:
+     void resizeEvent(QResizeEvent *event);
 
 private:
-    static  HealthState_Display *instance;
+    void  analysisNetData(char* data,int size,HealthData &result);
 
+private:
     //动态布局实现
     bool ifDynamicLayout;                                          //是否为动态布局，网络布局需要接受网络数据，静态布局开机就可以
     LayoutAndDisplay *mDisplayElem;
@@ -68,16 +75,6 @@ private:
 
     //解析的网络数据
     HealthData  mNetData;
-
-private:
-    void  analysisNetData(char* data,int size,HealthData &result);                     //解析网络数据
-    explicit HealthState_Display(QWidget *parent = 0);
-
-protected:
-     void resizeEvent(QResizeEvent *event);
-
-public://测试用函数
-     void handleNetData(HealthData &result);
 };
 
 #endif // HEALTHSTATE_DISPLAY_H

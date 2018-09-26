@@ -12,11 +12,10 @@
 #ifndef FILEOPT_H
 #define FILEOPT_H
 
-#include <QtXml/QDomNode>
-#include <QtXml/QDomElement>
-#include "healthstate_display.h"
-#include "layoutset.h"
 #include "Base/util/fileutils.h"
+#include "Base/util/xlsfilesaver.h"
+#include "layoutset.h"
+#include "healthstate_display.h"
 
 namespace HealthState {
 struct HealthData;
@@ -43,7 +42,7 @@ public:
     virtual ~ParseXML_HealthStateLayout();
 
 
-    HealthData  *mHealthData;       //这是狗屎编译器的问题，强制我使用指针
+    HealthData  * mHealthData;       //这是狗屎编译器的问题，强制我使用指针
 
 protected:
      virtual bool  concreteParse(QDomNode &node);
@@ -59,21 +58,22 @@ private:
  * \attention  为了分别工作状态下的数据与颜色，设置为数值【颜色格式】
  */
 
-class XlsHealthState:public FileUtils::XlsFileProxery
+class XlsHealthState:public TableXLSProxery
 {
 public:
     XlsHealthState(bool isVisible = false);
      void addData(HealthData &data);
 
-private:
-     HealthData *mData;
-     bool bisFirstReceive;
-
 protected:
      virtual void run();
+
 private:
-     void initXlsFirstLine();                   //初始化xls文件的第一行
+     void initXlsFirstLine();
      void writeData();
+
+private:
+     HealthData * mData;
+     bool bisFirstReceive;
 };
 
 }

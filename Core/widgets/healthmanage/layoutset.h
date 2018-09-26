@@ -1,12 +1,12 @@
-﻿/*date：2018/8/20
- *author:yww
- *file brief:根据给定参数，动态的根据协议结构体生成相应的界面
- *要求：界面大小会被动态的调整，内部布局要跟着变，数据量较多，刷新速度保证够快
- *
- *界面刷新触发条件：报文数据量更改，显示界面大小更改
- *date:工作状态与分机-组件
- * default：数据默认标签使用label,工作状态使用lineEdit，分机状态使用状态灯
- *modeName:使用设计模式--模板方法
+﻿/*!
+ *  @brief     根据给定参数，动态的根据协议结构体生成相应的界面
+ *  @details   界面大小会被动态的调整，内部布局要跟着变，数据量较多，刷新速度保证够快
+ *  @author    yww
+ *  @version   1.0
+ *  @date      2018.08.20
+ *  @warning
+ *  @copyright NanJing RenGu.
+ *  @note
  */
 
 #ifndef LAYOUTSET_H
@@ -127,6 +127,7 @@ private slots:
      void choooseComponent(QModelIndex index);
 
 private:
+     void initView();
      void retranslateUi();
 
 public:

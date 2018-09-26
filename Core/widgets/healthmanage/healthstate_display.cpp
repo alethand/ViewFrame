@@ -1,8 +1,10 @@
 ﻿#include "healthstate_display.h"
+
 #include <QString>
 #include <QResizeEvent>
 #include <QDebug>
 #include <QVariant>
+#include <QHBoxLayout>
 
 #include "dynamiclayoutbynet.h"
 #include "staticlayoutbyxml.h"
@@ -30,28 +32,17 @@ QString  transformToString(char *startPos,int size)
     return s;
 }
 
-HealthState_Display* HealthState_Display::instance  = NULL;
-
-HealthState_Display *HealthState_Display::getOne()
-{
-    if(NULL == instance)
-        instance = new HealthState_Display();
-    return instance;
-}
-
-
 HealthState_Display::HealthState_Display(QWidget *parent) :
     QWidget(parent)
 {
     ifDynamicLayout = false;
     mDisplayElem = NULL;
     xlsPrinter = NULL;
-
 }
 
 void HealthState_Display::handleNetData(HealthData &result)
 {
-    HealthData *data =new HealthData;
+    HealthData *data = new HealthData;
     *data = result;
     mDisplayElem->startLayout(*data,true);
 }
@@ -75,7 +66,7 @@ HealthState_Display::~HealthState_Display()
 }
 
 /*!
- * \brief HealthState_Display::openDynamicLayout  开启动态布局
+ * \brief 开启动态布局
  * \param ifOpen =true   使用网络数据进行布局
  *        ifOpen = false 使用xls文件进行布局
  * \attention 使用了goto语句
@@ -83,6 +74,7 @@ HealthState_Display::~HealthState_Display()
 void HealthState_Display::openDynamicLayout(bool ifOpen)
 {
     ifDynamicLayout = ifOpen;
+
     if(ifOpen)
     {
 layoutByNet:
@@ -99,10 +91,15 @@ layoutByNet:
             goto layoutByNet;
         }
     }
+
+    QHBoxLayout * layout = new QHBoxLayout;
+    layout->setContentsMargins(1,1,1,1);
+    layout->addWidget(mDisplayElem);
+    this->setLayout(layout);
 }
 
 /*!
- * \brief HealthState_Display::openRecordData   开启记录数据
+ * \brief 开启记录数据
  * \param ifRecord = true 在每次接收到网络数据之后，将会自动写入xls文件
  */
 void HealthState_Display::openRecordData(bool ifRecord)
@@ -120,7 +117,7 @@ void HealthState_Display::openRecordData(bool ifRecord)
 }
 
 /*!
- * \brief HealthState_Display::handleNetData 处理网络数据，如果是动态布局（网络）,根据信息进行布局
+ * \brief 处理网络数据，如果是动态布局（网络）,根据信息进行布局
  * \param data 数据报文首地址
  * \param size 数据报文长度
  */
@@ -157,7 +154,7 @@ void HealthState_Display::handleNetData(char *data, int size)
 }
 
 /*!
- * \brief HealthState_Display::analysisNetData  解析网络数据，从字符串将数据解析成对应的结构体
+ * \brief 解析网络数据，从字符串将数据解析成对应的结构体
  * \param data    网络数据的首地址
  * \param size    网络数的大小
  * \param result  最后解析的数据的存储位置

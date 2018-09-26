@@ -118,16 +118,17 @@ void SwitchPagePrivate::genetateLayout()
             break;
     }
     layout->addStretch(1);
+    layout->setContentsMargins(0,0,0,0);
     q_ptr->setLayout(layout);
 
     switch(mButNums)
     {
-        case SwitchPage::DisPlayPreAndNextNOPageJump:
+        case SwitchPage::DisplayPreAndNextNoPageJump:
              firstPage->hide();
              lastPage->hide();
              jumpPage->hide();
              break;
-        case SwitchPage::DisPlayALLNOPageJump:
+        case SwitchPage::DisplayAllNoPageJump:
              jumpPage->hide();
              break;
         default:
@@ -139,7 +140,6 @@ SwitchPage::SwitchPage(SwitchPage::PageNumAppearPos pos, Qt::Orientation directi
     :QWidget(parent),d_ptr(new SwitchPagePrivate(this,pos,direction,buttonNums))
 {
     setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-
     RSingleton<Base::Subject>::instance()->attach(this);
     retranslateUi();
 }
@@ -156,13 +156,6 @@ SwitchPage::~SwitchPage()
 void SwitchPage::bindCaller(PageInfo *subClass)
 {
     Q_D(SwitchPage);
-    d->hostClass = subClass;
-}
-
-void SwitchPage::bindCaller(PageInfo *subClass, const char *slotsFunc)
-{
-    Q_D(SwitchPage);
-    Q_UNUSED(slotsFunc)
     d->hostClass = subClass;
 }
 

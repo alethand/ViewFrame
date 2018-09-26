@@ -15,8 +15,7 @@ HealthInfoDockPanel::HealthInfoDockPanel(QWidget *parent)
 
 bool HealthInfoDockPanel::initialize()
 {
-    infoWidget = HealthState_Display::getOne();
-
+    infoWidget = new HealthState_Display();
     setWidget(infoWidget);
 
     //todo 以下需要删除

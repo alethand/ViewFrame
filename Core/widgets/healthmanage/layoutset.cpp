@@ -65,53 +65,11 @@ LayoutAndDisplay::LayoutAndDisplay(QWidget *parent)
 {
     RSingleton<Base::Subject>::instance()->attach(this);
 
-    mWorkStateWidget = new QWidget();
-    mWorkStateWidget->setMinimumHeight(minRowInterval*2+mItemsHeight);
-    mWorkStateWidget->setLayout(new QGridLayout());
+    initView();
+    wkRowCount =0,wkColcount =0;
+    subMRowCount = 0 ,subMColCount =0;
 
-    mSwPgWidget = new SwitchPage();
-    mSwPgWidget->setFixedHeight(60);
-    mSwPgWidget->bindCaller(this);
-
-   //以下的布局内容或许会更改
-   QWidget *workStateWidget = new QWidget();
-   QVBoxLayout *vlayout = new QVBoxLayout();
-   vlayout->addWidget(mWorkStateWidget);
-   vlayout->addWidget(mSwPgWidget);
-   workStateWidget->setLayout(vlayout);
-
-   msubMachWidget = new QStackedWidget;
-   msubMachList = new QListWidget();
-   msubMachList->setFixedWidth(100);
-   connect(msubMachList,SIGNAL(clicked(QModelIndex)),this,SLOT(choooseComponent(QModelIndex)));
-   StateLamp::initColorMap();
-
-   QWidget *subStateInfoWidget = new QWidget();
-   QHBoxLayout *hlayout1 = new QHBoxLayout();
-   hlayout1->addWidget(msubMachList);
-   hlayout1->addWidget(msubMachWidget);
-   hlayout1->setMargin(0);
-   subStateInfoWidget->setLayout(hlayout1);
-
-   tabWidget = new QTabWidget();
-   tabWidget->insertTab(0,workStateWidget,tr("WorkState"));
-   tabWidget->insertTab(1,subStateInfoWidget,tr("Sub-component"));
-   tabWidget->setLayout(new QVBoxLayout);
-
-   QVBoxLayout *vlayout2 = new QVBoxLayout();
-   vlayout2->setMargin(0);
-   vlayout2->addWidget(tabWidget);
-   parent->setLayout(vlayout2);
-
-   connect(tabWidget,SIGNAL(currentChanged(int)),this,SLOT(reLayout_BySize()));
-
-   wkRowCount =0,wkColcount =0;
-   subMRowCount = 0 ,subMColCount =0;
-
-   ///显示第一个子机组件信息
-   msubMachWidget->setCurrentIndex(0);
-
-   retranslateUi();
+    retranslateUi();
 }
 
 LayoutAndDisplay::~LayoutAndDisplay()
@@ -373,6 +331,52 @@ void LayoutAndDisplay::choooseComponent(QModelIndex index)
 
     generateSubMCpLayout(index.row());
     msubMachWidget->setCurrentIndex(index.row());
+}
+
+void LayoutAndDisplay::initView()
+{
+    mWorkStateWidget = new QWidget();
+    mWorkStateWidget->setMinimumHeight(minRowInterval*2+mItemsHeight);
+    mWorkStateWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    mWorkStateWidget->setLayout(new QGridLayout());
+
+    mSwPgWidget = new SwitchPage(SwitchPage::PageNumAppearAtStart);
+    mSwPgWidget->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Preferred);
+    mSwPgWidget->bindCaller(this);
+
+   //以下的布局内容或许会更改
+    QWidget *workStateWidget = new QWidget();
+    QVBoxLayout *vlayout = new QVBoxLayout();
+    vlayout->setContentsMargins(1,1,1,1);
+    vlayout->addWidget(mWorkStateWidget);
+    vlayout->addWidget(mSwPgWidget);
+    workStateWidget->setLayout(vlayout);
+
+    msubMachWidget = new QStackedWidget;
+    msubMachList = new QListWidget();
+    msubMachList->setFixedWidth(100);
+    connect(msubMachList,SIGNAL(clicked(QModelIndex)),this,SLOT(choooseComponent(QModelIndex)));
+    StateLamp::initColorMap();
+
+    QWidget *subStateInfoWidget = new QWidget();
+    QHBoxLayout *hlayout1 = new QHBoxLayout();
+    hlayout1->setContentsMargins(0,0,0,0);
+    hlayout1->addWidget(msubMachList);
+    hlayout1->addWidget(msubMachWidget);
+    subStateInfoWidget->setLayout(hlayout1);
+
+    tabWidget = new QTabWidget();
+    tabWidget->addTab(workStateWidget,tr("WorkState"));
+    tabWidget->addTab(subStateInfoWidget,tr("Sub-component"));
+
+    QVBoxLayout *vlayout2 = new QVBoxLayout();
+    vlayout2->setContentsMargins(0,0,0,0);
+    vlayout2->addWidget(tabWidget);
+    this->setLayout(vlayout2);
+
+    connect(tabWidget,SIGNAL(currentChanged(int)),this,SLOT(reLayout_BySize()));
+
+    msubMachWidget->setCurrentIndex(0);
 }
 
 void LayoutAndDisplay::retranslateUi()

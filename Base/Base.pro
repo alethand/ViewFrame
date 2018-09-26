@@ -32,7 +32,6 @@ CONFIG(debug, debug|release) {
   }
 }
 
-
 HEADERS += \
     pluginmanager/observer.h \
     pluginmanager/pluginmanager.h \
@@ -97,3 +96,13 @@ SOURCES += \
     selfwidget/pageinfo.cpp \
     common/validator/rvalidator.cpp \
     common/validator/rcombinevalidator.cpp
+
+win32-msvc2013{
+
+HEADERS +=  \
+    util/xlsfilesaver.h
+
+SOURCES +=  \
+    util/xlsfilesaver.cpp
+
+}

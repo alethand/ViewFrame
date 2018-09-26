@@ -18,26 +18,24 @@ class QSpinBox;
 #include "../pluginmanager/observer.h"
 
 /*!
- * \brief The PageInfo class  想要拥有换页按钮的类必须继承这个类并实现upDateInterface方法
+ * \brief 想要拥有换页按钮的类必须继承这个类并实现upDateInterface方法
  */
 class BASESHARED_EXPORT PageInfo
 {
-  public:
+public:
     PageInfo(){}
     virtual void upDateSwitchPageInfo(int indexsb)=0;
 };
 
-
 /*!
- * \brief  根据参数进行自动布局的按钮切换控件
- * \details  包括上页，下页，首页，尾页，总行数与当前页数，可进行跳转
- * \cond  使用条件：用户在需要有换页的界面继承pageIno类并实现upDateInterface(int index)函数
+ * @brief  根据参数进行自动布局的按钮切换控件
+ * @details  包括上页，下页，首页，尾页，总行数与当前页数，可进行跳转
+ * @cond  使用条件：用户在需要有换页的界面继承pageIno类并实现upDateInterface(int index)函数
  *               在类中新建SwitchPage类的实例
  *                 调用bindCaller进行绑定
  *                 调用switchPage设定总页数
- *  \warning 页面数由第1页开始
+ * @warning 页面数由第1页开始
  */
-
 class SwitchPagePrivate;
 
 class BASESHARED_EXPORT SwitchPage : public QWidget,public Base::Observer
@@ -45,6 +43,9 @@ class BASESHARED_EXPORT SwitchPage : public QWidget,public Base::Observer
     Q_OBJECT
     Q_DECLARE_PRIVATE(SwitchPage)
 public:
+    /*!
+    *  @brief 页面跳转显示位置
+    */
      enum PageNumAppearPos
      {
          PageNumAppearAtStart,         /*!< 开始 */
@@ -57,16 +58,15 @@ public:
      */
      enum DisplayNums
      {
-          DisPlayPreAndNextNOPageJump,         //仅显示上下页切换按钮且无页面跳转
-          DisPlayALLNOPageJump,                //显示首页，上下页，和尾页无页面跳转
-          DisPlayALLYESPageJump                //显示首页，上下页且支持页面跳转
+          DisplayPreAndNextNoPageJump,          //仅显示上下页切换按钮且无页面跳转
+          DisplayAllNoPageJump,                 //显示首页，上下页，和尾页无页面跳转
+          DisplayAllWithPageJump                //显示首页，上下页且支持页面跳转
      };
 
-     SwitchPage(PageNumAppearPos pos = PageNumAppearAtMiddle,Qt::Orientation direction = Qt::Horizontal,DisplayNums buttonNums = DisPlayALLYESPageJump,QWidget *parent=0);
+     SwitchPage(PageNumAppearPos pos = PageNumAppearAtMiddle,Qt::Orientation direction = Qt::Horizontal,DisplayNums buttonNums = DisplayAllWithPageJump,QWidget *parent=0);
      ~SwitchPage();
 
      void bindCaller(PageInfo *subClass);
-     void bindCaller(PageInfo *subClass,const char *slotsFunc);     //推荐使用
 
      void setTotalPageNums(uint total);
      uint getCurPage();

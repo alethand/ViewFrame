@@ -302,25 +302,24 @@ int HexToOct(QString s)
 
 
 XlsHealthState::XlsHealthState(bool isVisible)
-    :XlsFileProxery(isVisible)
+    :TableXLSProxery(isVisible)
 {
       mData = NULL;
       bisFirstReceive = false;
 }
 
 /*!
- * \brief XlsHealthState::addData  对接收到的健康信息，开启线程进行处理
- * \param data
+ * @brief 对接收到的健康信息，开启线程进行处理
+ * @param[in] data 待保存数据
  */
 void XlsHealthState::addData(HealthData &data)
 {
     mData = &data;
     this->start();
-
 }
 
 /*!
- * \brief XlsHealthState::initXlsFirstLine 初始化xls文件的第一行，即表头
+ * @brief 初始化xls文件的第一行，即表头
  */
 void XlsHealthState::initXlsFirstLine()
 {
@@ -368,7 +367,7 @@ void XlsHealthState::writeData()
 
 void XlsHealthState::run()
 {
-    XlsFileProxery::run();
+    TableXLSProxery::run();
 
     if(NULL == mData)
         return;

@@ -20,9 +20,11 @@ bool StaticLayoutByXml::startLayout(HealthData &data,bool ifUse)
     Q_UNUSED(ifUse)
 
     if(!isHasLayout)
-    {   isHasLayout = true;
+    {
+        isHasLayout = true;
         if(!readXMLFile())
             return false;
+
         ensureLayoutData(*(mxmlData->mHealthData));         //解析data数据,确定数据量
         mUpdatePara.reset(mxmlData->mHealthData);
 
