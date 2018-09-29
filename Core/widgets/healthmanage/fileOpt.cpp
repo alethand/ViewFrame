@@ -29,10 +29,9 @@ QColor transformFrHexToRGB(QString strColor)
    return QColor();
 }
 
-ParseXML_HealthStateLayout::ParseXML_HealthStateLayout(ParseXMLMethod *parent)
-    :ParseXMLMethod(parent)
+ParseXML_HealthStateLayout::ParseXML_HealthStateLayout()
+    :RXmlParseMethod()
 {
-
     mHealthData = new HealthData();
 }
 
@@ -42,19 +41,16 @@ ParseXML_HealthStateLayout::~ParseXML_HealthStateLayout()
 }
 
 /*!
- * \brief ParseXML_HealthStateLayout::startParse
- * \param node  接下来应该会读到的节点
- * \attention  注意使用格式，先调用父节点的解析方式
+ * @brief   根据不同的xml文件，统一设置解析的方式
+ * @param[in]   node    xml文件的根节点
+ * @attention  注意使用格式，先调用父节点的解析方式
  *              然后使用循环解析自己的方式，并把节点更新为下一个节点，有利于下一个解析方式的使用
- * \todo @1将解析的xml数据关于工作状态的颜色信息设置保存起来
+ * @todo @1将解析的xml数据关于工作状态的颜色信息设置保存起来
  */
-bool ParseXML_HealthStateLayout::concreteParse(QDomNode &node)
+bool ParseXML_HealthStateLayout::startParse(QDomNode &node)
 {
     LayoutAndDisplay::colorMap.clear();
     StateLamp::colorMap.clear();
-
-    if(mParent != NULL)
-        mParent->startParse(node);
 
     QDomElement root = node.toElement();
     if(root.tagName() != "HealthState")
@@ -162,7 +158,6 @@ bool ParseXML_HealthStateLayout::concreteParse(QDomNode &node)
         node = node.nextSibling();
     }
     return true;
-
 }
 
 bool ParseXML_HealthStateLayout::handleWorkStateInfo(QDomElement &node)

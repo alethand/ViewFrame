@@ -3,6 +3,7 @@
 
 #include <QString>
 #include "protocol/datastruct.h"
+
 using namespace Datastruct;
 class GlobalConfigFile;
 

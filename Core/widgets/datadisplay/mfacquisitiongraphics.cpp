@@ -88,13 +88,14 @@ void MFAcquisitionGraphicsPrivate::initTimeFiledGraphis()
     int maxSize=10000;
 
     m_chart=new QChart();
-    chartTimeFiledView=new QChartView(m_chart);
+    chartTimeFiledView = new QChartView(m_chart);
     chartTimeFiledView->setRubberBand(QChartView::RectangleRubberBand);
 
     m_series=new QLineSeries();
     m_chart->addSeries(m_series);
 
-    m_series->setUseOpenGL(true);
+    //导致窗口全屏后无法菜单栏无法弹出
+//    m_series->setUseOpenGL(true);
 
     QValueAxis *axisX = new QValueAxis();
     axisX->setRange(0,maxSize);

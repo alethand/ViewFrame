@@ -5,7 +5,8 @@
 
 #include "Base/constants.h"
 #include "Base/util/rsingleton.h"
-#include "table.h"
+#include "modelview/tableviewdata.h"
+#include "modelview/tableviewmodelcustom.h"
 
 namespace DataView {
 
@@ -22,17 +23,22 @@ public:
     MFAcquistionTable * q_ptr;
 
     QWidget * mainWidget;
-    Table *mfTable;
+    TableView* dataView;
+    TableViewModelCustom* dataViewModel;
 };
 
 void MFAcquistionTablePrivate::initView()
 {
     mainWidget = new QWidget();
 
-    mfTable = new Table(mainWidget);
-
     QVBoxLayout * vlayout = new QVBoxLayout;
-    vlayout->addWidget(mfTable);
+
+    dataView=new TableView(q_ptr);
+    dataView->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    dataViewModel=new TableViewModelCustom(dataView);
+    dataView->setModel(dataViewModel);
+    vlayout->addWidget(dataView);
+    dataViewModel->setTableCustomKind(MF_ACQUISITION_INFO);
 
     mainWidget->setLayout(vlayout);
 }
@@ -77,22 +83,18 @@ void MFAcquistionTable::onMessage(MessageType::MessType type)
 void MFAcquistionTable::initMFAcquistionTable()
 {
     Q_D(MFAcquistionTable);
-    for(int i=0;i<d->mfTable->rowCount();i++)
-    {
-        QString strValue=QString("%1").arg(i+1);
-        d->mfTable->addRowValue(i,0,strValue);
-    }
 
     QStringList headInfo;
-    int colCount=6;
 
-    headInfo<<QStringLiteral("序号")<<QStringLiteral("采集时间")<<QStringLiteral("采集模式")<<QStringLiteral("采集脉冲个数")<<QStringLiteral("均值")
+    headInfo<<QStringLiteral("序号")<<QStringLiteral("采集时间")<<QStringLiteral("采集模式")<<QStringLiteral("采集脉冲个数")
                     <<QStringLiteral("采集点数");
+    d_ptr->dataViewModel->resetHeadInfo(headInfo);
+    d_ptr->dataView->setColumnWidth(0,90);
+    for(int i=1;i<headInfo.size();i++)
+    {
+        d_ptr->dataView->setColumnWidth(i,130);
+    }
 
-    d->mfTable->setColumnValue(colCount, headInfo);
-    d->mfTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    int row=40;
-    d->mfTable->addRowValue(30,row,true);
 }
 
 void MFAcquistionTable::retranslateUi()

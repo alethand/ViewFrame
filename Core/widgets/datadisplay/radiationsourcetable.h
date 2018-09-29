@@ -9,6 +9,7 @@
 #define RADIATIONSOURCETABLE_H
 
 #include "protocol/datastruct.h"
+#include <QModelIndex>
 using namespace Datastruct;
 
 #include "Base/pluginmanager/rcomponent.h"
@@ -24,33 +25,27 @@ public:
     explicit RadiationSourceTable(QWidget *parent = 0);
     ~RadiationSourceTable();
 
-    /*!
-     *  @brief 数据源刷新方式
-     */
-    enum DataRefreshModel
-    {
-        SCROLL_RENOVATE = 1,            /*!< 滚动刷新 */
-        COVER_RENOVATE                  /*!< 覆盖刷新 */
-    };
 
     bool initialize();
     void release();
     void onMessage(MessageType::MessType type);
-
-public slots:
+    void changeTableHeaderInfo(bool blAddColFlag);
     void recvRSPara(char *buff,int len);
 
 private slots:
     void on_radioButtonScrollReno_clicked();
     void on_radioButtonCoverReno_clicked();
+    void viewRSData(QModelIndex index);
+    void clearTable();
 
 private:
     void initRSTable();
-    void changeTableHeaderInfo(bool blAddColFlag);
     void showTSPara(const RadiationSourceBase& rsData);
     QString getCurrentDate();
     void retranslateUi();
-
+    void showRSDialog(QModelIndex index);
+signals:
+    void sendRSDataList(RSDataList* rsList);
 private:
     RadiationSourceTablePrivate * d_ptr;
 };

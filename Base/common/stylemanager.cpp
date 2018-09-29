@@ -17,7 +17,8 @@ public:
     }
 
     StyleManager * q_ptr;
-    StyleList slist;
+    StylePtrList slist;
+    CustomStyle * currStyle;
 };
 
 StyleManager::StyleManager():d_ptr(new StyleManagerPrivate(this)),QObject()
@@ -25,7 +26,7 @@ StyleManager::StyleManager():d_ptr(new StyleManagerPrivate(this)),QObject()
 
 }
 
-void StyleManager::addStyle(CustomStyle &style)
+void StyleManager::addStyle(CustomStyle *style)
 {
     Q_D(StyleManager);
     d->slist.push_back(style);
@@ -37,7 +38,7 @@ int StyleManager::size()
     return d->slist.size();
 }
 
-StyleList StyleManager::styles()
+StylePtrList StyleManager::styles()
 {
     Q_D(StyleManager);
     return d->slist;
@@ -47,20 +48,20 @@ void StyleManager::switchStyle(int index)
 {
     Q_D(StyleManager);
     Q_ASSERT(index < d->slist.size());
-    CustomStyle style = d->slist.at(index);
-    switch(style.getStyleType()){
+    d->currStyle = d->slist.at(index);
+    switch(d->currStyle->getStyleType()){
         case CustomStyle::STYLE_SHEET:
             {
-                QFile styleFile(style.getStylePath());
+                QFile styleFile(d->currStyle->getStylePath());
                 if(!styleFile.open(QFile::ReadOnly)){
-                    RLOG_ERROR("style file %s read error!",style.getStylePath().toLocal8Bit().data());
+                    RLOG_ERROR("style file %s read error!",d->currStyle->getStylePath().toLocal8Bit().data());
                     return;
                 }
                 qApp->setStyleSheet(styleFile.readAll());
             }
             break;
         case CustomStyle::STYLE_CUSTOMSTYLE:
-            switch(style.getClazz()){
+            switch(d->currStyle->getClazz()){
                 //qApp->setStyle();
                 default:
                     break;
@@ -69,6 +70,22 @@ void StyleManager::switchStyle(int index)
         default:
             break;
     }
+}
+
+CustomStyle * StyleManager::currentStyle()
+{
+    Q_D(StyleManager);
+    return d->currStyle;
+}
+
+CustomStyle *StyleManager::findStyle(QString styleName)
+{
+    Q_D(StyleManager);
+    for(int i = 0; i < d->slist.size();i++){
+        if(d->slist.at(i)->getStyleName() == styleName)
+            return d->slist.at(i);
+    }
+    return NULL;
 }
 
 }

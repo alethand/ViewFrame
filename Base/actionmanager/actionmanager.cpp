@@ -1,6 +1,8 @@
 ﻿#include "actionmanager.h"
 
 #include <QDebug>
+#include <QShortcut>
+#include <QKeySequence>
 
 #include "action.h"
 #include "actioncontainer.h"

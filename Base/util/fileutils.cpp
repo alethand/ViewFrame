@@ -1,178 +1,91 @@
 ﻿#include "fileutils.h"
-#include "qt_windows.h"
 
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
+#include <QTextCodec>
 #include <QDebug>
 
-namespace FileUtils {
+#include "rlog.h"
 
-XmlFileOpt* XmlFileOpt::singleton = NULL;
-
-XmlFileOpt *XmlFileOpt::getOne()
-{
-    if(NULL == singleton)
-    {
-        singleton = new XmlFileOpt();
-    }
-    return singleton;
-}
-
-FileSaverBase::FileSaverBase():m_hasError(false)
+RFile::RFile(const QString &fileName):QFile(fileName)
 {
 
 }
 
-FileSaverBase::~FileSaverBase()
+
+RXmlFile::RXmlFile(const QString &fileName):RFile(fileName),parseMethod(NULL)
 {
-    delete m_file;
+
 }
 
-bool FileSaverBase::finalize()
+RXmlFile::~RXmlFile()
 {
-    m_file->close();
-    m_hasError = m_file->error() == QFile::NoError;
-    delete m_file;
-    m_file = NULL;
-    return m_hasError;
+    if(parseMethod)
+        delete parseMethod;
 }
 
-bool FileSaverBase::write(const char *data, int len)
+bool RXmlFile::startParse()
 {
-    if (m_hasError)
-    {
-        return false;
-    }
-    return setResult(m_file->write(data, len) == len);
-}
+    if(parseMethod){
 
-bool FileSaverBase::write(const QByteArray &bytes)
-{
-    if (m_hasError)
-    {
-        return false;
-    }
-    return setResult(m_file->write(bytes) == bytes.count());
-}
-
-bool FileSaverBase::setResult(bool ok)
-{
-    if (!ok && !m_hasError)
-    {
-        m_errorString = tr("Cannot write file %1. Disk full?").arg(QDir::toNativeSeparators(m_fileName));
-        m_hasError = true;
-    }
-    return ok;
-}
-
-FileSaver::FileSaver(const QString &filename, QIODevice::OpenMode mode)
-{
-    m_fileName = filename;
-
-    m_file = new QFile(filename);
-
-    if (!m_file->open(QIODevice::WriteOnly | mode))
-    {
-        QString err = QFile::exists(filename) ? tr("Cannot overwrite file %1: %2") : tr("Cannot create file %1: %2");
-        m_errorString = err.arg(QDir::toNativeSeparators(filename), m_file->errorString());
-        m_hasError = true;
-    }
-}
-
-bool FileSaver::finalize()
-{
-    if(!m_hasError)
-    {
-        if(!m_file->flush())
-        {
-            m_file->remove();
+        QFileInfo info(fileName());
+        if(!info.exists()|| info.isDir()){
+            RLOG_INFO("File [%s] type is not correct!",fileName().toLocal8Bit().data());
             return false;
         }
 
-        m_file->close();
-        if (m_file->error() != QFile::NoError) {
-            m_file->remove();
+        if(!open(QFile::ReadOnly)){
+            RLOG_INFO("File [%s] open error!",fileName().toLocal8Bit().data());
             return false;
         }
 
-        return true;
+        QDomDocument doc;
+        QString errorMsg;
+        int errorRow = 0,errorCol = 0;
+        if(!doc.setContent(this, false, &errorMsg, &errorRow, &errorCol)){
+            RLOG_INFO("Open xml file error [row:%d,col:%d,msg:%s]!",errorRow,errorCol,errorMsg.toLocal8Bit().data());
+            close();
+            return false;
+        }
+        close();
+        return parseMethod->startParse(doc.documentElement());
     }
+    RLOG_INFO("Not set xml parseMethod!");
     return false;
 }
 
-
-void XmlFileOpt::writeFileHead()
+bool RXmlFile::startSave()
 {
-
-    //   mdoc = new QDomDocument();
-
-    //   //添加处理指令
-    //   QDomProcessingInstruction instruction;
-    //   instruction = mdoc->createProcessingInstruction("xml","version = \"1.0\" encoding = \"UTF-8\"");
-    //   mdoc->appendChild(instruction);
-
-
-}
-
-
-void XmlFileOpt::setParseMethod(ParseXMLMethod *method)
-{
-    if(NULL == method)
-        return;
-    delete mParseMethod;
-    mParseMethod = method;
-}
-
-bool XmlFileOpt::readXmLsFile(QString filePath)
-{
-    if(filePath.isEmpty())
-        return false;
-
-    QFile file(filePath);
-    if(!file.exists())
+    if(parseMethod)
     {
-        qDebug()<<QString("file %1 doesn't exist.").arg(filePath);
-        return false;
+        QFileInfo info(fileName());
+        if(info.isDir()){
+            RLOG_INFO("File [%s] type is not correct!",fileName().toLocal8Bit().data());
+            return false;
+        }
+
+        if(fileName().lastIndexOf(".xml") < 0)
+            setFileName(fileName()+".xml");
+
+        if(!open(QFile::WriteOnly | QFile::Truncate | QFile::Text)){
+            RLOG_INFO("File [%s] open error!",fileName().toLocal8Bit().data());
+            return false;
+        }
+
+        QTextStream stream(this);
+        stream.setCodec(QTextCodec::codecForLocale());
+
+        QDomDocument doc("");
+
+        QDomProcessingInstruction instruction = doc.createProcessingInstruction("xml","version='1.0' encoding='UTF-8'");
+        doc.appendChild(instruction);
+
+        bool result = parseMethod->startSave(doc);
+        if(result)
+            doc.save(stream,4);
+        return result;
     }
-
-    if (!file.open(QIODevice::ReadOnly|QFile::Text))
-    {
-        qDebug()<<" open "<<filePath<<" error";
-        return false;
-    }
-
-    QString error = "";
-    int row = 0, column = 0;
-    QDomDocument doc;
-    if(!doc.setContent(&file, false, &error, &row, &column)){
-        qDebug() << "parse file failed:" << row << "---" << column <<":" <<error;
-        file.close();
-        return false;
-    }
-
-    file.close();
-
-
-    QDomElement root = doc.documentElement();
-
-    if(!root.isNull())
-    {
-        mParseMethod->startParse(dynamic_cast<QDomNode&>(root));
-    }
-    return true;
-}
-
-XmlFileOpt::XmlFileOpt()
-{
-    mParseMethod = new ParseXMLMethod();
-}
-bool ParseXMLMethod::startParse(QDomNode &node)
-{
-    if(NULL != mParent)
-    {
-        return mParent->startParse(node);
-    }
-    return mParent->concreteParse(node);
-}
-
+    RLOG_INFO("Not set xml parseMethod!");
+    return false;
 }

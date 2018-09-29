@@ -23,13 +23,17 @@ public:
     explicit Action(Id id,QObject * parent = 0);
     ~Action();
 
+    void setDefaultKey(QKeySequence dkey);
+    QKeySequence defaultKey();
+    void resetDefaultKey();
+
     void setAction(QAction * act);
     QAction *action() const ;
     QShortcut *shortcut() const;
 
 private:
     QAction * m_action;
-
+    bool initKey;
 };
 
 #endif // ACTION_H

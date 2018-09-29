@@ -4,9 +4,11 @@
 #include <QHBoxLayout>
 #include <QRadioButton>
 
-#include "table.h"
+//#include "table.h"
 #include "Base/constants.h"
 #include "Base/util/rsingleton.h"
+#include "modelview/tableviewdata.h"
+#include "modelview/tableviewmodelcustom.h"
 
 namespace DataView {
 
@@ -20,7 +22,7 @@ public:
     }
     void initView();
 
-    Table *allPluseTable;
+    //Table *allPluseTable;
     AllPluseTable::WorkModel showTableMode;
 
     QWidget * mainWidget;
@@ -28,6 +30,11 @@ public:
 
     QRadioButton * radioButton_RealityShow;
     QRadioButton * radioButton_HistoryShow;
+
+    TableView* dataViewStatictis;                   //统计信息表格
+    TableViewModelCustom* dataViewModelStatictis;
+    TableView* dataViewOriginal;                    //原始信息表格
+    TableViewModelCustom* dataViewModelOriginal;
 };
 
 void AllPluseTablePrivate::initView()
@@ -48,11 +55,23 @@ void AllPluseTablePrivate::initView()
     layout->addWidget(radioButton_HistoryShow);
     radioWidget->setLayout(layout);
 
-    allPluseTable = new Table(mainWidget);
+    dataViewStatictis=new TableView(q_ptr);
+    dataViewStatictis->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    dataViewModelStatictis=new TableViewModelCustom(dataViewStatictis);
+    dataViewStatictis->setModel(dataViewModelStatictis);
+    dataViewModelStatictis->setTableCustomKind(STATISTICAL_INFO);
+
+    dataViewOriginal=new TableView(q_ptr);
+    dataViewOriginal->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+    dataViewModelOriginal=new TableViewModelCustom(dataViewOriginal);
+    dataViewOriginal->setModel(dataViewModelOriginal);
+    dataViewModelOriginal->setTableCustomKind(ORIGINAL_INFO);
 
     QVBoxLayout * vlayout = new QVBoxLayout;
     vlayout->addWidget(radioWidget);
-    vlayout->addWidget(allPluseTable);
+
+    vlayout->addWidget(dataViewStatictis);
+    vlayout->addWidget(dataViewOriginal);
 
     mainWidget->setLayout(vlayout);
 }
@@ -95,10 +114,46 @@ void AllPluseTable::onMessage(MessageType::MessType type)
 void AllPluseTable::initAllPulseTable()
 {
     Q_D(AllPluseTable);
-    changeTableHeaderInfo(true);
-    d->allPluseTable->setHeaderWidth(0,60);
-    int row=40;
-    d->allPluseTable->addRowValue(30,row,true);
+
+    //初始化统计信息列表
+    QStringList headInfo;
+    headInfo<<QStringLiteral("序号")<<QStringLiteral("统计参数名称")<<QStringLiteral("最小值")<<QStringLiteral("最大值")<<QStringLiteral("均值")
+               <<QStringLiteral("均方差");
+
+    d_ptr->dataViewModelStatictis->resetHeadInfo(headInfo);
+    d_ptr->dataViewStatictis->setColumnWidth(0,70);
+    for(int i=1;i<headInfo.size();i++)
+    {
+        d_ptr->dataViewStatictis->setColumnWidth(i,110);
+    }
+
+    headInfo.clear();
+    int N=5;
+    int M=3;
+    QString strValue;
+    headInfo<<QStringLiteral("序号");
+    for(int i=0;i<N;i++)
+    {
+        for(int j=0;j<M;j++)
+        {
+            strValue=QStringLiteral("原始数据%1属性%2名称").arg(i+1).arg(j+1);
+            headInfo<<strValue;
+
+            strValue=QStringLiteral("原始数据%1属性%2是否绘图").arg(i+1).arg(j+1);
+            headInfo<<strValue;
+
+            strValue=QStringLiteral("原始数据%1属性%2值").arg(i+1).arg(j+1);
+            headInfo<<strValue;
+        }
+    }
+
+    d_ptr->dataViewModelOriginal->resetHeadInfo(headInfo);
+    d_ptr->dataViewOriginal->setColumnWidth(0,70);
+    for(int i=1;i<headInfo.size();i++)
+    {
+        d_ptr->dataViewOriginal->setColumnWidth(i,110);
+    }
+
 }
 
 /*!
@@ -108,11 +163,11 @@ void AllPluseTable::initAllPulseTable()
 void AllPluseTable::changeTableHeaderInfo(bool blRealityTypeFlag)
 {
     Q_D(AllPluseTable);
-    for(int i=0;i<d->allPluseTable->rowCount();i++)
-    {
-        QString strValue=QString("%1").arg(i+1);           //行号
-        d->allPluseTable->addRowValue(i,0,strValue);
-    }
+//    for(int i=0;i<d->allPluseTable->rowCount();i++)
+//    {
+//        QString strValue=QString("%1").arg(i+1);           //行号
+//        d->allPluseTable->addRowValue(i,0,strValue);
+//    }
 
     QStringList headInfo;
     int colCount=50;    //列数
@@ -162,7 +217,7 @@ void AllPluseTable::changeTableHeaderInfo(bool blRealityTypeFlag)
         }
     }
 
-    d->allPluseTable->setColumnValue(colCount, headInfo);
+    //d->allPluseTable->setColumnValue(colCount, headInfo);
 }
 
 void AllPluseTable::retranslateUi()

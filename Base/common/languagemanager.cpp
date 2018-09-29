@@ -31,7 +31,7 @@ public:
     }
 
     LanguageManager * q_ptr;
-    LanguageList lanlist;
+    LanguagePtrList lanlist;
     QString transPath;           /*!< 保存翻译文件路径 */
     QTranslator translator;
 };
@@ -60,9 +60,9 @@ void LanguageManager::loadTranslator(QString filePath)
     std::for_each(qmfiles.begin(),qmfiles.end(),[&](const QString & fileName){
         QStringList result = fileName.left(fileName.indexOf(".")).split("_");
         if(result.size() == 3){
-            Language la(fileName,result.at(2));
+            Language * la = new Language(fileName,result.at(2));
             if(fileName.contains(locale.name())){
-                la.setSelected(true);
+                la->setSelected(true);
             }
             d->lanlist.push_back(la);
         }
@@ -85,10 +85,20 @@ bool LanguageManager::switchLanguage(QString fileName)
     return false;
 }
 
-LanguageList LanguageManager::languages()
+LanguagePtrList LanguageManager::languages()
 {
     Q_D(LanguageManager);
     return d->lanlist;
+}
+
+Language *LanguageManager::findLan(QString fileName)
+{
+    Q_D(LanguageManager);
+    for(int i = 0; i < d->lanlist.size();i++){
+        if(d->lanlist.at(i)->getFileName() == fileName)
+            return d->lanlist.at(i);
+    }
+    return NULL;
 }
 
 } //namespace Base

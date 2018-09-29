@@ -23,8 +23,6 @@ struct HealthData;
 using namespace HealthState;
 using HealthState::HealthData;
 
-using namespace FileUtils;
-
 //16进制转Rgb再转颜色
 
 namespace HealthState {
@@ -35,17 +33,15 @@ QColor transformFrHexToRGB(QString strColor);
 /*!
  * \brief 解析健康管理的xml文件
  */
-class  ParseXML_HealthStateLayout:public ParseXMLMethod
+class  ParseXML_HealthStateLayout : public RXmlParseMethod
 {
 public:
-    ParseXML_HealthStateLayout(ParseXMLMethod *parent=0);
+    ParseXML_HealthStateLayout();
     virtual ~ParseXML_HealthStateLayout();
 
+    virtual bool  startParse(QDomNode & node);
 
-    HealthData  * mHealthData;       //这是狗屎编译器的问题，强制我使用指针
-
-protected:
-     virtual bool  concreteParse(QDomNode &node);
+    HealthData  * mHealthData;
 
 private:
     bool handleWorkStateInfo(QDomElement &node);        //处理工作状态信息

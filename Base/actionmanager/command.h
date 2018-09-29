@@ -12,6 +12,7 @@
 #define COMMAND_H
 
 #include <QObject>
+#include <QKeySequence>
 #include "id.h"
 #include "../base_global.h"
 
@@ -44,9 +45,11 @@ public:
     virtual QAction *action() const ;
     virtual QShortcut *shortcut() const;
 
+protected:
+    QKeySequence m_defaultKey;
+
 private:
     Id m_id;
-
 };
 
 #endif // COMMAND_H

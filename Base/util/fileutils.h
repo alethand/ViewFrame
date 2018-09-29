@@ -1,10 +1,14 @@
 ﻿/*!
- *  @brief     文本帮助工具类
- *  @details   提供统一的文本创建、保存等操作
- *  @file
+ *  @brief     文本解析/保存类
+ *  @details   对不同的文本读取、保存做了一定的抽象，简化代码 @p
+ *             @class RXmlParseMethod
+ *                  解析不同的xml文件时，只需继承此类，并且根据需要实现对应的虚函数
+ *
+ *             @class RXmlFile
+ *                  xml格式文件,采用装饰器模式对通用的信息进行处理
  *  @author    wey
  *  @version   1.0
- *  @date      2017.12.XX
+ *  @date      2018.09.20
  *  @warning
  *  @copyright NanJing RenGu.
  */
@@ -12,103 +16,57 @@
 #ifndef FILEUTILS_H
 #define FILEUTILS_H
 
-#include <QString>
-#include <QIODevice>
-#include <QCoreApplication>
-
-#include <QtXml/qdom.h>
-#include <QtXml/QDomProcessingInstruction>
-#include <QtXml/QDomDocument>
-#include <QtXml/QDomNode>
 #include <QtXml/QDomElement>
-#include <QtXml/QDomNodeList>
+#include <QFile>
 
 #include "../base_global.h"
 
-class QFile;
-
-namespace FileUtils
+class BASESHARED_EXPORT RFile : public QFile
 {
-
-class BASESHARED_EXPORT FileSaverBase
-{
-    Q_DECLARE_TR_FUNCTIONS(FileSaverBase)
+    Q_OBJECT
 public:
-    FileSaverBase();
-    ~FileSaverBase();
+    RFile(const QString &fileName);
 
-    QString fileName() const { return m_fileName; }
-    bool hasError() const { return m_hasError; }
-    QString errorString() const { return m_errorString; }
+    virtual bool startParse(){return true;}
+    virtual bool startSave(){return true;}
+};
 
-    virtual bool finalize();
+class BASESHARED_EXPORT RXmlParseMethod
+{
+public:
+    RXmlParseMethod(){}
+    virtual ~RXmlParseMethod(){}
 
-    bool write(const char *data, int len);
-    bool write(const QByteArray &bytes);
-    bool setResult(bool ok);
+    /*!
+     * @brief 解析xml文件
+     * @attention rootNode是已经打开的文件根节点，只需从此节点开始进一步解析子节点即可。
+     * @param[in] rootNode 文档根节点
+     * @return bool 是否解析成功
+     */
+    virtual bool  startParse(QDomNode & /*rootNode*/){return true;}
+
+    /*!
+     * @brief 保存xml文件信息
+     * @attention 用户需要在doc中创建根节点，并一次创建其它节点，文件的保存由基类处理
+     * @param[in] doc 文档对象
+     * @return true 保存成功
+     */
+    virtual bool  startSave(QDomDocument & /*doc*/){return true;}
+};
+
+class BASESHARED_EXPORT RXmlFile : public RFile
+{
+public:
+    RXmlFile(const QString & fileName);
+    ~RXmlFile();
+
+    void setParseMethod(RXmlParseMethod * p){this->parseMethod = p;}
+
+    virtual bool startParse();
+    virtual bool startSave();
 
 protected:
-    QFile * m_file;
-    QString m_fileName;
-    QString m_errorString;
-    bool m_hasError;
-
+    RXmlParseMethod * parseMethod;
 };
-
-class BASESHARED_EXPORT FileSaver : public FileSaverBase
-{
-    Q_DECLARE_TR_FUNCTIONS(FileSaver)
-public:
-    explicit FileSaver(const QString &filename, QIODevice::OpenMode mode = QIODevice::NotOpen);
-    QFile *file() { return m_file; }
-
-    virtual bool finalize();
-
-private:
-};
-
-///--------XMl文件操作----------///
-
-class ParseXMLMethod;
-class BASESHARED_EXPORT XmlFileOpt
-{
-public:
-   static   XmlFileOpt* getOne();
-
-   ///写入xml文件
-   void writeFileHead();                        //函数无作用
-
-   ///解析xml文件
-   void setParseMethod(ParseXMLMethod *method);       //设置解析方式
-   bool readXmLsFile(QString filePath);
-
-
-   ParseXMLMethod *mParseMethod;
-
-private:
-    XmlFileOpt();
-
-    static XmlFileOpt *singleton;
-};
-
-
-/*!
- * @brief   xml文件的解析方式
- * @warning 每个解析中的所解释出来的节构体声明为public
- * @note 装饰者模式
- */
-class BASESHARED_EXPORT ParseXMLMethod
-{
-public:
-    ParseXMLMethod(ParseXMLMethod *parent=0){mParent = parent;}
-    virtual ~ParseXMLMethod(){}
-
-    bool  startParse(QDomNode &node);
-protected:
-    ParseXMLMethod *mParent;
-    virtual bool concreteParse(QDomNode &node) {Q_UNUSED(node) return true;}
-};
-
-}
 
 #endif // FILEUTILS_H

@@ -24,10 +24,12 @@ public:
     void setSettings(QSettings * settings){this->settings = settings;}
 
     bool parseFile();
+    void saveFile();
 
 public:
     RLog::LogConfig logConfig;
     Datastruct::DatabaseConfigInfo databaseConfig;
+    Datastruct::SystemConfigInfo systemConfigInfo;
 
 private:
     QVariant getGlobalValue(const QString & group,const QString &key, const QVariant & defaultValue);

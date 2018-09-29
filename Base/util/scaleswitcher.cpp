@@ -1,9 +1,9 @@
 ﻿#include "scaleswitcher.h"
 
-#include <WinSock2.h>
 #include <QDebug>
 
-#ifdef WIN32
+#ifdef Q_OS_WIN
+#include <WinSock2.h>
 #pragma comment(lib,"ws2_32.lib")
 #endif
 

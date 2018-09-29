@@ -52,8 +52,9 @@ void StaticLayoutByXml::flushScreen(HealthData &data)
 
 bool StaticLayoutByXml::readXMLFile()
 {
-    XmlFileOpt::getOne()->setParseMethod(mxmlData);
-    return XmlFileOpt::getOne()->readXmLsFile("test.xml");
+    RXmlFile file("test.xml");
+    file.setParseMethod(mxmlData);
+    return file.startParse();
 }
 
 void StaticLayoutByXml::compareStringOrder(HealthData &data)

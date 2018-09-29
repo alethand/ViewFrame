@@ -36,8 +36,6 @@ class QLineEdit;
 #define MAX_SubMACHINE_NUMS 20                          //最大分机数量
 #define MAX_COMPONENT_NUMS 20                           //最大分机组件个数
 
-using namespace FileUtils;
-
 using namespace HealthState;
 using HealthState::HealthData;
 

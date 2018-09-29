@@ -2,8 +2,12 @@
 #include "ui_mainwindow.h"
 
 #include <QAction>
+#include <QActionGroup>
 #include <QDebug>
 #include <QFile>
+#include <QFileInfo>
+#include <QDir>
+#include <QMessageBox>
 
 #include "Base/actionmanager/actioncontainer.h"
 #include "Base/actionmanager/actionmanager.h"
@@ -15,6 +19,7 @@
 #include "Base/common/languagemanager.h"
 #include "Base/pluginmanager/subject.h"
 #include "Base/util/rlog.h"
+#include "Base/util/fileutils.h"
 #include "healthmanage/healthinfopannel.h"
 
 #include "datadisplay/datadisplaypanel.h"
@@ -26,7 +31,11 @@
 #include "datadisplay/mfacquisitiongraphics.h"
 #include "datadisplay/spectrumgraphics.h"
 
+#include "global.h"
+#include "file/globalconfigfile.h"
+#include "file/programfilepath.h"
 #include "widgets/taskcontrol/taskcontrolpanel.h"
+#include "shortcutsettings.h"
 
 using namespace Base;
 
@@ -39,13 +48,14 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowTitle(tr("ViewFrame"));
 
     //TODO 20180915 待添加对配置路径下文件搜索
-    RSingleton<StyleManager>::instance()->addStyle(CustomStyle(tr("Technology style"),":/resource/style/Technology.qss",true));
-    RSingleton<StyleManager>::instance()->addStyle(CustomStyle(tr("Dark style"),":/resource/style/Black.qss",false));
-    RSingleton<StyleManager>::instance()->addStyle(CustomStyle(tr("Light style"),":/resource/style/White.qss",false));
+    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Technology style"),":/resource/style/Technology.qss",true));
+    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Dark style"),":/resource/style/Black.qss",false));
+    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Light style"),":/resource/style/White.qss",false));
 
     RSingleton<Subject>::instance()->attach(this);
 
     initMenu();
+    loadUserSetting();
     initComponent();
 
     updateLanguage(curLanguageName);
@@ -80,13 +90,13 @@ void MainWindow::initMenu()
 
     //程序菜单
     serverMenu = ActionManager::instance()->createMenu(Constant::G_PROGRAM);
-    serverMenu->menu()->raise();
     serverMenu->appendGroup(Constant::G_PROGRAM);
     menubar->addMenu(serverMenu, Constant::G_PROGRAM);
 
     exitAction = new QAction(this);
     connect(exitAction,SIGNAL(triggered()),this,SLOT(programExit()));
     Action * serverDelete = ActionManager::instance()->registAction(Constant::PROGRAM_EXIT,exitAction);
+    serverDelete->setDefaultKey(QKeySequence("Ctrl+Q"));
 
     serverMenu->addAction(serverDelete,Constant::G_PROGRAM);
 
@@ -99,12 +109,14 @@ void MainWindow::initMenu()
     topHintAction->setCheckable(true);
     connect(topHintAction,SIGNAL(triggered(bool)),this,SLOT(windowTopHint(bool)));
     Action * topHint = ActionManager::instance()->registAction(Constant::TOP_HINT,topHintAction);
+    topHint->setDefaultKey(QKeySequence("Ctrl+Shift+T"));
     settingsMenu->addAction(topHint,Constant::G_SETTING);
 
     fullScreenAction = new QAction(this);
     fullScreenAction->setCheckable(true);
     connect(fullScreenAction,SIGNAL(triggered(bool)),this,SLOT(windowFullScreen(bool)));
     Action * fullScreen = ActionManager::instance()->registAction(Constant::FULL_SCREEN,fullScreenAction);
+    fullScreen->setDefaultKey(QKeySequence("Ctrl+Shift+f11"));
     settingsMenu->addAction(fullScreen,Constant::G_SETTING);
 
     settingsMenu->addSeparator(Constant::G_SETTING);
@@ -115,15 +127,18 @@ void MainWindow::initMenu()
     styleMenu->appendGroup(Constant::CUSTOM_STYLE);
     settingsMenu->addMenu(styleMenu,Constant::CUSTOM_STYLE);
 
-    StyleList styles = RSingleton<StyleManager>::instance()->styles();
+    StylePtrList styles = RSingleton<StyleManager>::instance()->styles();
+    QActionGroup * styleGroup = new QActionGroup(this);
     for(int i = 0;i<styles.size();i++){
-        QAction * action = new QAction(styles.at(i).getStyleName());
+        QAction * action = new QAction(styles.at(i)->getStyleName());
         styleActionList.append(action);
         action->setCheckable(true);
-        if(styles.at(i).isSelected()){
-            action->setChecked(styles.at(i).isSelected());
+        if(styles.at(i)->isSelected()){
+            action->setChecked(styles.at(i)->isSelected());
             updateStyle(i);
         }
+        styles.at(i)->setAction(action);
+        styleGroup->addAction(action);
         connect(action,SIGNAL(triggered()),this,SLOT(switchStyle()));
         action->setProperty(Constant::CUSTOM_STYLE,i);
         Action * tmpStyle = ActionManager::instance()->registAction(QString("StyleAction%1").arg(i).toLocal8Bit().data(),action);
@@ -136,20 +151,32 @@ void MainWindow::initMenu()
     lanMenu->appendGroup(Constant::SYSTEM_LANGUAGE);
     settingsMenu->addMenu(lanMenu,Constant::SYSTEM_LANGUAGE);
 
-    LanguageList lans = RSingleton<LanguageManager>::instance()->languages();
+    LanguagePtrList lans = RSingleton<LanguageManager>::instance()->languages();
+    QActionGroup * lanGroup = new QActionGroup(this);
     for(int i = 0;i<lans.size();i++){
-        QAction * action = new QAction(lans.at(i).getName());
+        QAction * action = new QAction(lans.at(i)->getName());
         lanActionList.append(action);
         action->setCheckable(true);
-        if(lans.at(i).isSelected()){
-            action->setChecked(lans.at(i).isSelected());
-            curLanguageName = lans.at(i).getFileName();
+        if(lans.at(i)->isSelected()){
+            action->setChecked(lans.at(i)->isSelected());
+            curLanguageName = lans.at(i)->getFileName();
         }
+        lans.at(i)->setAction(action);
+        lanGroup->addAction(action);
         connect(action,SIGNAL(triggered()),this,SLOT(switchLanguage()));
-        action->setProperty(Constant::SYSTEM_LANGUAGE,lans.at(i).getFileName());
+        action->setProperty(Constant::SYSTEM_LANGUAGE,lans.at(i)->getFileName());
         Action * tmpStyle = ActionManager::instance()->registAction(QString("LanAction%1").arg(i).toLocal8Bit().data(),action);
         lanMenu->addAction(tmpStyle,Constant::SYSTEM_LANGUAGE);
     }
+
+    //快捷键盘
+    settingsMenu->appendGroup(Constant::SYSTEM_SHORTCUT);
+    shortcutAction = new QAction(this);
+    connect(shortcutAction,SIGNAL(triggered()),this,SLOT(showShortcutSettings()));
+    Action * shortcut = ActionManager::instance()->registAction(Constant::SYSTEM_SHORTCUT,shortcutAction);
+    shortcut->setDefaultKey(QKeySequence("Ctrl+Shift+K"));
+    settingsMenu->addAction(shortcut,Constant::SYSTEM_SHORTCUT);
+
 
     //帮助菜单
     helpMenu = ActionManager::instance()->createMenu(Constant::G_HELP);
@@ -197,8 +224,10 @@ void MainWindow::windowFullScreen(bool)
     Qt::WindowStates state = windowState();
     if(!isFullScreen())
         state |= Qt::WindowFullScreen;
-    else
+    else{
         state = state & ~Qt::WindowFullScreen;
+        showMaximized();
+    }
 
     setWindowState(state);
 }
@@ -209,10 +238,17 @@ void MainWindow::windowFullScreen(bool)
 void MainWindow::switchStyle()
 {
     int switchIndex = QObject::sender()->property(Constant::CUSTOM_STYLE).toInt();
-    StyleList list = RSingleton<StyleManager>::instance()->styles();
+    StylePtrList list = RSingleton<StyleManager>::instance()->styles();
     if(switchIndex >= 0 && switchIndex < list.size()){
         updateStyle(switchIndex);
+        RGlobal::G_GlobalConfigFile->systemConfigInfo.style = RSingleton<StyleManager>::instance()->currentStyle()->getStyleName();
+        RGlobal::G_GlobalConfigFile->saveFile();
     }
+}
+
+void MainWindow::updateStyle(int index)
+{
+    RSingleton<StyleManager>::instance()->switchStyle(index);
 }
 
 /*!
@@ -222,16 +258,8 @@ void MainWindow::switchLanguage()
 {
     QString switchLan = QObject::sender()->property(Constant::SYSTEM_LANGUAGE).toString();
     updateLanguage(switchLan);
-}
-
-void MainWindow::updateStyle(int index)
-{
-    RSingleton<StyleManager>::instance()->switchStyle(index);
-    for(int i = 0;i < styleActionList.size(); i++){
-        if( index != i){
-            styleActionList.at(i)->setChecked(false);
-        }
-    }
+    RGlobal::G_GlobalConfigFile->systemConfigInfo.locale = switchLan;
+    RGlobal::G_GlobalConfigFile->saveFile();
 }
 
 /*!
@@ -241,29 +269,90 @@ void MainWindow::updateStyle(int index)
 void MainWindow::updateLanguage(QString lanFileName)
 {
     if(RSingleton<LanguageManager>::instance()->switchLanguage(lanFileName)){
-        std::for_each(lanActionList.begin(),lanActionList.end(),[&](QAction * action){
-            if(action->property(Constant::SYSTEM_LANGUAGE).toString() != lanFileName){
-                action->setChecked(false);
-            }
-        });
         RSingleton<Subject>::instance()->notify(MessageType::MESS_LAN_CHANGED);
+    }
+}
+
+/*!
+ * @brief 加载上一次的默认配置
+ * @details 1.语言设置； @n
+ *          2.样式表设置； @n
+ *          3.从config/config.ini文件中查找是否有快捷键设置，若存在快捷键设置则使用 @n
+ *          4.布局设置(待添加) @n
+ */
+void MainWindow::loadUserSetting()
+{
+    //[1] 语言设置
+    if(RGlobal::G_GlobalConfigFile->systemConfigInfo.locale.isEmpty()){
+        RGlobal::G_GlobalConfigFile->systemConfigInfo.locale = curLanguageName;
+        RGlobal::G_GlobalConfigFile->saveFile();
+    }else{
+        Base::Language * currLan = RSingleton<LanguageManager>::instance()->findLan(RGlobal::G_GlobalConfigFile->systemConfigInfo.locale);
+        if(currLan){
+            currLan->getAction()->setChecked(true);
+            updateLanguage(RGlobal::G_GlobalConfigFile->systemConfigInfo.locale);
+        }
+    }
+
+    //[2] 样式表设置
+    if(RGlobal::G_GlobalConfigFile->systemConfigInfo.style.isEmpty()){
+        RGlobal::G_GlobalConfigFile->systemConfigInfo.style = RSingleton<StyleManager>::instance()->currentStyle()->getStyleName();
+        RGlobal::G_GlobalConfigFile->saveFile();
+    }else{
+        Base::CustomStyle * currStyle = RSingleton<StyleManager>::instance()->findStyle(RGlobal::G_GlobalConfigFile->systemConfigInfo.style);
+        if(currStyle){
+            currStyle->getAction()->setChecked(true);
+            updateStyle(currStyle->getAction()->property(Constant::CUSTOM_STYLE).toInt());
+        }
+    }
+
+    //[3] 快捷键
+    if(!RGlobal::G_GlobalConfigFile->systemConfigInfo.defaultKeySchemes){
+        ProgramFilePath filePath;
+        RXmlFile xmlfile(filePath.shortcutPath + QDir::separator() + RGlobal::G_GlobalConfigFile->systemConfigInfo.userKeySchemesName);
+        ShortcutParseMethod * method = new ShortcutParseMethod();
+        xmlfile.setParseMethod(method);
+        if(xmlfile.startParse()){
+            ShortcutParseMethod::ShortcutMappingList list = method->getParsedList();
+            ActionManager::ActionMap actMap = ActionManager::instance()->getAllActions();
+
+            ActionManager::ActionMapIterator iter = actMap.constBegin();
+            while(iter != actMap.constEnd()){
+                QString id = const_cast<Id&>(iter.key()).data();
+                if(id.indexOf(".") > 0 && id.split(".").size() == 2){
+                    auto findIndex = std::find_if(list.constBegin(),list.constEnd(),[&id](const ShortcutMapping & item){
+                        return item.id == id;
+                    });
+                    if(findIndex != list.constEnd()){
+                        iter.value()->setDefaultKey(QKeySequence((*findIndex).keySequence));
+                    }else{
+                        iter.value()->setDefaultKey(QKeySequence());
+                    }
+                }
+                iter++;
+            }
+        }else{
+            QMessageBox::warning(this,tr("warning"),tr("User defined shortcut keys not available!"),QMessageBox::Yes);
+        }
     }
 }
 
 void MainWindow::retranslateUi()
 {
-    serverMenu->menu()->setTitle(tr("&Program"));
-    exitAction->setText(tr("&Exit"));
+    serverMenu->menu()->setTitle(tr("Program(&P)"));
+    exitAction->setText(tr("Exit(&X)"));
 
-    settingsMenu->menu()->setTitle(tr("&Settings"));
+    settingsMenu->menu()->setTitle(tr("Settings(&S)"));
     topHintAction->setText(tr("Top hint"));
     fullScreenAction->setText(tr("Full screen"));
 
-    styleMenu->menu()->setTitle(tr("Styles"));
-    lanMenu->menu()->setTitle(tr("Language"));
-    helpMenu->menu()->setTitle(tr("&Help"));
-    supportAction->setText(tr("Technical support"));
-    aboutPorgramAction->setText(tr("About program"));
+    styleMenu->menu()->setTitle(tr("Styles(&Y)"));
+    lanMenu->menu()->setTitle(tr("Language(&L)"));
+    shortcutAction->setText(tr("Shortcut settings(&T)"));
+
+    helpMenu->menu()->setTitle(tr("Help(&H)"));
+    supportAction->setText(tr("Technical support(&T)"));
+    aboutPorgramAction->setText(tr("About program(&A)"));
 }
 
 void MainWindow::technicalSupport()
@@ -274,6 +363,16 @@ void MainWindow::technicalSupport()
 void MainWindow::aboutProgram()
 {
 
+}
+
+/*!
+ * @brief 显示快捷键设置窗口
+ * @details 初始显示所有快捷键信息，按照插件分类显示；
+ */
+void MainWindow::showShortcutSettings()
+{
+    ShortcutSettings ss(this);
+    ss.exec();
 }
 
 /*!
@@ -329,7 +428,7 @@ void MainWindow::initComponent()
     PluginManager::ComponentMap::iterator iter = maps.begin();
     while(iter != maps.end()){
         RComponent * comp = iter.value();
-        comp->setFeatures(QDockWidget::DockWidgetMovable);
+        comp->setFeatures(QDockWidget::AllDockWidgetFeatures);
         comp->initialize();
         iter++;
     }

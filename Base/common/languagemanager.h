@@ -16,6 +16,8 @@
 
 #include "../base_global.h"
 
+class QAction;
+
 namespace Base{
 
 class BASESHARED_EXPORT Language{
@@ -28,15 +30,19 @@ public:
     void setSelected(bool flag){this->selected = flag;}
     bool isSelected()const{return this->selected;}
 
+    void setAction(QAction * act){this->action = act;}
+    QAction * getAction(){return action;}
+
 private:
     void switchName(QString code);
 private:
     QString name;           /*!< Action显示语言名称 */
     QString fileName;       /*!< 翻译文件名(带后缀) */
     bool selected;          /*!< 是否被选中显示 */
+    QAction * action;
 };
 
-typedef QList<Language> LanguageList;
+typedef QList<Language *> LanguagePtrList;
 
 class LanguageManagerPrivate;
 
@@ -50,7 +56,8 @@ public:
     void loadTranslator(QString filePath);
 
     bool switchLanguage(QString fileName);
-    LanguageList languages();
+    LanguagePtrList languages();
+    Language * findLan(QString fileName);
 
 private:
     LanguageManagerPrivate * d_ptr;

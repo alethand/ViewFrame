@@ -13,6 +13,7 @@
 #include "Base/common/languagemanager.h"
 #include "global.h"
 #include "file/globalconfigfile.h"
+#include "file/programfilepath.h"
 
 #if _MSC_VER >= 1600
 #pragma execution_character_set("utf-8")
@@ -32,13 +33,12 @@ int main(int argc, char *argv[])
     QTextCodec::setCodecForLocale(codec);
 #endif
 
-    QString configFullPath = qApp->applicationDirPath() + QString(Constant::PATH_ConfigPath);
+    ProgramFilePath programPath;
 
     //解析INI文件
-    QSettings * settings = new QSettings(configFullPath+"/config.ini",QSettings::IniFormat);
+    QSettings * settings = new QSettings(programPath.configFile,QSettings::IniFormat);
     RUtil::setGlobalSettings(settings);
 
-    //解析XML文件
     RGlobal::G_GlobalConfigFile = new GlobalConfigFile;
     RGlobal::G_GlobalConfigFile->setSettings(settings);
     if(!RGlobal::G_GlobalConfigFile->parseFile()){
@@ -51,9 +51,12 @@ int main(int argc, char *argv[])
         QMessageBox::warning(NULL,QObject::tr("Warning"),QObject::tr("Log module initialization failure!"),QMessageBox::Yes,QMessageBox::Yes);
     }
 
-    QString translationPath = configFullPath + QString(Constant::CONFIG_LocalePath);
-    if(RUtil::createDir(translationPath)){
-        RSingleton<Base::LanguageManager>::instance()->loadTranslator(translationPath);
+    if(RUtil::createDir(programPath.translationPath)){
+        RSingleton<Base::LanguageManager>::instance()->loadTranslator(programPath.translationPath);
+    }
+
+    if(!RUtil::createDir(programPath.shortcutPath)){
+        QMessageBox::warning(NULL,QObject::tr("Warning"),QObject::tr("Create schemes path failed!"),QMessageBox::Yes,QMessageBox::Yes);
     }
 
     MainWindow w;

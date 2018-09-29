@@ -7,27 +7,33 @@
 #include <QList>
 #include <QMap>
 #include <QHBoxLayout>
-
-#include "table.h"
+//#include <QMenu>
+//#include "table.h"
 #include "Base/constants.h"
 #include "Base/util/rsingleton.h"
+#include "modelview/tableviewdata.h"
+#include "modelview/tableviewmoderradiationsource.h"
+#include "radiationsourcetablerenovatedialog.h"
 
 namespace DataView {
 
 const int INIT_TABLE_COL_NUM =50;                                   //表格初始化为50列
 const int INIT_TABLE_ROW_NUM=40;                                    //表格初始化为20行
 const int RADIASOURCE_START_POINT=140;                              //数据源基信息起始位置
+const char ACTION_TYPE[] = "ActionType";
 
 class RadiationSourceTablePrivate
 {
     Q_DECLARE_PUBLIC(RadiationSourceTable)
 public:
-    explicit RadiationSourceTablePrivate(RadiationSourceTable * q):q_ptr(q),enRSReKind(RadiationSourceTable::SCROLL_RENOVATE),
+    explicit RadiationSourceTablePrivate(RadiationSourceTable * q):q_ptr(q),enRSReKind(SCROLL_RENOVATE),
         m_currentRowToInsert(-1)
     {
         initView();
+        initTableViewMenu();
     }
     void initView();
+    void initTableViewMenu();
     void intRSTable();
 
     RadiationSourceTable * q_ptr;
@@ -37,14 +43,21 @@ public:
     QRadioButton * radioButtonCoverReno;
     QRadioButton * radioButtonScrollReno;
 
-    RadiationSourceTable::DataRefreshModel enRSReKind;                //刷新方式
-    Table * rsTable;
-    QMap<int,RadiationSourceRenovate> rsReMap;          //覆盖刷新下的map,key：数据源批号 value:数据源的具体信息
-    int m_currentRowToInsert;                           //当前表格总行数
+    DataRefreshModel enRSReKind;                //刷新方式
+    //Table * rsTable;
+    RSDataMap rsReMap;                          //覆盖刷新下的map,key：数据源批号 value:数据源的具体信息
+    int m_currentRowToInsert;
+    RSDataList rsDataList;
+    TableView* dataView;
+    TableViewModelRadiationSource * dataViewModel;
+    bool blDoubleClickedFlag;                   //覆盖刷新模式下的双击标识
+
+    QAction *clearAction;
 };
 
 void RadiationSourceTablePrivate::initView()
 {
+    blDoubleClickedFlag=false;
     mainWidget = new QWidget();
 
     QWidget * radioWidget = new QWidget();
@@ -62,13 +75,26 @@ void RadiationSourceTablePrivate::initView()
 
     radioWidget->setLayout(layout);
 
-    rsTable = new Table(mainWidget);
-
     QVBoxLayout * vlayout = new QVBoxLayout;
     vlayout->addWidget(radioWidget);
-    vlayout->addWidget(rsTable);
+
+    dataView = new TableView(q_ptr);
+    dataView->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+
+    dataViewModel = new TableViewModelRadiationSource(dataView);
+    dataView->setModel(dataViewModel);
+    vlayout->addWidget(dataView);
 
     mainWidget->setLayout(vlayout);
+
+    QObject::connect(dataView, SIGNAL(tableCheckDoubleSignal(QModelIndex)), q_ptr, SLOT(viewRSData(QModelIndex)));
+}
+
+void RadiationSourceTablePrivate::initTableViewMenu()
+{
+    clearAction = new QAction();
+    dataView->addAction(clearAction);
+    QObject::connect(clearAction, SIGNAL(triggered(bool)), q_ptr, SLOT(clearTable()));
 }
 
 RadiationSourceTable::RadiationSourceTable(QWidget *parent) :
@@ -113,9 +139,8 @@ void RadiationSourceTable::onMessage(MessageType::MessType type)
 void RadiationSourceTable::initRSTable()
 {
     Q_D(RadiationSourceTable);
+    d->clearAction->setText(QObject::tr("Clear Table"));
     changeTableHeaderInfo(false);
-    d->rsTable->setHeaderWidth(0,60);
-    d->rsTable->addRowValue(30,INIT_TABLE_ROW_NUM,true);
 }
 
 /*!
@@ -128,7 +153,10 @@ void RadiationSourceTable::on_radioButtonScrollReno_clicked()
     {
         d->enRSReKind=SCROLL_RENOVATE;
         changeTableHeaderInfo(false);
-        d->m_currentRowToInsert=0;
+        //d->m_currentRowToInsert=0;
+        d_ptr->dataViewModel->resetRefreshModel(d->enRSReKind);
+        //d->rsDataList.clear();
+        //d->rsReMap.clear();
     }
 }
 
@@ -142,6 +170,9 @@ void RadiationSourceTable::on_radioButtonCoverReno_clicked()
     {
         d->enRSReKind=COVER_RENOVATE;
         changeTableHeaderInfo(true);
+        d_ptr->dataViewModel->resetRefreshModel(d->enRSReKind);
+        //d->rsDataList.clear();
+        //d->rsReMap.clear();
     }
 }
 
@@ -151,16 +182,8 @@ void RadiationSourceTable::on_radioButtonCoverReno_clicked()
  */
 void RadiationSourceTable::changeTableHeaderInfo(bool blAddColFlag)
 {
-    Q_D(RadiationSourceTable);
-    d->rsTable->clear();
-    for(int i=0;i<d->rsTable->rowCount();i++)
-    {
-        QString strValue=QString("%1").arg(i+1);           //行号
-        d->rsTable->addRowValue(i,0,strValue);
-    }
-
     QStringList headInfo;
-    int colCount=INIT_TABLE_COL_NUM;    //列数
+    //int colCount=INIT_TABLE_COL_NUM;    //列数
     headInfo<<QStringLiteral("序号")<<QStringLiteral("辐射源批号")<<QStringLiteral("脉间类型")<<QStringLiteral("脉内类型")<<QStringLiteral("载频个数")
                <<QStringLiteral("连续波标记")<<QStringLiteral("载频脉组内脉冲数")<<QStringLiteral("载频频段码")<<QStringLiteral("RF1")<<QStringLiteral("RF2")
                 <<QStringLiteral("RF3")<<QStringLiteral("RF4")<<QStringLiteral("RF5")<<QStringLiteral("RF6")<<QStringLiteral("RF7")
@@ -173,14 +196,18 @@ void RadiationSourceTable::changeTableHeaderInfo(bool blAddColFlag)
                               <<QStringLiteral("纬度")<<QStringLiteral("高度")<<QStringLiteral("脉内有效标识")<<QStringLiteral("脉内特征信息")<<QStringLiteral("CRC校验");
 
 
+
     if(blAddColFlag) //新增两列
     {
         headInfo<<QStringLiteral("截获次数")<<QStringLiteral("截获时间");
-        colCount+=2;
-        d->rsTable->insertColumn(colCount);
     }
 
-    d->rsTable->setColumnValue(colCount, headInfo);
+    for(int i=0;i<headInfo.size();i++)
+    {
+        d_ptr->dataView->setColumnWidth(i,90);
+    }
+
+    d_ptr->dataViewModel->resetHeadInfo(headInfo);
 }
 
 /*!
@@ -198,17 +225,15 @@ void RadiationSourceTable::recvRSPara(char *buff, int len)
 
     int rsNum;
     RadiationSourceBase rsData;
-    //rsList.clear();
+    RadiationSourceRenovate rsReData;
     memcpy(&rsNum,buff+RADIASOURCE_START_POINT-4,4);
     for(int i=0;i<rsNum;i++)
     {
+        bool blExist=false;
         memcpy(&rsData,buff+RADIASOURCE_START_POINT,sizeof(RadiationSourceBase));
         if(d->enRSReKind==COVER_RENOVATE) //覆盖刷新模式
         {
             int num=rsData.usSourceNo; //数据源批号
-            RadiationSourceRenovate rsReData;
-
-            bool blExist=false;
             if(!d->rsReMap.isEmpty())
             {
                 QMap<int,RadiationSourceRenovate>::Iterator iter;
@@ -221,6 +246,7 @@ void RadiationSourceTable::recvRSPara(char *buff, int len)
                     rsReData.strHoldTime=getCurrentDate();
                     rsReData.rsInfo=rsData;
                     d->rsReMap[num]=rsReData;  //重新赋值
+                    d->m_currentRowToInsert=rsReData.iInsertRow;
                 }
             }
 
@@ -230,12 +256,20 @@ void RadiationSourceTable::recvRSPara(char *buff, int len)
                 rsReData.strHoldTime=getCurrentDate();
                 rsReData.rsInfo=rsData;
                 rsReData.iInsertRow=d->rsReMap.size();
+                d->m_currentRowToInsert=rsReData.iInsertRow;
                 d->rsReMap.insert(num,rsReData);
             }
-            rsReData.rsInfo=rsData;
         }
+
+        rsReData.rsInfo=rsData;
+        if(!blExist)
+        {
+            rsReData.strHoldTime=getCurrentDate();
+        }
+
+        d->rsDataList.append(rsReData);
         showTSPara(rsData);
-        //rsList.append(rsData);
+
     }
 }
 
@@ -246,185 +280,40 @@ void RadiationSourceTable::recvRSPara(char *buff, int len)
 void RadiationSourceTable::showTSPara(const RadiationSourceBase& rsData)
 {
     Q_D(RadiationSourceTable);
-    int col=0;
-    int row=0;
-    QString strValue;
+
     if((rsData.usStartCode!=0x55AA)||(rsData.usEndCode!=0x55AA))
     {
         return;
     }
 
-    if(d->enRSReKind==COVER_RENOVATE) //覆盖刷新模式
+    d_ptr->dataViewModel->updateTableData(d->rsReMap);
+    d_ptr->dataViewModel->updateTableData(d->rsDataList,false);
+    if(d->enRSReKind==COVER_RENOVATE) //覆盖刷新模式,设置高亮行
     {
-        row=d->rsReMap[rsData.usSourceNo].iInsertRow;
+        d_ptr->dataViewModel->resetHigetLightRow(d->m_currentRowToInsert);
     }
-    else
+    if(d_ptr->blDoubleClickedFlag)
     {
-        row=d->m_currentRowToInsert;
-        d->m_currentRowToInsert++;
+        emit sendRSDataList(&(d->rsDataList));
     }
+}
 
-    strValue=QString("%1").arg(row+1);                                //行号
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.usSourceNo);                  //辐射源序号
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.ucPulseType);                 //脉间类型
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.ucIntraPulseType);            //脉内类型
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.ucCarrierCount);              //载频,个数
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.ucContinuousWaveLabeling);    //载频,连续波标记,0 无效 1 有效
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.usPulseGroupInCount);         //载频,脉组内脉冲数
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.usFrequencyBandCode);         //载频,频段码
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dRF1);        //载频,RF1
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dRF2);        //载频,RF2
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dRF3);        //载频,RF3
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dRF4);        //载频,RF4
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dRF5);        //载频,RF5
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dRF6);        //载频,RF6
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dRF7);        //载频,RF7
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dRF8);        //载频,RF8
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.usMultiPluseType);            //重频,类型,0 固定,1 抖动,2 滑变,3 成组参差,4 固定参差
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.usMultiPluseCount);           //重频,个数
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.ulMultiPulseGroupInCount);    //重频,脉组内脉冲数
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPRI1);        //重频,周期PRI1
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPRI2);        //重频,周期PRI2
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPRI3);        //重频,周期PRI3
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPRI4);        //重频,周期PRI4
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPRI5);        //重频,周期PRI5
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPRI6);        //重频,周期PRI6
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPRI7);        //重频,周期PRI7
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPRI8);        //重频,周期PRI8
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.usPluseWidthType);                //脉宽,类型,0 固定,1 变化,0xff 未知
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.usPluseWidthCount);               //脉宽,个数,≤8
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.ulPluseWidthGroupInCount);        //脉宽,脉组内脉冲数
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPW1);        //脉宽,PW1
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPW2);        //脉宽,PW2
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPW3);        //脉宽,PW3
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPW4);        //脉宽,PW4
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPW5);        //脉宽,PW5
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPW6);        //脉宽,PW6
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPW7);        //脉宽,PW7
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dPW8);        //脉宽,PW8
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.ucDigitalPA);             //数字幅度,0-255
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.ucAnalogPA);              //模拟幅度,0-255
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dDigitalPower);           //数字功率,单位:dBm,大于9999无效
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dAnalogPower);            //模拟功率,单位:dBm,大于9999无效
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dAziAngle);               //测量信息,方位角
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dEleAngle);               //测量信息,俯仰角
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dLon);                    //定位结果,经度
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dLat);                    //定位结果,纬度
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.dHight);                  //定位结果,高度
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.ulIntraPulseEffFlag);     //脉内调制信息,脉内有效标识,1 有效,0 无效
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    char *pBuff=new char[32];
-    memcpy(pBuff,rsData.ucIntraPulseInfo,32);
-    strValue=QString(QLatin1String(pBuff));                     //脉内调制信息,脉内特征信息
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    strValue=QString("%1").arg(rsData.usCRC);                   //CRC校验
-    d->rsTable->addRowValue(row,col++,strValue);
-
-    if(d->enRSReKind==COVER_RENOVATE) //覆盖刷新模式
+/*!
+ * @brief 清空表格
+ */
+void RadiationSourceTable::clearTable()
+{
+    d_ptr->rsReMap.clear();
+    d_ptr->rsDataList.clear();
+    d_ptr->dataViewModel->updateTableData(d_ptr->rsReMap);
+    d_ptr->dataViewModel->updateTableData(d_ptr->rsDataList,false);
+    if(d_ptr->enRSReKind==COVER_RENOVATE) //覆盖刷新模式,设置高亮行
     {
-        row=d->rsReMap[rsData.usSourceNo].iInsertRow;
-
-        strValue=QString("%1").arg(d->rsReMap[rsData.usSourceNo].iHoldCount);        //截获次数
-        d->rsTable->addRowValue(row,col++,strValue);
-
-        strValue=d->rsReMap[rsData.usSourceNo].strHoldTime;                          //截获时间
-        d->rsTable->addRowValue(row,col++,strValue);
+        d_ptr->dataViewModel->resetHigetLightRow(d_ptr->m_currentRowToInsert);
+    }
+    if(d_ptr->blDoubleClickedFlag)
+    {
+        emit sendRSDataList(&(d_ptr->rsDataList));
     }
 }
 
@@ -442,11 +331,46 @@ QString RadiationSourceTable::getCurrentDate()
 void RadiationSourceTable::retranslateUi()
 {
     Q_D(RadiationSourceTable);
-    m_name = tr("Data source Map");
+    m_name = tr("Radiation source data");
     setWindowTitle(m_name);
 
     d->radioButtonCoverReno->setText(tr("Overwrite Refresh"));
     d->radioButtonScrollReno->setText(tr("Scrolling Refresh"));
 }
 
+void RadiationSourceTable::viewRSData(QModelIndex index)
+{
+    showRSDialog(index);
+}
+
+/*!
+ * @brief 显示数据源覆盖刷新模式下的详细信息
+ */
+void RadiationSourceTable::showRSDialog(QModelIndex index)
+{
+    if(d_ptr->enRSReKind==COVER_RENOVATE)
+    {
+        RadiationSourceTableRenovateDialog dialog(this);
+        dialog.resize(800,600);
+        d_ptr->blDoubleClickedFlag=true;
+        unsigned short usSourceNo=0;
+        int row=index.row();
+        RadiationSourceRenovate rsRe;
+        QMap<int,RadiationSourceRenovate>::const_iterator iter;
+        for(iter=d_ptr->rsReMap.begin();iter!=d_ptr->rsReMap.end();iter++)  //根据所在行找到数据源批号
+        {
+            rsRe=iter.value();
+            if(rsRe.iInsertRow==row)
+            {
+                usSourceNo=rsRe.rsInfo.usSourceNo;
+                break;
+            }
+        }
+
+        QObject::connect(this,SIGNAL(sendRSDataList(RSDataList*)),&dialog,SLOT(recvRSDataList(RSDataList*)));
+        dialog.setRadiationSourceList(usSourceNo,d_ptr->rsDataList);
+        dialog.exec();
+        d_ptr->blDoubleClickedFlag=false;
+    }
+}
 } //namespace DataView

@@ -16,6 +16,8 @@
 
 #include "../base_global.h"
 
+class QAction;
+
 namespace Base{
 
 /*!
@@ -32,6 +34,8 @@ public:
     enum CustomStyleClass{
 
     };
+
+    CustomStyle(){}
 
     CustomStyle(QString name,QString path,bool selected = false):name(name),path(path),selected(selected),stype(STYLE_SHEET){
 
@@ -52,15 +56,19 @@ public:
     QString getStylePath()const{return this->path;}
     bool isSelected()const{return this->selected;}
 
+    void setAction( QAction * action){this->action = action;}
+     QAction * getAction(){return this->action;}
+
 private:
     QString name;           /*!< 样式名 */
     StyleType stype;        /*!< 样式类型 */
     CustomStyleClass clazz; /*!< 自定义样式类型 */
     QString path;           /*!< 样式保存路径，可为本地路径，也可为资源文件中路径 */
     bool selected;          /*!< 是否被选中显示 */
+    QAction * action;       /*!< 工具栏对应按钮 */
 };
 
-typedef QList<CustomStyle> StyleList;
+typedef QList<CustomStyle *> StylePtrList;
 class  StyleManagerPrivate;
 
 class BASESHARED_EXPORT StyleManager : public QObject
@@ -70,10 +78,12 @@ class BASESHARED_EXPORT StyleManager : public QObject
 public:
     explicit StyleManager();
 
-    void addStyle(CustomStyle & style);
+    void addStyle(CustomStyle * style);
     int size();
-    StyleList styles();
+    StylePtrList styles();
     void switchStyle(int index);
+    CustomStyle *currentStyle();
+    CustomStyle * findStyle(QString styleName);
 
 private:
     StyleManagerPrivate * d_ptr;

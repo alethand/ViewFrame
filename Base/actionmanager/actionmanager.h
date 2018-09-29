@@ -30,7 +30,10 @@ class BASESHARED_EXPORT ActionManager : public QObject
     Q_OBJECT
 public:
     typedef QMap<Id,Action*> ActionMap;
+    typedef QMap<Id,Action*>::const_iterator ActionMapIterator;
+
     typedef QMap<Id,ActionContainer*> ActionContainerMap;
+    typedef QMapIterator<Id,ActionContainer*> ActionContainerMapIterator;
 
     static ActionManager * instance();
     ~ActionManager();
@@ -42,6 +45,8 @@ public:
     ActionContainer * createMenuBar(Id id);
 
     ActionContainer * actionContainer(Id id);
+
+    ActionMap getAllActions(){return actions;}
 
     void releaseMenu(Id id);
 

@@ -25,9 +25,8 @@ class AllPluseGraphicsPrivate
 public:
     explicit AllPluseGraphicsPrivate(AllPluseGraphics * q):q_ptr(q)
     {
-        initTimeParaGraphis();
+//        initTimeParaGraphis();
         initBarGraphis();
-
         initView();
     }
     void initView();
@@ -49,8 +48,8 @@ void AllPluseGraphicsPrivate::initView()
     mainWidget = new QWidget();
 
     QVBoxLayout * vlayout = new QVBoxLayout;
-    vlayout->addWidget(chartTimeView);
-//    vlayout->addWidget(chartBarView);
+//    vlayout->addWidget(chartTimeView);
+    vlayout->addWidget(chartBarView);
 
     mainWidget->setLayout(vlayout);
 }
@@ -98,13 +97,11 @@ void AllPluseGraphicsPrivate::initTimeParaGraphis()
     int maxSize=500;
 
     m_chart=new QChart();
-    chartTimeView=new QChartView(m_chart);
+    chartTimeView = new QChartView(m_chart);
     chartTimeView->setRubberBand(QChartView::RectangleRubberBand);
 
     m_series=new QLineSeries();
     m_chart->addSeries(m_series);
-
-    m_series->setUseOpenGL(true);
 
     QValueAxis *axisX = new QValueAxis();
     axisX->setRange(0,maxSize);
@@ -161,8 +158,9 @@ void AllPluseGraphicsPrivate::initBarGraphis()
 
     //![3]
         QChart *chart = new QChart();
+        chart->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
         chart->addSeries(series);
-        chart->setTitle(QStringLiteral("全脉冲参数频度直方图"));
+//        chart->setTitle(QStringLiteral("全脉冲参数频度直方图"));
         chart->setAnimationOptions(QChart::SeriesAnimations);
     //![3]
 
@@ -172,7 +170,7 @@ void AllPluseGraphicsPrivate::initBarGraphis()
         //QString str=QStringLiteral("参数分布");
         QBarCategoryAxis *axis = new QBarCategoryAxis();
         axis->append(categories);
-        axis->setTitleText(QStringLiteral("参数分布"));
+//        axis->setTitleText(QStringLiteral("参数分布"));
         chart->createDefaultAxes();
         chart->setAxisX(axis, series);
     //![4]

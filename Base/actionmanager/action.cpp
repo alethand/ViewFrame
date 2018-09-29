@@ -3,7 +3,7 @@
 #include <QAction>
 
 Action::Action(Id id, QObject *parent):
-    CommandPrivate(id,parent),m_action(nullptr)
+    CommandPrivate(id,parent),m_action(nullptr),initKey(false)
 {
 
 }
@@ -11,6 +11,27 @@ Action::Action(Id id, QObject *parent):
 Action::~Action()
 {
 
+}
+
+void Action::setDefaultKey(QKeySequence dkey)
+{
+    if(!initKey){
+        m_defaultKey = dkey;
+        initKey = true;
+    }
+    if(m_action)
+        m_action->setShortcut(dkey);
+}
+
+QKeySequence Action::defaultKey()
+{
+    return m_defaultKey;
+}
+
+void Action::resetDefaultKey()
+{
+    if(m_action && initKey)
+        m_action->setShortcut(m_defaultKey);
 }
 
 void Action::setAction(QAction *act)

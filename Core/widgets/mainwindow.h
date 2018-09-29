@@ -49,10 +49,13 @@ private slots:
     void technicalSupport();
     void aboutProgram();
 
+    void showShortcutSettings();
+
 private:
     void initComponent();
     void updateStyle(int index);
     void updateLanguage(QString lanFileName);
+    void loadUserSetting();
     void retranslateUi();
 
 private:
@@ -71,6 +74,7 @@ private:
     QAction * exitAction;
     QAction * topHintAction;
     QAction * fullScreenAction;
+    QAction * shortcutAction;
     QAction * supportAction;
     QAction * aboutPorgramAction;
 

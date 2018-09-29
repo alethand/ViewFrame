@@ -36,7 +36,6 @@ SOURCES += main.cpp \
     protocol/datastruct.cpp \
     protocol/protocoldata.cpp \
     file/globalconfigfile.cpp \
-    file/xmlparse.cpp \
     global.cpp \
     widgets/taskcontrol/modelview/tableview.cpp \
     widgets/taskcontrol/modelview/tableviewdelegate.cpp \
@@ -56,24 +55,30 @@ SOURCES += main.cpp \
     widgets/healthmanage/layoutset.cpp \
     widgets/healthmanage/dynamiclayoutbynet.cpp \
     widgets/healthmanage/staticlayoutbyxml.cpp \
+    widgets/taskcontrol/net/taskdispatcher.cpp \
     widgets/datadisplay/allplusegraphics.cpp \
     widgets/datadisplay/allplusetable.cpp \
     widgets/datadisplay/datadisplay.cpp \
+    widgets/datadisplay/datadisplaypanel.cpp \
     widgets/datadisplay/mfacquisitiongraphics.cpp \
     widgets/datadisplay/mfacquistiontable.cpp \
     widgets/datadisplay/radiasourcemap.cpp \
     widgets/datadisplay/radiationsourcetable.cpp \
+    widgets/datadisplay/radiationsourcetablerenovate.cpp \
+    widgets/datadisplay/radiationsourcetablerenovatedialog.cpp \
     widgets/datadisplay/spectrumgraphics.cpp \
     widgets/datadisplay/table.cpp \
-    widgets/datadisplay/datadisplaypanel.cpp \
-    widgets/taskcontrol/net/taskdispatcher.cpp
+    widgets/datadisplay/modelview/tableviewdata.cpp \
+    widgets/datadisplay/modelview/tableviewmodelcustom.cpp \
+    widgets/datadisplay/modelview/tableviewmoderradiationsource.cpp \
+    widgets/shortcutsettings.cpp \
+    file/programfilepath.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
     protocol/datastruct.h \
     protocol/protocoldata.h \
     file/globalconfigfile.h \
-    file/xmlparse.h \
     global.h \
     widgets/taskcontrol/modelview/tableview.h \
     widgets/taskcontrol/modelview/tableviewdelegate.h \
@@ -96,23 +101,32 @@ HEADERS  += \
     widgets/healthmanage/dynamiclayoutbynet.h \
     widgets/healthmanage/staticlayoutbyxml.h \
     widgets/healthmanage/head.h \
+    widgets/taskcontrol/net/taskdispatcher.h \
     widgets/datadisplay/allplusegraphics.h \
     widgets/datadisplay/allplusetable.h \
     widgets/datadisplay/datadisplay.h \
+    widgets/datadisplay/datadisplaypanel.h \
     widgets/datadisplay/mfacquisitiongraphics.h \
     widgets/datadisplay/mfacquistiontable.h \
     widgets/datadisplay/radiasourcemap.h \
     widgets/datadisplay/radiationsourcetable.h \
+    widgets/datadisplay/radiationsourcetablerenovate.h \
+    widgets/datadisplay/radiationsourcetablerenovatedialog.h \
     widgets/datadisplay/spectrumgraphics.h \
     widgets/datadisplay/table.h \
-    widgets/datadisplay/datadisplaypanel.h \
-    widgets/taskcontrol/net/taskdispatcher.h
+    widgets/datadisplay/modelview/tableviewdata.h \
+    widgets/datadisplay/modelview/tableviewmodelcustom.h \
+    widgets/datadisplay/modelview/tableviewmoderradiationsource.h \
+    widgets/shortcutsettings.h \
+    file/programfilepath.h
 
 FORMS    += mainwindow.ui \
     widgets/taskcontrol/gathercontroldialog.ui \
     widgets/datadisplay/mfacquisitiongraphics.ui \
     widgets/datadisplay/radiasourcemap.ui \
     widgets/datadisplay/radiationsourcetable.ui \
+    widgets/datadisplay/radiationsourcetablerenovate.ui \
+    widgets/datadisplay/radiationsourcetablerenovatedialog.ui \
     widgets/datadisplay/spectrumgraphics.ui
 
 win32-msvc2013{

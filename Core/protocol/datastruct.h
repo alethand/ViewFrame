@@ -28,15 +28,6 @@ enum ServiceType
 };
 
 /*!
- *  @brief 传输模式
- */
-enum TransmissionMode
-{
-    TRANS_NET,              /*!< 网络传输方式 */
-    TRANS_TEL               /*!< 电话传输方式 */
-};
-
-/*!
  *  @brief 数据库类型
  */
 enum DatabaseType
@@ -61,13 +52,11 @@ struct CommandParameter
     CommandParameter()
     {
         serviceType = SERVICE_TEXT;
-        transMode = TRANS_NET;
         dbType = DB_MYSQL;
         parseResult = PARSE_ERROR;
     }
 
     ServiceType serviceType;
-    TransmissionMode  transMode;
     DatabaseType dbType;
     ResultType parseResult;
 };
@@ -84,31 +73,6 @@ struct DBFeature
 };
 
 /*!
- *  @brief 配置文件参数
- */
-struct SettingConfig
-{
-    SettingConfig()
-    {
-        textRecvProcCount = 5;
-        textSendProcCount = 5;
-        textListenPort = 8023;
-        fileListenPort = 8024;
-        textIp = "127.0.0.1";
-        fileIp = "127.0.0.1";
-    }
-    int textRecvProcCount;
-    int textSendProcCount;
-    ushort textListenPort;
-    ushort fileListenPort;
-
-    QString textIp;
-    QString fileIp;
-
-    QString uploadFilePath;
-};
-
-/*!
  *  @brief 数据库配置信息
  */
 struct DatabaseConfigInfo
@@ -119,6 +83,19 @@ struct DatabaseConfigInfo
     QString dbUser;
     QString dbPass;
     ushort port;
+};
+
+/*!
+ *  @brief 系统配置信息
+ */
+struct SystemConfigInfo
+{
+    SystemConfigInfo():defaultKeySchemes(true){
+    }
+    bool defaultKeySchemes;             /*!< 是否采用默认的快捷键设置，默认为true */
+    QString userKeySchemesName;         /*!< 自定义快捷键设置名称 @see defaultKeySchemes 为false时有效 */
+    QString locale;                     /*!< 显示的语言 */
+    QString style;                      /*!< 默认样式 */
 };
 
 
@@ -181,6 +158,61 @@ struct RadiationSourceBase
 };
 
 
+enum RadiationSourceHead{
+    T_No = 0,               /*!< 序号 */
+    T_SourceNo,       /*!< 辐射源序号,递增*/
+    T_PulseType,       /*!< 载频,脉间类型,0 固定,1 脉间捷变,2 脉组捷变,3 分时分集,4 连续波,5 双频点,0xff:未知*/
+    T_IntraPulseType,  /*!< 载频,脉内类型,0 单载频 1 多载频 2 调频 0xff 未知*/
+    T_CarrierCount,    /*!< 载频,个数*/
+    T_ContinuousWaveLabeling,     /*!< 载频,连续波标记,0 无效 1 有效*/
+    T_PulseGroupInCount,         /*!< 载频,脉组内脉冲数*/
+    T_FrequencyBandCode,          /*!< 载频,频段码*/
+    T_RF1,                        /*!< 载频,1*/
+    T_RF2,                        /*!< 载频,2*/
+    T_RF3,                        /*!< 载频,3*/
+    T_RF4,                        /*!< 载频,4*/
+    T_RF5,                        /*!< 载频,5*/
+    T_RF6,                        /*!< 载频,6*/
+    T_RF7,                        /*!< 载频,7*/
+    T_RF8,                        /*!< 载频,8,单位,MHz*/
+    T_MultiPluseType,            /*!< 重频,类型,0 固定,1 抖动,2 滑变,3 成组参差,4 固定参差*/
+    T_MultiPluseCount,           /*!< 重频,个数*/
+    T_MultiPulseGroupInCount,      /*!< 重频,脉组内脉冲数*/
+    T_PRI1,                       /*!< 重频,周期1*/
+    T_PRI2,                       /*!< 重频,周期2*/
+    T_PRI3,                       /*!< 重频,周期3*/
+    T_PRI4,                       /*!< 重频,周期4*/
+    T_PRI5,                       /*!< 重频,周期5*/
+    T_PRI6,                       /*!< 重频,周期6*/
+    T_PRI7,                       /*!< 重频,周期7*/
+    T_PRI8,                       /*!< 重频,周期8,单位:ns*/
+    T_PluseWidthType,            /*!< 脉宽,类型,0 固定,1 变化,0xff 未知*/
+    T_PluseWidthCount,           /*!< 脉宽,个数,≤8*/
+    T_PluseWidthGroupInCount,      /*!< 脉宽,脉组内脉冲数*/
+    T_PW1,                        /*!< 脉宽,1*/
+    T_PW2,                        /*!< 脉宽,2*/
+    T_PW3,                        /*!< 脉宽,3*/
+    T_PW4,                        /*!< 脉宽,4*/
+    T_PW5,                        /*!< 脉宽,5*/
+    T_PW6,                        /*!< 脉宽,6*/
+    T_PW7,                        /*!< 脉宽,7*/
+    T_PW8,                        /*!< 脉宽,8,单位:ns*/
+    T_DigitalPA,                  /*!< 数字幅度,0-255*/
+    T_AnalogPA,                   /*!< 模拟幅度,0-255*/
+    T_DigitalPower,               /*!< 数字功率,单位:dBm,大于9999无效*/
+    T_AnalogPower,                /*!< 模拟功率,单位:dBm,大于9999无效*/
+    T_AziAngle,                   /*!< 测量信息,方位角*/
+    T_EleAngle,                   /*!< 测量信息,俯仰角*/
+    T_Lon,                        /*!< 定位结果,经度*/
+    T_Lat,                        /*!< 定位结果,纬度*/
+    T_Hight,                      /*!< 定位结果，高度*/
+    T_ntraPulseEffFlag,           /*!< 脉内调制信息,脉内有效标识,1 有效,0 无效*/
+    T_IntraPulseInfo,         /*!< 脉内调制信息,脉内特征信息*/
+    T_CRC,                       /*!< CRC校验*/
+    T_Counter,                       /*!< 次数*/
+    T_Timer                       /*!< 时间*/
+};
+
 /*!
  *  @brief 数据源信息覆盖记录信息
  */
@@ -191,6 +223,9 @@ struct RadiationSourceRenovate
     QString strHoldTime;            /*!< 截获时间>*/
     int iInsertRow;                 /*!< 所在行>*/
 };
+
+typedef QList<RadiationSourceRenovate> RSDataList;
+typedef QMap<int,RadiationSourceRenovate> RSDataMap;  /*!< 数据源信息 key：数据源批号 value:数据源的具体信息*/
 
 /*!
  * @brief 数据显示模块消息类型
@@ -225,6 +260,26 @@ enum DataDisplayTableType
     GRAPHICSE_ALLPLUSE,             /*!< 全脉冲图形*/
     GRAPHICSE_MFACQUISITION,        /*!< 中频数据图形*/
     GRAPHICSE_SPECTRUM              /*!< 频谱数据图形*/
+};
+
+/*!
+ *  @brief 数据源刷新方式
+ */
+enum DataRefreshModel
+{
+    SCROLL_RENOVATE = 1,            /*!< 滚动刷新 */
+    COVER_RENOVATE                  /*!< 覆盖刷新 */
+};
+
+/*!
+ *  @brief tableviewmodelcustom下使用的表格显示类型
+ */
+enum TableCustomKind
+{
+    STATISTICAL_INFO=1,             /*!< 统计信息 */
+    ORIGINAL_INFO,                  /*!< 原始数据 */
+    MF_ACQUISITION_INFO             /*!< 中频数据 */
+
 };
 
 
