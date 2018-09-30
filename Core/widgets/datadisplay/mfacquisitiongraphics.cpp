@@ -69,6 +69,11 @@ void MFAcquisitionGraphics::release()
 
 }
 
+QString MFAcquisitionGraphics::pluginName()
+{
+    return tr("DataDisplay panel");
+}
+
 void MFAcquisitionGraphics::onMessage(MessageType::MessType type)
 {
     switch(type){

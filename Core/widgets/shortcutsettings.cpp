@@ -24,6 +24,8 @@
 #include "file/globalconfigfile.h"
 #include "global.h"
 
+#define LIST_ITEM_LEN 3
+
 class ShortcutKey{
 public:
     ShortcutKey():root("mapping"),nodeName("shortcut"),nodeKey("key"),nodeValue("value"){}
@@ -55,7 +57,7 @@ bool ShortcutParseMethod::startSave(QDomDocument &doc)
     doc.appendChild(root);
     while(iter != actMap.constEnd()){
         QString id = const_cast<Id &>(iter.key()).data();
-        if(id.indexOf(".") > 0 && id.split(".").size() == 2){
+        if(id.indexOf(".") > 0 && id.split(".").size() == LIST_ITEM_LEN){
             QDomElement element = doc.createElement(shortcut.nodeName);
             element.setAttribute(shortcut.nodeKey,id);
             element.setAttribute(shortcut.nodeValue,iter.value()->action()->shortcut().toString(QKeySequence::NativeText));
@@ -335,10 +337,25 @@ int ShortcutSettings::translateModifiers(Qt::KeyboardModifiers state,
  * @details 从ActionManager::instance()中获取所有注册的action信息，并按照插件所属插件Id的名称分类显示， \p
  *          Id的命名请遵循constant.h中相关规则
  */
+
+/*!
+ *  @brief 插件快捷键节点
+ *  @details
+ *      |   + MouleA      |
+ *      |   - MouleB      |
+ *      |     - Plugin1   |
+ *      |       - Action1 |
+ *      |       - Action2 |
+ *      |     - Plugin2   |
+ */
+struct ShortcutItem{
+    QTreeWidgetItem * rootItem;
+    QMap<QString,QTreeWidgetItem *> childItems;
+};
+
 void ShortcutSettings::initShortcutTree()
 {
     Q_D(ShortcutSettings);
-
     ActionManager::ActionMap actMap = ActionManager::instance()->getAllActions();
 
     d->treeWidget->setColumnCount(3);
@@ -347,35 +364,71 @@ void ShortcutSettings::initShortcutTree()
     d->treeWidget->setHeaderLabels(headItem);
     d->treeWidget->header()->setSectionResizeMode(QHeaderView::Stretch);
 
-    QMap<QString,QTreeWidgetItem *> categorys;
+    QMap<QString,ShortcutItem *> categorys;
+    QMap<QString,QTreeWidgetItem *> pluginMap;
     ActionManager::ActionMap::iterator iter = actMap.begin();
     while(iter != actMap.end()){
         QString id(const_cast<Id&>(iter.key()).data());
-        if(id.indexOf(".") > 0 && id.split(".").size() == 2){
+        if(id.indexOf(".") > 0 && id.split(".").size() == LIST_ITEM_LEN){
             QStringList idList = id.split(".");
+            ShortcutItem  * categoryItem = NULL;
+            if(idList.at(0) == QString("Plugin")){
+                if(!categorys.contains(idList.at(1))){
+                    categoryItem = new ShortcutItem();
+                    //创建模块节点
+                    QTreeWidgetItem * rootItem = new QTreeWidgetItem();
+                    rootItem->setText(0,idList.at(1));
+                    d->treeWidget->addTopLevelItem(rootItem);
+                    rootItem->setExpanded(true);
+                    categoryItem->rootItem = rootItem;
+                    categorys.insert(idList.at(1),categoryItem);
+                }else{
+                    categoryItem =  categorys.value(idList.at(1));
+                }
 
-            QTreeWidgetItem  * categoryItem = NULL;
-            if(!categorys.contains(idList.at(0))){
-                categoryItem = new QTreeWidgetItem();
-                categoryItem->setText(0,idList.at(0));
-                d->treeWidget->addTopLevelItem(categoryItem);
-                categoryItem->setExpanded(true);
-                categorys.insert(idList.at(0),categoryItem);
+                QTreeWidgetItem * pluginItem = new QTreeWidgetItem();
+                pluginItem->setText(T_COMMAND,idList.at(2));
+                pluginItem->setText(T_TAG,iter.value()->action()->text());
+                pluginItem->setText(T_SHORTCUT,iter.value()->action()->shortcut().toString(QKeySequence::NativeText));
+                d->shortcutItems.insert(id,pluginItem);
+                categoryItem->rootItem->addChild(pluginItem);
+
+                categoryItem->childItems.insert(idList.at(2),pluginItem);
+                pluginMap.insert(idList.at(2),pluginItem);
                 iter++;
                 continue;
-            }else{
-                categoryItem =  categorys.value(idList.at(0));
             }
-
-            QTreeWidgetItem * childItem = new QTreeWidgetItem();
-            childItem->setText(T_COMMAND,idList.at(1));
-            childItem->setText(T_TAG,iter.value()->action()->text());
-            childItem->setText(T_SHORTCUT,iter.value()->action()->shortcut().toString(QKeySequence::NativeText));
-            d->shortcutItems.insert(id,childItem);
-            categoryItem->addChild(childItem);
-            childItem->setData(T_COMMAND,Qt::UserRole,id);
         }
         iter++;
+    }
+
+    iter = actMap.begin();
+    while(iter != actMap.end()){
+        QString id(const_cast<Id&>(iter.key()).data());
+        if(id.indexOf(".") > 0 && id.split(".").size() == LIST_ITEM_LEN){
+            QStringList idList = id.split(".");
+            if(idList.at(0) == QString("Action")){
+                if(pluginMap.contains(idList.at(1))){
+                    QTreeWidgetItem * pluginItem = pluginMap.value(idList.at(1));
+                    if(pluginItem){
+                        QTreeWidgetItem * childItem = new QTreeWidgetItem();
+                        childItem->setText(T_COMMAND,idList.at(2));
+                        childItem->setText(T_TAG,iter.value()->action()->text());
+                        childItem->setText(T_SHORTCUT,iter.value()->action()->shortcut().toString(QKeySequence::NativeText));
+                        d->shortcutItems.insert(id,childItem);
+                        pluginItem->addChild(childItem);
+                        pluginItem->setExpanded(true);
+                        childItem->setData(T_COMMAND,Qt::UserRole,id);
+                    }
+                }
+         }
+      }
+      iter++;
+    }
+
+    QMap<QString,ShortcutItem *>::iterator riter = categorys.begin();
+    while(riter != categorys.end()){
+        riter = categorys.erase(riter);
     }
 }
 
@@ -555,7 +608,7 @@ bool ShortcutSettings::parsedLocalFile(QString fileName, bool userSelected)
         ActionManager::ActionMapIterator iter = actMap.constBegin();
         while(iter != actMap.constEnd()){
             QString id = const_cast<Id&>(iter.key()).data();
-            if(id.indexOf(".") > 0 && id.split(".").size() == 2){
+            if(id.indexOf(".") > 0 && id.split(".").size() == LIST_ITEM_LEN){
                 auto findIndex = std::find_if(list.constBegin(),list.constEnd(),[&id](const ShortcutMapping & item){
                     return item.id == id;
                 });

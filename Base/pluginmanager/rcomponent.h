@@ -31,13 +31,13 @@ public:
 
     virtual bool initialize() = 0;
     virtual void release() = 0;
+    virtual QString pluginName() = 0;
 
     virtual void onMessage(MessageType::MessType type) = 0;
 
 protected:
     Id m_id;
-    QString m_name;
-
+    QString m_name;               /*!< dockwidget titlebar */
 };
 
 } //namespace Base

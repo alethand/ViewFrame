@@ -22,7 +22,6 @@
 #include "Base/util/fileutils.h"
 #include "healthmanage/healthinfopannel.h"
 
-#include "datadisplay/datadisplaypanel.h"
 #include "datadisplay/radiationsourcetable.h"
 #include "datadisplay/allplusetable.h"
 #include "datadisplay/mfacquistiontable.h"
@@ -55,11 +54,11 @@ MainWindow::MainWindow(QWidget *parent) :
     RSingleton<Subject>::instance()->attach(this);
 
     initMenu();
-    loadUserSetting();
     initComponent();
 
     updateLanguage(curLanguageName);
 
+    loadUserSetting();
     showMaximized();
 }
 
@@ -84,42 +83,71 @@ void MainWindow::initMenu()
     ActionContainer *menubar = ActionManager::instance()->createMenuBar(Constant::MENU_BAR);
 
     setMenuBar(menubar->menuBar());
-    menubar->appendGroup(Constant::G_PROGRAM);
-    menubar->appendGroup(Constant::G_SETTING);
-    menubar->appendGroup(Constant::G_HELP);
+    menubar->appendGroup(Constant::MENU_PROGRAM);
+    menubar->appendGroup(Constant::MENU_VIEW);
+    menubar->appendGroup(Constant::MENU_SETTING);
+    menubar->appendGroup(Constant::MENU_HELP);
+
+    QAction * coreAction = new QAction();
+    coreAction->setVisible(false);
+    ActionManager::instance()->registAction(Constant::PLUGIN_CORE,coreAction);
 
     //程序菜单
-    serverMenu = ActionManager::instance()->createMenu(Constant::G_PROGRAM);
-    serverMenu->appendGroup(Constant::G_PROGRAM);
-    menubar->addMenu(serverMenu, Constant::G_PROGRAM);
+    serverMenu = ActionManager::instance()->createMenu(Constant::MENU_PROGRAM);
+    serverMenu->appendGroup(Constant::MENU_PROGRAM);
+    menubar->addMenu(serverMenu, Constant::MENU_PROGRAM);
 
     exitAction = new QAction(this);
     connect(exitAction,SIGNAL(triggered()),this,SLOT(programExit()));
     Action * serverDelete = ActionManager::instance()->registAction(Constant::PROGRAM_EXIT,exitAction);
     serverDelete->setDefaultKey(QKeySequence("Ctrl+Q"));
 
-    serverMenu->addAction(serverDelete,Constant::G_PROGRAM);
+    serverMenu->addAction(serverDelete,Constant::MENU_PROGRAM);
+
+    //视图菜单
+    viewMenu = ActionManager::instance()->createMenu(Constant::MENU_VIEW);
+    viewMenu->appendGroup(Constant::MENU_VIEW);
+    menubar->addMenu(viewMenu, Constant::MENU_VIEW);
+
+    viewManagerMenu = ActionManager::instance()->createMenu(Constant::VIEW_MANAGER);
+    viewManagerMenu->appendGroup(Constant::VIEW_MANAGER);
+    viewMenu->addMenu(viewManagerMenu,Constant::VIEW_MANAGER);
+
+    importViewAction = new QAction(this);
+    connect(importViewAction,SIGNAL(triggered()),this,SLOT(importView()));
+    Action * importView = ActionManager::instance()->registAction(Constant::IMPORT_VIEW,importViewAction);
+    importView->setDefaultKey(QKeySequence("Ctrl+Shift+I"));
+    viewManagerMenu->addAction(importView,Constant::VIEW_MANAGER);
+
+    exportViewAction = new QAction(this);
+    connect(exportViewAction,SIGNAL(triggered()),this,SLOT(exportView()));
+    Action * exportView = ActionManager::instance()->registAction(Constant::EXPORT_VIEW,exportViewAction);
+    exportView->setDefaultKey(QKeySequence("Ctrl+Shift+E"));
+    viewManagerMenu->addAction(exportView,Constant::VIEW_MANAGER);
+
+    viewMenu->addMenu(viewManagerMenu,Constant::MENU_VIEW);
+    viewMenu->addSeparator(Constant::MENU_VIEW);
 
     //设置菜单
-    settingsMenu = ActionManager::instance()->createMenu(Constant::G_SETTING);
-    settingsMenu->appendGroup(Constant::G_SETTING);
-    menubar->addMenu(settingsMenu, Constant::G_SETTING);
+    settingsMenu = ActionManager::instance()->createMenu(Constant::MENU_SETTING);
+    settingsMenu->appendGroup(Constant::MENU_SETTING);
+    menubar->addMenu(settingsMenu, Constant::MENU_SETTING);
 
     topHintAction = new QAction(this);
     topHintAction->setCheckable(true);
     connect(topHintAction,SIGNAL(triggered(bool)),this,SLOT(windowTopHint(bool)));
     Action * topHint = ActionManager::instance()->registAction(Constant::TOP_HINT,topHintAction);
     topHint->setDefaultKey(QKeySequence("Ctrl+Shift+T"));
-    settingsMenu->addAction(topHint,Constant::G_SETTING);
+    settingsMenu->addAction(topHint,Constant::MENU_SETTING);
 
     fullScreenAction = new QAction(this);
     fullScreenAction->setCheckable(true);
     connect(fullScreenAction,SIGNAL(triggered(bool)),this,SLOT(windowFullScreen(bool)));
     Action * fullScreen = ActionManager::instance()->registAction(Constant::FULL_SCREEN,fullScreenAction);
     fullScreen->setDefaultKey(QKeySequence("Ctrl+Shift+f11"));
-    settingsMenu->addAction(fullScreen,Constant::G_SETTING);
+    settingsMenu->addAction(fullScreen,Constant::MENU_SETTING);
 
-    settingsMenu->addSeparator(Constant::G_SETTING);
+    settingsMenu->addSeparator(Constant::MENU_SETTING);
 
     //样式
     settingsMenu->appendGroup(Constant::CUSTOM_STYLE);
@@ -179,21 +207,21 @@ void MainWindow::initMenu()
 
 
     //帮助菜单
-    helpMenu = ActionManager::instance()->createMenu(Constant::G_HELP);
-    helpMenu->appendGroup(Constant::G_HELP);
-    menubar->addMenu(helpMenu, Constant::G_HELP);
+    helpMenu = ActionManager::instance()->createMenu(Constant::MENU_HELP);
+    helpMenu->appendGroup(Constant::MENU_HELP);
+    menubar->addMenu(helpMenu, Constant::MENU_HELP);
 
     supportAction = new QAction(this);
     connect(supportAction,SIGNAL(triggered()),this,SLOT(technicalSupport()));
     Action * support = ActionManager::instance()->registAction(Constant::TEC_SUPPORT,supportAction);
-    helpMenu->addAction(support,Constant::G_HELP);
+    helpMenu->addAction(support,Constant::MENU_HELP);
 
-    helpMenu->addSeparator(Constant::G_HELP);
+    helpMenu->addSeparator(Constant::MENU_HELP);
 
     aboutPorgramAction = new QAction(this);
     connect(aboutPorgramAction,SIGNAL(triggered()),this,SLOT(aboutProgram()));
     Action * aboutProgram = ActionManager::instance()->registAction(Constant::ABOUT_PROGRAM,aboutPorgramAction);
-    helpMenu->addAction(aboutProgram,Constant::G_HELP);
+    helpMenu->addAction(aboutProgram,Constant::MENU_HELP);
 }
 
 /*!
@@ -342,6 +370,11 @@ void MainWindow::retranslateUi()
     serverMenu->menu()->setTitle(tr("Program(&P)"));
     exitAction->setText(tr("Exit(&X)"));
 
+    viewMenu->menu()->setTitle(tr("View(&V)"));
+    viewManagerMenu->menu()->setTitle(tr("View manager"));
+    importViewAction->setText(tr("Import view"));
+    exportViewAction->setText(tr("Export view"));
+
     settingsMenu->menu()->setTitle(tr("Settings(&S)"));
     topHintAction->setText(tr("Top hint"));
     fullScreenAction->setText(tr("Full screen"));
@@ -353,6 +386,24 @@ void MainWindow::retranslateUi()
     helpMenu->menu()->setTitle(tr("Help(&H)"));
     supportAction->setText(tr("Technical support(&T)"));
     aboutPorgramAction->setText(tr("About program(&A)"));
+
+    PluginManager::ComponentMap maps = RSingleton<PluginManager>::instance()->plugins();
+    PluginManager::ComponentMap::iterator iter = maps.begin();
+    while(iter != maps.end()){
+        Id id = iter.value()->id();
+        Action * act = ActionManager::instance()->action(id);
+        if(act)
+            act->action()->setText(iter.value()->name());
+
+        QStringList slist = id.toString().split(".");
+        QString menuId = slist.at(0)+"."+slist.at(1);
+        char mid[128] = {0};
+        memcpy(mid,menuId.toLocal8Bit().data(),menuId.toLocal8Bit().size());
+        Action * module = ActionManager::instance()->action(mid);
+        if(module)
+            module->action()->setText(iter.value()->pluginName());
+        iter++;
+    }
 }
 
 void MainWindow::technicalSupport()
@@ -373,6 +424,16 @@ void MainWindow::showShortcutSettings()
 {
     ShortcutSettings ss(this);
     ss.exec();
+}
+
+void MainWindow::importView()
+{
+
+}
+
+void MainWindow::exportView()
+{
+
 }
 
 /*!
@@ -429,7 +490,34 @@ void MainWindow::initComponent()
     while(iter != maps.end()){
         RComponent * comp = iter.value();
         comp->setFeatures(QDockWidget::AllDockWidgetFeatures);
+//        comp->setFloating(true);
         comp->initialize();
+
+        if(comp->toggleViewAction()){
+            QStringList slist = comp->id().toString().split(".");
+            QString menuId = slist.at(0)+"."+slist.at(1);
+            ActionContainer * container = ActionManager::instance()->actionContainer(Constant::MENU_VIEW);
+            if(container){
+                char mid[128] = {0};
+                memcpy(mid,menuId.toLocal8Bit().data(),menuId.toLocal8Bit().size());
+                ActionContainer * moduleMenu = ActionManager::instance()->actionContainer(mid);
+                if(moduleMenu == NULL){
+                    QAction * moduleAction = new QAction();
+                    moduleAction->setText(comp->pluginName());
+                    Action * module = ActionManager::instance()->registAction(mid,moduleAction);
+                    container->appendGroup(mid);
+                    container->addAction(module,mid);
+
+                    moduleMenu = ActionManager::instance()->createMenu(mid);
+                    moduleMenu->appendGroup(mid);
+
+                    moduleAction->setMenu(moduleMenu->menu());
+                }
+                Action * toggleAction = ActionManager::instance()->registAction(comp->id(),comp->toggleViewAction());
+                moduleMenu->addAction(toggleAction,mid);
+            }
+        }
+
         iter++;
     }
 }

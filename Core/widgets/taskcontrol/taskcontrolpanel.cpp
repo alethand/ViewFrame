@@ -4,6 +4,8 @@
 #include "taskcontrol.h"
 #include "Base/util/rsingleton.h"
 
+#include <QDebug>
+
 using namespace TaskControlModel;
 
 TaskControlPanel::TaskControlPanel(QWidget *parent):
@@ -29,6 +31,11 @@ bool TaskControlPanel::initialize()
 void TaskControlPanel::release()
 {
 
+}
+
+QString TaskControlPanel::pluginName()
+{
+    return tr("TaskControl panel");
 }
 
 void TaskControlPanel::onMessage(MessageType::MessType type)

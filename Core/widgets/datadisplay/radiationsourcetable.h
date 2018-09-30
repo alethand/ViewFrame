@@ -25,9 +25,9 @@ public:
     explicit RadiationSourceTable(QWidget *parent = 0);
     ~RadiationSourceTable();
 
-
     bool initialize();
     void release();
+    QString pluginName();
     void onMessage(MessageType::MessType type);
     void changeTableHeaderInfo(bool blAddColFlag);
     void recvRSPara(char *buff,int len);

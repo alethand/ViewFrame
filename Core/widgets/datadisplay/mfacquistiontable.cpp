@@ -69,6 +69,11 @@ void MFAcquistionTable::release()
 
 }
 
+QString MFAcquistionTable::pluginName()
+{
+    return  tr("DataDisplay panel");
+}
+
 void MFAcquistionTable::onMessage(MessageType::MessType type)
 {
     switch(type){

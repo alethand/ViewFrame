@@ -78,6 +78,11 @@ void AllPluseGraphics::release()
 
 }
 
+QString AllPluseGraphics::pluginName()
+{
+    return tr("DataDisplay panel");
+}
+
 void AllPluseGraphics::onMessage(MessageType::MessType type)
 {
     switch(type){

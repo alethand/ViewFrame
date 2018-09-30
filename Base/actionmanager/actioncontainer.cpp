@@ -62,7 +62,14 @@ QAction *ActionContainerProxy::insertLocation(Id groupId) const
 
 void ActionContainerProxy::appendGroup(Id groupId)
 {
-     m_groups.append(Group(groupId));
+    auto iter = std::find_if(m_groups.constBegin(),m_groups.constEnd(),[&](const Group & group){
+        return group.id == groupId;
+    });
+
+    if(iter != m_groups.constEnd())
+        return;
+
+    m_groups.append(Group(groupId));
 }
 
 void ActionContainerProxy::insertGroup(Id before, Id groupId)

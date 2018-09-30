@@ -49,6 +49,11 @@ void SpectrumGraphics::release()
 
 }
 
+QString SpectrumGraphics::pluginName()
+{
+    return tr("DataDisplay panel");
+}
+
 void SpectrumGraphics::onMessage(MessageType::MessType type)
 {
     switch(type){

@@ -122,6 +122,11 @@ void RadiationSourceTable::release()
 
 }
 
+QString RadiationSourceTable::pluginName()
+{
+    return tr("DataDisplay panel");
+}
+
 void RadiationSourceTable::onMessage(MessageType::MessType type)
 {
     switch(type){

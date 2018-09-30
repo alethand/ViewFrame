@@ -100,6 +100,11 @@ void AllPluseTable::release()
 
 }
 
+QString AllPluseTable::pluginName()
+{
+    return tr("DataDisplay panel");
+}
+
 void AllPluseTable::onMessage(MessageType::MessType type)
 {
     switch(type){

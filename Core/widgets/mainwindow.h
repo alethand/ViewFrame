@@ -51,6 +51,9 @@ private slots:
 
     void showShortcutSettings();
 
+    void importView();
+    void exportView();
+
 private:
     void initComponent();
     void updateStyle(int index);
@@ -67,11 +70,15 @@ private:
     QString curLanguageName;
 
     ActionContainer * serverMenu;
+    ActionContainer * viewMenu;
+    ActionContainer * viewManagerMenu;
     ActionContainer * settingsMenu;
     ActionContainer * styleMenu;
     ActionContainer * lanMenu;
     ActionContainer * helpMenu;
     QAction * exitAction;
+    QAction * importViewAction;
+    QAction * exportViewAction;
     QAction * topHintAction;
     QAction * fullScreenAction;
     QAction * shortcutAction;

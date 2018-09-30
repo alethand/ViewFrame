@@ -46,6 +46,11 @@ bool HealthInfoDockPanel::initialize()
     return true;
 }
 
+QString HealthInfoDockPanel::pluginName()
+{
+    return tr("HealthInfo panel");
+}
+
 void HealthInfoDockPanel::onMessage(MessageType::MessType type)
 {
     switch(type){

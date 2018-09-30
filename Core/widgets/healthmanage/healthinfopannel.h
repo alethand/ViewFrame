@@ -23,6 +23,7 @@ public:
 
      bool initialize();
      void release(){}
+     QString pluginName();
      void onMessage(MessageType::MessType type);
      QSize sizeHint()const;
 

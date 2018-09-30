@@ -51,6 +51,11 @@ void RadiaSourceMap::release()
 
 }
 
+QString RadiaSourceMap::pluginName()
+{
+    return tr("DataDisplay panel");
+}
+
 void RadiaSourceMap::onMessage(MessageType::MessType type)
 {
     switch(type){

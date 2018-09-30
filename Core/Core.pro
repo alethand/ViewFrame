@@ -58,8 +58,6 @@ SOURCES += main.cpp \
     widgets/taskcontrol/net/taskdispatcher.cpp \
     widgets/datadisplay/allplusegraphics.cpp \
     widgets/datadisplay/allplusetable.cpp \
-    widgets/datadisplay/datadisplay.cpp \
-    widgets/datadisplay/datadisplaypanel.cpp \
     widgets/datadisplay/mfacquisitiongraphics.cpp \
     widgets/datadisplay/mfacquistiontable.cpp \
     widgets/datadisplay/radiasourcemap.cpp \
@@ -104,8 +102,6 @@ HEADERS  += \
     widgets/taskcontrol/net/taskdispatcher.h \
     widgets/datadisplay/allplusegraphics.h \
     widgets/datadisplay/allplusetable.h \
-    widgets/datadisplay/datadisplay.h \
-    widgets/datadisplay/datadisplaypanel.h \
     widgets/datadisplay/mfacquisitiongraphics.h \
     widgets/datadisplay/mfacquistiontable.h \
     widgets/datadisplay/radiasourcemap.h \
