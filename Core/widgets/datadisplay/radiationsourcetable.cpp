@@ -7,6 +7,10 @@
 #include <QList>
 #include <QMap>
 #include <QHBoxLayout>
+#include <QSortFilterProxyModel>
+#include <QFileDialog>
+#include <QDesktopServices>
+#include <QPushButton>
 //#include <QMenu>
 //#include "table.h"
 #include "Base/constants.h"
@@ -14,6 +18,10 @@
 #include "modelview/tableviewdata.h"
 #include "modelview/tableviewmoderradiationsource.h"
 #include "radiationsourcetablerenovatedialog.h"
+#include "../Util/dataexportandprint.h"
+
+#include <iostream>
+using namespace std;
 
 namespace DataView {
 
@@ -40,6 +48,8 @@ public:
 
     QWidget * mainWidget;
 
+    QPushButton * btn_load;
+
     QRadioButton * radioButtonCoverReno;
     QRadioButton * radioButtonScrollReno;
 
@@ -53,6 +63,7 @@ public:
     bool blDoubleClickedFlag;                   //覆盖刷新模式下的双击标识
 
     QAction *clearAction;
+    QLabel *rowCounterLabel;                    //行数标签
 };
 
 void RadiationSourceTablePrivate::initView()
@@ -64,10 +75,15 @@ void RadiationSourceTablePrivate::initView()
     radioButtonCoverReno = new QRadioButton(radioWidget);
     radioButtonScrollReno = new QRadioButton(radioWidget);
 
+    btn_load = new QPushButton(radioWidget);
+    btn_load->setText(QObject::tr("Output"));
+
+    QObject::connect(btn_load,SIGNAL(clicked()),q_ptr,SLOT(on_btn_load_clicked()));
     QObject::connect(radioButtonCoverReno,SIGNAL(clicked()),q_ptr,SLOT(on_radioButtonCoverReno_clicked()));
     QObject::connect(radioButtonScrollReno,SIGNAL(clicked()),q_ptr,SLOT(on_radioButtonScrollReno_clicked()));
 
     QHBoxLayout * layout = new QHBoxLayout;
+    layout->addWidget(btn_load);
     layout->addStretch(1);
     layout->setContentsMargins(1,1,1,1);
     layout->addWidget(radioButtonCoverReno);
@@ -80,10 +96,30 @@ void RadiationSourceTablePrivate::initView()
 
     dataView = new TableView(q_ptr);
     dataView->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+//    m_tableView->resizeColumnsToContents();
 
     dataViewModel = new TableViewModelRadiationSource(dataView);
-    dataView->setModel(dataViewModel);
+
+    dataView->setSortingEnabled(true);
+    QSortFilterProxyModel *dataViewProxy = new QSortFilterProxyModel();
+    dataViewProxy->setSourceModel(dataViewModel);
+    dataView->setModel(dataViewProxy);
+
+//    dataView->resizeColumnsToContents();
+
+
     vlayout->addWidget(dataView);
+
+    QWidget *rowLabelWidget=new QWidget();
+    QLabel *rowLabel=new QLabel(QStringLiteral("row:"));
+    rowCounterLabel=new QLabel(QStringLiteral("0"));
+    QHBoxLayout *hLayout=new QHBoxLayout();
+    hLayout->addStretch(1);
+    hLayout->setContentsMargins(1,1,1,1);
+    hLayout->addWidget(rowLabel);
+    hLayout->addWidget(rowCounterLabel);
+    rowLabelWidget->setLayout(hLayout);
+    vlayout->addWidget(rowLabelWidget);
 
     mainWidget->setLayout(vlayout);
 
@@ -94,6 +130,7 @@ void RadiationSourceTablePrivate::initTableViewMenu()
 {
     clearAction = new QAction();
     dataView->addAction(clearAction);
+//    dataView->resizeColumnsToContents();
     QObject::connect(clearAction, SIGNAL(triggered(bool)), q_ptr, SLOT(clearTable()));
 }
 
@@ -187,29 +224,44 @@ void RadiationSourceTable::on_radioButtonCoverReno_clicked()
  */
 void RadiationSourceTable::changeTableHeaderInfo(bool blAddColFlag)
 {
+    theblAddColFlag = blAddColFlag;
     QStringList headInfo;
     //int colCount=INIT_TABLE_COL_NUM;    //列数
-    headInfo<<QStringLiteral("序号")<<QStringLiteral("辐射源批号")<<QStringLiteral("脉间类型")<<QStringLiteral("脉内类型")<<QStringLiteral("载频个数")
-               <<QStringLiteral("连续波标记")<<QStringLiteral("载频脉组内脉冲数")<<QStringLiteral("载频频段码")<<QStringLiteral("RF1")<<QStringLiteral("RF2")
-                <<QStringLiteral("RF3")<<QStringLiteral("RF4")<<QStringLiteral("RF5")<<QStringLiteral("RF6")<<QStringLiteral("RF7")
-                  <<QStringLiteral("RF8")<<QStringLiteral("重频类型")<<QStringLiteral("重频个数")<<QStringLiteral("重频脉组内脉冲数")<<QStringLiteral("PRI1")
-                    <<QStringLiteral("PRI2")<<QStringLiteral("PRI3")<<QStringLiteral("PRI4")<<QStringLiteral("PRI5")<<QStringLiteral("PRI6")
-                      <<QStringLiteral("PRI7")<<QStringLiteral("PRI8")<<QStringLiteral("脉宽类型")<<QStringLiteral("脉宽个数")<<QStringLiteral("脉宽脉组内脉冲数")
-                        <<QStringLiteral("PW1")<<QStringLiteral("PW2")<<QStringLiteral("PW3")<<QStringLiteral("PW4")<<QStringLiteral("PW5")
-                          <<QStringLiteral("PW6")<<QStringLiteral("PW7")<<QStringLiteral("PW8")<<QStringLiteral("数字幅度")<<QStringLiteral("模拟幅度")
-                            <<QStringLiteral("数字功率")<<QStringLiteral("模拟功率")<<QStringLiteral("方位角")<<QStringLiteral("俯仰角")<<QStringLiteral("经度")
-                              <<QStringLiteral("纬度")<<QStringLiteral("高度")<<QStringLiteral("脉内有效标识")<<QStringLiteral("脉内特征信息")<<QStringLiteral("CRC校验");
-
+//    headInfo<<QStringLiteral("序号")<<QStringLiteral("辐射源批号")<<QStringLiteral("脉间类型")<<QStringLiteral("脉内类型")<<QStringLiteral("载频个数")
+//               <<QStringLiteral("连续波标记")<<QStringLiteral("载频脉组内脉冲数")<<QStringLiteral("载频频段码")<<QStringLiteral("RF1")<<QStringLiteral("RF2")
+//                <<QStringLiteral("RF3")<<QStringLiteral("RF4")<<QStringLiteral("RF5")<<QStringLiteral("RF6")<<QStringLiteral("RF7")
+//                  <<QStringLiteral("RF8")<<QStringLiteral("重频类型")<<QStringLiteral("重频个数")<<QStringLiteral("重频脉组内脉冲数")<<QStringLiteral("PRI1")
+//                    <<QStringLiteral("PRI2")<<QStringLiteral("PRI3")<<QStringLiteral("PRI4")<<QStringLiteral("PRI5")<<QStringLiteral("PRI6")
+//                      <<QStringLiteral("PRI7")<<QStringLiteral("PRI8")<<QStringLiteral("脉宽类型")<<QStringLiteral("脉宽个数")<<QStringLiteral("脉宽脉组内脉冲数")
+//                        <<QStringLiteral("PW1")<<QStringLiteral("PW2")<<QStringLiteral("PW3")<<QStringLiteral("PW4")<<QStringLiteral("PW5")
+//                          <<QStringLiteral("PW6")<<QStringLiteral("PW7")<<QStringLiteral("PW8")<<QStringLiteral("数字幅度")<<QStringLiteral("模拟幅度")
+//                            <<QStringLiteral("数字功率")<<QStringLiteral("模拟功率")<<QStringLiteral("方位角")<<QStringLiteral("俯仰角")<<QStringLiteral("经度")
+//                              <<QStringLiteral("纬度")<<QStringLiteral("高度")<<QStringLiteral("脉内有效标识")<<QStringLiteral("脉内特征信息")<<QStringLiteral("CRC校验");
+//    headInfo<<QObject::tr("Index")<<QObject::tr("Type")<<QObject::tr("Parameter")
+//                  <<QObject::tr("Dispatch Time")<<QObject::tr("Execute Time")<<QObject::tr("Issued status");
+    headInfo<<QObject::tr("Serial number")<<QObject::tr("Radiation source batch number")<<QObject::tr("Interpulse type")<<QObject::tr("Intrapulse type")<<QObject::tr("Number of carrier frequencies")
+               <<QObject::tr("Continuous wave mark")<<QObject::tr("Number of pulses in carrier frequency group")<<QObject::tr("Carrier frequency band code")<<QObject::tr("RF1")<<QObject::tr("RF2")
+                <<QObject::tr("RF3")<<QObject::tr("RF4")<<QObject::tr("RF5")<<QObject::tr("RF6")<<QObject::tr("RF7")
+                  <<QObject::tr("RF8")<<QObject::tr("Re-frequency type")<<QObject::tr("Re-frequency number")<<QObject::tr("Number of pulses in the re-frequency group")<<QObject::tr("PRI1")
+                    <<QObject::tr("PRI2")<<QObject::tr("PRI3")<<QObject::tr("PRI4")<<QObject::tr("PRI5")<<QObject::tr("PRI6")
+                      <<QObject::tr("PRI7")<<QObject::tr("PRI8")<<QObject::tr("Pulse width type")<<QObject::tr("Pulse width number")<<QObject::tr("Pulse width pulse number")
+                        <<QObject::tr("PW1")<<QObject::tr("PW2")<<QObject::tr("PW3")<<QObject::tr("PW4")<<QObject::tr("PW5")
+                          <<QObject::tr("PW6")<<QObject::tr("PW7")<<QObject::tr("PW8")<<QObject::tr("Digital amplitude")<<QObject::tr("Analog amplitude")
+                            <<QObject::tr("Digital power")<<QObject::tr("Analog power")<<QObject::tr("Azimuth")<<QObject::tr("Pitch angle")<<QObject::tr("Longitude")
+                              <<QObject::tr("Latitude")<<QObject::tr("Height")<<QObject::tr("Intra-pulse effective identification")<<QObject::tr("Intra-pulse characteristic information")<<QObject::tr("CRC check");
 
 
     if(blAddColFlag) //新增两列
     {
-        headInfo<<QStringLiteral("截获次数")<<QStringLiteral("截获时间");
+        headInfo<<QObject::tr("Interceptions")<<QObject::tr("Interception time");
     }
 
+    d_ptr->dataView->resizeColumnsToContents();
+    d_ptr->dataView->horizontalHeader();
     for(int i=0;i<headInfo.size();i++)
     {
-        d_ptr->dataView->setColumnWidth(i,90);
+        d_ptr->dataView->setColumnWidth(i, d_ptr->dataView->columnWidth(i) + 40);
+//        d_ptr->dataView->setColumnWidth(i,90);
     }
 
     d_ptr->dataViewModel->resetHeadInfo(headInfo);
@@ -301,6 +353,28 @@ void RadiationSourceTable::showTSPara(const RadiationSourceBase& rsData)
     {
         emit sendRSDataList(&(d->rsDataList));
     }
+    showRowCounter();
+}
+
+/*!
+ * @brief 显示当前表格数据总行数
+ */
+void RadiationSourceTable::showRowCounter()
+{
+    QString strNum;
+    if(d_ptr->enRSReKind==COVER_RENOVATE) //覆盖刷新模式
+    {
+        strNum=QString("%1").arg(d_ptr->rsReMap.size());
+    }
+    else if(d_ptr->enRSReKind==SCROLL_RENOVATE) //滚动刷新模式
+    {
+        strNum=QString("%1").arg(d_ptr->rsDataList.size());
+    }
+    else
+    {
+        return;
+    }
+    d_ptr->rowCounterLabel->setText(strNum);
 }
 
 /*!
@@ -335,12 +409,26 @@ QString RadiationSourceTable::getCurrentDate()
 
 void RadiationSourceTable::retranslateUi()
 {
+//    cout<<"the1"<<endl;
     Q_D(RadiationSourceTable);
+//    QStringList headInfo;
     m_name = tr("Radiation source data");
     setWindowTitle(m_name);
 
+
     d->radioButtonCoverReno->setText(tr("Overwrite Refresh"));
     d->radioButtonScrollReno->setText(tr("Scrolling Refresh"));
+
+    changeTableHeaderInfo(theblAddColFlag);
+
+    d_ptr->dataView->resizeColumnsToContents();
+    d_ptr->dataView->horizontalHeader();
+    for(int i=0;i< d_ptr->dataView->horizontalHeader()->count();i++)
+    {
+        d_ptr->dataView->setColumnWidth(i, d_ptr->dataView->columnWidth(i) + 40);
+//        d_ptr->dataView->setColumnWidth(i,90);
+    }
+
 }
 
 void RadiationSourceTable::viewRSData(QModelIndex index)
@@ -377,5 +465,16 @@ void RadiationSourceTable::showRSDialog(QModelIndex index)
         dialog.exec();
         d_ptr->blDoubleClickedFlag=false;
     }
+}
+
+void RadiationSourceTable::on_btn_load_clicked()
+{
+    Q_D(RadiationSourceTable);
+    // 指定存储的位置
+    QString filepath = QFileDialog::getSaveFileName(this, tr("Save as..."),
+                                                    QString(), tr("EXCEL files (*.xls *.xlsx);;HTML-Files (*.htm *.html);;"));
+    if(filepath.isEmpty())
+        return;
+    DataExportAndPrint::exportToExcel(d->dataView,filepath);
 }
 } //namespace DataView

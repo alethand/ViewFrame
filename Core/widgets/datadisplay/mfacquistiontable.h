@@ -9,6 +9,7 @@
 #define MFACQUISTIONTABLE_H
 
 #include "Base/pluginmanager/rcomponent.h"
+#include <QAction>
 
 namespace DataView {
 class MFAcquistionTablePrivate;
@@ -27,11 +28,14 @@ public:
     void onMessage(MessageType::MessType type);
 
 public slots:
-    void recvMFAcquistionPara(char *buff, int len);
+    void recvMidFreqData(char *buff, int len);
+    void clearTable();
+    void on_btn_load_clicked();
 
 private:
     void initMFAcquistionTable();
     void retranslateUi();
+    QString getCurrentDate();
 
 private:
     MFAcquistionTablePrivate * d_ptr;

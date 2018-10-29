@@ -8,9 +8,11 @@
 
 #ifndef ALLPLUSEGRAPHICS_H
 #define ALLPLUSEGRAPHICS_H
-
+#include "protocol/datastruct.h"
 #include "Base/pluginmanager/rcomponent.h"
-
+#include "widgets/datadisplay/Graphics/scatterdiagram.h"
+using namespace Datastruct;
+using namespace Diagram;
 namespace DataView {
 
 class AllPluseGraphicsPrivate;
@@ -23,6 +25,8 @@ public:
     explicit AllPluseGraphics(QWidget *parent = 0);
     ~AllPluseGraphics();
 
+
+
     bool initialize();
     void release();
     QString pluginName();
@@ -30,10 +34,22 @@ public:
 
 private:
     void retranslateUi();
+    void drawTimeParaGraphis();
+    void drawBarGraphis();
+
+private slots:
+   // void recvAllPulseInfoList(AllPluseStatisticInfoList* statisticInfoList,AllPulseOriginalInfoList* originalInfoList);
 
 private:
     AllPluseGraphicsPrivate * d_ptr;
+   // AllPluseStatisticInfoList allPluseStatisticInfoList;
+    AllPulseOriginalInfoList allPluseOriginalInfoList;
+    Diagram::Scatter  timeScatter;
+    Diagram::Histogram freqHistogram;
 };
+
+
+
 
 } //namespace DataView
 

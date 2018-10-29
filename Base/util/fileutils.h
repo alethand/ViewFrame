@@ -27,9 +27,11 @@ class BASESHARED_EXPORT RFile : public QFile
 public:
     RFile(const QString &fileName);
 
-    virtual bool startParse(){return true;}
-    virtual bool startSave(){return true;}
+    virtual bool startParse(OpenMode openMode = QFile::ReadOnly);
+    virtual bool startSave(OpenMode  openMode = QFile::WriteOnly | QFile::Truncate | QFile::Text);
 };
+
+/***********************************XML文件解析******************************************/
 
 class BASESHARED_EXPORT RXmlParseMethod
 {
@@ -62,11 +64,52 @@ public:
 
     void setParseMethod(RXmlParseMethod * p){this->parseMethod = p;}
 
-    virtual bool startParse();
-    virtual bool startSave();
+    virtual bool startParse(OpenMode  openMode = QFile::ReadOnly);
+    virtual bool startSave(OpenMode  openMode = QFile::WriteOnly | QFile::Truncate | QFile::Text);
 
 protected:
     RXmlParseMethod * parseMethod;
 };
+
+/***********************************普通文件解析******************************************/
+
+class RTextFile;
+
+class BASESHARED_EXPORT RTextParseMethod
+{
+public:
+    RTextParseMethod(){}
+    virtual ~RTextParseMethod(){}
+
+    /*!
+     * @brief 解析普通文件
+     * @param[in] file 文档对象
+     * @return bool 是否解析成功
+     */
+    virtual bool  startParse(RTextFile * /*file*/){return true;}
+
+    /*!
+     * @brief 保存xml文件信息
+     * @param[in] file 文档对象
+     * @return true 保存成功
+     */
+    virtual bool  startSave(RTextFile * /*file*/){return true;}
+};
+
+class BASESHARED_EXPORT RTextFile : public RFile
+{
+public:
+    RTextFile(const QString & fileName);
+    ~RTextFile();
+
+    void setParseMethod(RTextParseMethod * p){this->parseMethod = p;}
+
+    virtual bool startParse(OpenMode  openMode = QFile::ReadOnly);
+    virtual bool startSave(OpenMode  openMode = QFile::WriteOnly | QFile::Truncate | QFile::Text);
+
+protected:
+    RTextParseMethod * parseMethod;
+};
+
 
 #endif // FILEUTILS_H

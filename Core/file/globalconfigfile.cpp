@@ -59,4 +59,15 @@ void GlobalConfigFile::saveFile()
     settings->setValue(Constant::SYSTEM_LOCALE,systemConfigInfo.locale);
     settings->setValue(Constant::SYSTEM_STYLE,systemConfigInfo.style);
     settings->endGroup();
+
+//    settings->beginGroup(Constant::LAY_SETTING);
+//    settings->setValue(Constant::LAY_GEOMETRY,saveGeometry());
+//    settings->setValue(Constant::LAY_WINDOWSTATE,this->saveState());
+//    settings->setValue(Constant::SYSTEM_LOCALE,systemConfigInfo.locale);
+//    settings->setValue(Constant::SYSTEM_STYLE,systemConfigInfo.style);
+
+//    QSettings settings("MyCompany", "MyApp");
+//    settings.setValue("geometry", saveGeometry());
+//    settings.setValue("windowState", saveState());
+//    settings->endGroup();
 }

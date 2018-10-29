@@ -17,6 +17,8 @@
 
 #include "head.h"
 #include "Base/pluginmanager/observer.h"
+#include "taskcntldisplay_parsexml.h"
+
 
 class QTimerEvent;
 
@@ -36,15 +38,18 @@ public:
     void onMessage(MessageType::MessType type);
     
 private slots:
-    void viewTask(QModelIndex); /*!< 查看任务信息 */
-    void modifyTask();          /*!< 修改任务信息 */
-    void deleteTask();          /*!< 删除任务信息 */
-    void copyTable();           /*!< 复制任务信息 */
-    void pasteTask();           /*!< 粘贴任务信息 */
+    void viewTask(QModelIndex);
+    void mouseHoverItem(QModelIndex index);
+    void modifyTask();
+    void deleteTask();
+    void copyTable();
+    void pasteTask();
 
-    void addNewTask();          /*!< 添加任务 */
-    void distributeTask();      /*!< 下发任务 */
-    void resetTask();           /*!< 重置任务状态 */
+    void importTask();
+    void exportTask();
+    void addNewTask();
+    void distributeTask();
+    void resetTask();
 
     void updateTaskState();
     void dispatchOver();
@@ -62,6 +67,7 @@ private:
 
 private:
     QSharedPointer<TaskControlPrivate> d_ptr;
+
 };
 
 } //namespace TaskControlModel

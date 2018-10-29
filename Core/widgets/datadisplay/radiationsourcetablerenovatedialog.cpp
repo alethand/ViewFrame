@@ -28,6 +28,7 @@ RadiationSourceTableRenovateDialog::RadiationSourceTableRenovateDialog(QWidget *
     setLayout(vlayout);
 
     initTableHeaderInfo();
+
 }
 
 RadiationSourceTableRenovateDialog::~RadiationSourceTableRenovateDialog()
@@ -55,10 +56,25 @@ void RadiationSourceTableRenovateDialog::initTableHeaderInfo()
                             <<QStringLiteral("数字功率")<<QStringLiteral("模拟功率")<<QStringLiteral("方位角")<<QStringLiteral("俯仰角")<<QStringLiteral("经度")
                               <<QStringLiteral("纬度")<<QStringLiteral("高度")<<QStringLiteral("脉内有效标识")<<QStringLiteral("脉内特征信息")<<QStringLiteral("CRC校验")
                                 <<QStringLiteral("截获次数")<<QStringLiteral("截获时间");
+//    headInfo<<QObject::tr("Serial number")<<QObject::tr("Radiation source batch number")<<QObject::tr("Interpulse type")<<QObject::tr("Intrapulse type")<<QObject::tr("Number of carrier frequencies")
+//               <<QObject::tr("Continuous wave mark")<<QObject::tr("Number of pulses in carrier frequency group")<<QObject::tr("Carrier frequency band code")<<QObject::tr("RF1")<<QObject::tr("RF2")
+//                <<QObject::tr("RF3")<<QObject::tr("RF4")<<QObject::tr("RF5")<<QObject::tr("RF6")<<QObject::tr("RF7")
+//                  <<QObject::tr("RF8")<<QObject::tr("Re-frequency type")<<QObject::tr("Re-frequency number")<<QObject::tr("Number of pulses in the re-frequency group")<<QObject::tr("PRI1")
+//                    <<QObject::tr("PRI2")<<QObject::tr("PRI3")<<QObject::tr("PRI4")<<QObject::tr("PRI5")<<QObject::tr("PRI6")
+//                      <<QObject::tr("PRI7")<<QObject::tr("PRI8")<<QObject::tr("Pulse width type")<<QObject::tr("Pulse width number")<<QObject::tr("Pulse width pulse number")
+//                        <<QObject::tr("PW1")<<QObject::tr("PW2")<<QObject::tr("PW3")<<QObject::tr("PW4")<<QObject::tr("PW5")
+//                          <<QObject::tr("PW6")<<QObject::tr("PW7")<<QObject::tr("PW8")<<QObject::tr("Digital amplitude")<<QObject::tr("Analog amplitude")
+//                            <<QObject::tr("Digital power")<<QObject::tr("Analog power")<<QObject::tr("Azimuth")<<QObject::tr("Pitch angle")<<QObject::tr("Longitude")
+//                              <<QObject::tr("Latitude")<<QObject::tr("Height")<<QObject::tr("Intra-pulse effective identification")<<QObject::tr("Intra-pulse characteristic information")<<QObject::tr("CRC check")
+//                                <<QObject::tr("Interceptions")<<QObject::tr("Interception time");
 
+
+    dataView->resizeColumnsToContents();
+    dataView->horizontalHeader();
     for(int i=0;i<headInfo.size();i++)
     {
-        dataView->setColumnWidth(i,90);
+        dataView->setColumnWidth(i, dataView->columnWidth(i) + 40);
+//        dataView->setColumnWidth(i,90);
     }
 
     dataViewModel->resetHeadInfo(headInfo);

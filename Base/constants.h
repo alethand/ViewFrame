@@ -43,6 +43,12 @@ const char DB_USERNAME[] = "UserName";
 const char DB_PASSWORD[] = "Password";
 const char DB_PORT[] = "Port";
 
+//布局
+const char LAY_SETTING[] = "Layout";
+const char LAY_GEOMETRY[] = "geometry";
+const char LAY_WINDOWSTATE[] = "windowState";
+
+
 /*************************************************</配置文件>******************************************************/
 
 
@@ -96,6 +102,7 @@ const char FULL_SCREEN[] = "Action.Core.FullScreen";
 const char CUSTOM_STYLE[] = "Action.Core.CustomStyle";
 const char SYSTEM_LANGUAGE[] = "Action.Core.SystemLanguage";
 const char SYSTEM_SHORTCUT[] = "Action.Core.ShortCut";
+const char SYSTEM_ScreenShot[] = "Action.Core.ScreenShot";
 
 //MENU_HELP 分组
 const char TEC_SUPPORT[] = "Action.Core.TecSupport";

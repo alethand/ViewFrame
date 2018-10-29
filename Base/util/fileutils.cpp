@@ -13,6 +13,37 @@ RFile::RFile(const QString &fileName):QFile(fileName)
 
 }
 
+bool RFile::startParse(OpenMode openMode)
+{
+    QFileInfo info(fileName());
+    if(!info.exists()|| info.isDir()){
+        RLOG_INFO("File [%s] type is not correct!",fileName().toLocal8Bit().data());
+        return false;
+    }
+
+    if(!open(openMode)){
+        RLOG_INFO("File [%s] open error!",fileName().toLocal8Bit().data());
+        return false;
+    }
+    return true;
+}
+
+bool RFile::startSave(OpenMode openMode)
+{
+    QFileInfo info(fileName());
+    if(info.isDir()){
+        RLOG_INFO("File [%s] type is not correct!",fileName().toLocal8Bit().data());
+        return false;
+    }
+
+    if(!open(openMode)){
+        RLOG_INFO("File [%s] open error!",fileName().toLocal8Bit().data());
+        return false;
+    }
+
+    return true;
+}
+
 
 RXmlFile::RXmlFile(const QString &fileName):RFile(fileName),parseMethod(NULL)
 {
@@ -25,20 +56,11 @@ RXmlFile::~RXmlFile()
         delete parseMethod;
 }
 
-bool RXmlFile::startParse()
+#include <QDebug>
+bool RXmlFile::startParse(OpenMode  openMode)
 {
-    if(parseMethod){
-
-        QFileInfo info(fileName());
-        if(!info.exists()|| info.isDir()){
-            RLOG_INFO("File [%s] type is not correct!",fileName().toLocal8Bit().data());
-            return false;
-        }
-
-        if(!open(QFile::ReadOnly)){
-            RLOG_INFO("File [%s] open error!",fileName().toLocal8Bit().data());
-            return false;
-        }
+    bool result = false;
+    if(parseMethod  && RFile::startParse(openMode)){
 
         QDomDocument doc;
         QString errorMsg;
@@ -49,30 +71,24 @@ bool RXmlFile::startParse()
             return false;
         }
         close();
-        return parseMethod->startParse(doc.documentElement());
+        QDomElement root = doc.documentElement();
+        if(!root.isNull())
+        {
+             result =  parseMethod->startParse(root.toElement());
+             return result;
+         }
     }
     RLOG_INFO("Not set xml parseMethod!");
     return false;
 }
 
-bool RXmlFile::startSave()
+bool RXmlFile::startSave(OpenMode  openMode)
 {
-    if(parseMethod)
+    if(fileName().lastIndexOf(".xml") < 0)
+        setFileName(fileName()+".xml");
+
+    if(parseMethod && RFile::startSave(openMode))
     {
-        QFileInfo info(fileName());
-        if(info.isDir()){
-            RLOG_INFO("File [%s] type is not correct!",fileName().toLocal8Bit().data());
-            return false;
-        }
-
-        if(fileName().lastIndexOf(".xml") < 0)
-            setFileName(fileName()+".xml");
-
-        if(!open(QFile::WriteOnly | QFile::Truncate | QFile::Text)){
-            RLOG_INFO("File [%s] open error!",fileName().toLocal8Bit().data());
-            return false;
-        }
-
         QTextStream stream(this);
         stream.setCodec(QTextCodec::codecForLocale());
 
@@ -87,5 +103,36 @@ bool RXmlFile::startSave()
         return result;
     }
     RLOG_INFO("Not set xml parseMethod!");
+    return false;
+}
+
+RTextFile::RTextFile(const QString &fileName):RFile(fileName),parseMethod(NULL)
+{
+
+}
+
+RTextFile::~RTextFile()
+{
+    if(parseMethod)
+        delete parseMethod;
+}
+
+bool RTextFile::startParse(OpenMode  openMode)
+{
+    if(parseMethod  && RFile::startParse(openMode)){
+        return parseMethod->startParse(this);
+    }
+
+    RLOG_INFO("Not set text file parseMethod!");
+    return false;
+}
+
+bool RTextFile::startSave(OpenMode  openMode)
+{
+    if(parseMethod && RFile::startSave(openMode))
+    {
+        return parseMethod->startSave(this);
+    }
+    RLOG_INFO("Not set text file parseMethod!");
     return false;
 }

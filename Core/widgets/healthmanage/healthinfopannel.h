@@ -24,6 +24,7 @@ public:
      bool initialize();
      void release(){}
      QString pluginName();
+     QString MachineName();
      void onMessage(MessageType::MessType type);
      QSize sizeHint()const;
 

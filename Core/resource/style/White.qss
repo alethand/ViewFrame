@@ -241,6 +241,7 @@ QHeaderView{
         border-bottom: 3px solid rgb(0, 78, 161);
         background: transparent;
         min-height: 30px;
+        font-size:14px;
 }
 QHeaderView::section:horizontal {
         border: none;

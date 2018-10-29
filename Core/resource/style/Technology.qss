@@ -12,6 +12,7 @@ QWidget{
     background-clip: border;
     border: 0px transparent black;
     background-color:#0d1a2a;
+    font-size: 9pt;
 }
 
 QWidget#Container
