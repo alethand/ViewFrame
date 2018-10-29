@@ -32,11 +32,14 @@ public:
     void changeTableHeaderInfo(bool blAddColFlag);
     void recvRSPara(char *buff,int len);
 
+    bool theblAddColFlag;
+
 private slots:
     void on_radioButtonScrollReno_clicked();
     void on_radioButtonCoverReno_clicked();
     void viewRSData(QModelIndex index);
     void clearTable();
+    void on_btn_load_clicked();
 
 private:
     void initRSTable();
@@ -44,6 +47,7 @@ private:
     QString getCurrentDate();
     void retranslateUi();
     void showRSDialog(QModelIndex index);
+    void showRowCounter();
 signals:
     void sendRSDataList(RSDataList* rsList);
 private:

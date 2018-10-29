@@ -1,0 +1,791 @@
+﻿
+QWidget#mainContainer{
+    color: white;
+    selection-color: #eff0f1;
+    background-clip: border;
+    border: 0px transparent black;
+    border-image: url(:/tech/resource/technology/background.png);
+}
+
+QWidget{
+    color: white;
+    selection-color: #eff0f1;
+    background-clip: border;
+    border: 0px transparent black;
+    background-color:#0d1a2a;
+    font-size: 13pt;
+}
+
+QWidget#Container
+{
+    border:1px solid #718eb4;
+}
+
+QDockWidget {
+    color:white;
+    background: #027eba;
+    border: 1px solid red;
+    titlebar-close-icon: url(:/tech/resource/technology/close.png);
+    titlebar-normal-icon: url(:/tech/resource/technology/undock.png);
+}
+
+QDockWidget>QWidget
+{
+border:1px solid #718eb4;
+}
+
+QDockWidget::title {
+    text-align: left; /* align the text to the left */
+    background: #027eba;
+    padding: 5px;
+}
+
+QDockWidget::close-button,
+QDockWidget::float-button {
+    border: 1px solid transparent;
+    border-radius: 2px;
+    background: transparent;
+}
+
+QDockWidget::close-button:hover,
+QDockWidget::float-button:hover {
+    background: rgba(255, 255, 255, 10);
+}
+
+QDockWidget::close-button:pressed,
+QDockWidget::float-button:pressed {
+    padding: 1px -1px -1px 1px;
+    background: rgba(255, 255, 255, 10);
+}
+
+QHeaderView {
+    border: 1px transparent;
+    border-radius: 0px;
+    margin: 0px;
+    padding: 0px;
+    font-size:13px;
+    font-weight:500;
+}
+
+QHeaderView::section {
+    background-color: #004c78;
+    color: #eff0f1;
+    padding: 7px;
+    border: 1px solid #76797C;
+    border-radius: 0px;
+    text-align: center;
+}
+
+QHeaderView::section::vertical::first,
+QHeaderView::section::vertical::only-one {
+    border-top: 1px solid #76797C;
+}
+
+QHeaderView::section::vertical {
+    border-top: transparent;
+}
+
+QHeaderView::section::horizontal::first,
+QHeaderView::section::horizontal::only-one {
+    border-left: 1px solid #76797C;
+}
+
+QHeaderView::section::horizontal {
+    border-left: transparent;
+}
+
+QHeaderView::section:checked {
+    color: white;
+    background-color: #334e5e;
+}
+
+QTableWidget,
+QTableView {
+    color: white;
+    gridline-color: black;
+    background-color: #0d1a2a;
+    alternate-background-color:#093266;
+    selection-color: white;
+    selection-background-color: #2a6e96;
+    border-radius: 2px;
+    padding: 2px 4px;
+}
+
+QMenuBar {
+    background-color: #0e2034;
+    color: #eff0f1;
+}
+
+QMenuBar::item {
+    background: transparent;
+    padding-left:15px;
+    padding-right:15px;
+    padding-top:5px;
+    padding-bottom:5px;
+}
+
+QMenuBar::item:selected {
+    background: #02a1cb;
+    border: 1px solid #019dc6;
+}
+
+QMenuBar::item:pressed {
+    background-color: #1f4570;
+    color: #eff0f1;
+}
+
+QMenu {
+    border: 1px solid #02a3cf;
+    color: #eff0f1;
+}
+
+QMenu::separator {
+    height: 2px;
+    background: #00ccff;
+}
+
+QMenu::item {
+    border:none;
+    padding:5px;
+    padding-left:20px;
+    padding-right:30px;
+    background-color:#052d46;
+}
+
+QMenu::item:selected {
+    background-color:#0493bb;
+}
+
+QMenu::indicator {
+    width: 16px;
+    height: 16px;
+    padding-left:2px;
+}
+
+QMenu::indicator:non-exclusive:unchecked {
+    image: url(:/tech/resource/technology/checkbox_unchecked.png);
+}
+
+QMenu::indicator:non-exclusive:unchecked:selected {
+    image: url(:/tech/resource/technology/checkbox_unchecked_disabled.png);
+}
+
+QMenu::indicator:non-exclusive:checked {
+    image: url(:/tech/resource/technology/checkbox_checked.png);
+}
+
+QMenu::indicator:non-exclusive:checked:selected {
+    image: url(:/tech/resource/technology/checkbox_checked_disabled.png);
+}
+
+
+/* exclusive indicator = radio button style indicator (see QActionGroup::setExclusive) */
+
+QMenu::indicator:exclusive:unchecked {
+    image: url(:/tech/resource/technology/radio_unchecked.png);
+}
+
+QMenu::indicator:exclusive:unchecked:selected {
+    image: url(:/tech/resource/technology/radio_unchecked_disabled.png);
+}
+
+QMenu::indicator:exclusive:checked {
+    image: url(:/tech/resource/technology/radio_checked.png);
+}
+
+QMenu::indicator:exclusive:checked:selected {
+    image: url(:/tech/resource/technology/radio_checked_disabled.png);
+}
+
+QMenu::right-arrow {
+    margin: 5px;
+    image: url(:/tech/resource/technology/right_arrow.png)
+}
+
+QPushButton {
+    color: #eff0f1;
+    border: 1px solid #00ccff;
+    padding: 5px;
+    border-radius: 2px;
+    outline: none;
+}
+
+QPushButton:hover {
+    color: #eff0f1;
+    border: 1px solid #00ccff;
+    background-color:#02a1cb;
+    padding: 5px;
+}
+
+QPushButton:pressed {
+    background-color: #00ccff;
+    padding-top: -15px;
+    padding-bottom: -17px;
+}
+
+QPushButton:focus {
+    background-color: #00ccff;
+}
+
+QPushButton:disabled {
+    background-color: #8c8c8c;
+    border-width: 1px;
+    border-color: #454545;
+    border-style: solid;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 2px;
+    color: #454545;
+}
+
+QComboBox {
+    background-color: #0e2034;
+    border-style: solid;
+    border: 1px solid #76797C;
+    border-radius: 2px;
+    padding: 5px;
+    min-width: 75px;
+}
+
+QComboBox:hover,
+QPushButton:hover,
+QAbstractSpinBox:hover,
+QTextEdit:hover,
+QPlainTextEdit:hover,
+QAbstractView:hover,
+QTreeView:hover {
+    border: 1px solid #00ccff;
+    color: #eff0f1;
+}
+
+QComboBox,
+QDockWidget,
+QLabel,
+QLineEdit,
+QTextEdit,
+QPlainTextEdit,
+QGroupBox,
+QPushButton,
+QMenu,
+QMenuBar,
+QMenuBar::item,
+QCheckBox
+{
+    border-image:none;
+}
+
+QComboBox:on {
+    padding-top: 3px;
+    padding-left: 4px;
+    selection-background-color: #4a4a4a;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #052d46;
+    border-radius: 2px;
+    border: 1px solid #019dc6;
+    selection-background-color: #0493bb;
+}
+
+QComboBox QAbstractItemView::item {
+    height:25px;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 15px;
+    border-left-width: 0px;
+    border-left-color: darkgray;
+    border-left-style: solid;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+QComboBox::down-arrow {
+    image: url(:/tech/resource/technology/down_arrow_disabled.png);
+}
+
+QComboBox::down-arrow:on,
+QComboBox::down-arrow:hover,
+QComboBox::down-arrow:focus {
+    image: url(:/tech/resource/technology/down_arrow.png);
+}
+
+QLabel {
+    border: 0px solid black;
+}
+
+QLineEdit {
+    background-color: rgba(35,38,41,20);
+    padding: 5px;
+    border-bottom: 1px solid #76797C;
+    border-radius: 0px;
+    color: #eff0f1;
+}
+
+QLineEdit:hover{
+    border-bottom: 1px solid #00ccff;
+}
+
+QAbstractItemView QLineEdit {
+    padding: 0;
+}
+
+
+QPlainTextEdit {
+    background-color: #232629;
+    color: #eff0f1;
+    border-radius: 2px;
+    border: 1px solid #76797C;
+}
+
+QGroupBox {
+    border: 1px solid #76797C;
+    border-radius: 2px;
+    margin-top: 20px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top center;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 10px;
+}
+
+QCheckBox {
+    spacing: 5px;
+    outline: none;
+    color: #eff0f1;
+    margin-bottom: 2px;
+    border-image:none;
+}
+
+QCheckBox:disabled {
+    color: #76797C;
+}
+
+QCheckBox::indicator,
+QGroupBox::indicator {
+    width: 18px;
+    height: 18px;
+}
+
+QGroupBox::indicator {
+    margin-left: 2px;
+}
+
+QCheckBox::indicator:unchecked,
+QGroupBox::indicator:unchecked {
+    image: url(:/tech/resource/technology/checkbox_unchecked.png);
+}
+
+QCheckBox::indicator:unchecked:hover,
+QCheckBox::indicator:unchecked:focus,
+QCheckBox::indicator:unchecked:pressed,
+QGroupBox::indicator:unchecked:hover,
+QGroupBox::indicator:unchecked:focus,
+QGroupBox::indicator:unchecked:pressed {
+    border: none;
+    image: url(:/tech/resource/technology/checkbox_unchecked_focus.png);
+}
+
+QCheckBox::indicator:checked,
+QGroupBox::indicator:checked {
+    image: url(:/tech/resource/technology/checkbox_checked.png);
+}
+
+QCheckBox::indicator:checked:hover,
+QCheckBox::indicator:checked:focus,
+QCheckBox::indicator:checked:pressed,
+QGroupBox::indicator:checked:hover,
+QGroupBox::indicator:checked:focus,
+QGroupBox::indicator:checked:pressed {
+    border: none;
+    image: url(:/tech/resource/technology/checkbox_checked_focus.png);
+}
+
+QCheckBox::indicator:indeterminate {
+    image: url(:/tech/resource/technology/checkbox_indeterminate.png);
+}
+
+QCheckBox::indicator:indeterminate:focus,
+QCheckBox::indicator:indeterminate:hover,
+QCheckBox::indicator:indeterminate:pressed {
+    image: url(:/tech/resource/technology/checkbox_indeterminate_focus.png);
+}
+
+QCheckBox::indicator:checked:disabled,
+QGroupBox::indicator:checked:disabled {
+    image: url(:/tech/resource/technology/checkbox_checked_disabled.png);
+}
+
+QCheckBox::indicator:unchecked:disabled,
+QGroupBox::indicator:unchecked:disabled {
+    image: url(:/tech/resource/technology/checkbox_unchecked_disabled.png);
+}
+
+QRadioButton {
+    spacing: 5px;
+    outline: none;
+    color: #eff0f1;
+    margin-bottom: 2px;
+    border-image:none;
+}
+
+QRadioButton:disabled {
+    color: #76797C;
+}
+
+QRadioButton::indicator {
+    width: 21px;
+    height: 21px;
+}
+
+QRadioButton::indicator:unchecked {
+    image: url(:/tech/resource/technology/radio_unchecked.png);
+}
+
+QRadioButton::indicator:unchecked:hover,
+QRadioButton::indicator:unchecked:focus,
+QRadioButton::indicator:unchecked:pressed {
+    border: none;
+    outline: none;
+    image: url(:/tech/resource/technology/radio_unchecked_focus.png);
+}
+
+QRadioButton::indicator:checked {
+    border: none;
+    outline: none;
+    image: url(:/tech/resource/technology/radio_checked.png);
+}
+
+QRadioButton::indicator:checked:hover,
+QRadioButton::indicator:checked:focus,
+QRadioButton::indicator:checked:pressed {
+    border: none;
+    outline: none;
+    image: url(:/tech/resource/technology/radio_checked_focus.png);
+}
+
+QRadioButton::indicator:checked:disabled {
+    outline: none;
+    image: url(:/tech/resource/technology/radio_checked_disabled.png);
+}
+
+QRadioButton::indicator:unchecked:disabled {
+    image: url(:/tech/resource/technology/radio_unchecked_disabled.png);
+}
+
+QScrollBar:horizontal {
+    height: 15px;
+    margin: 3px 15px 3px 15px;
+    border: 1px transparent #2A2929;
+    border-radius: 4px;
+    background-color: #2A2929;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #605F5F;
+    min-width: 5px;
+    border-radius: 4px;
+}
+
+QScrollBar::add-line:horizontal {
+    margin: 0px 3px 0px 3px;
+    border-image: url(:/tech/resource/technology/right_arrow_disabled.png);
+    width: 10px;
+    height: 10px;
+    subcontrol-position: right;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:horizontal {
+    margin: 0px 3px 0px 3px;
+    border-image: url(:/tech/resource/technology/left_arrow_disabled.png);
+    height: 10px;
+    width: 10px;
+    subcontrol-position: left;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::add-line:horizontal:hover,
+QScrollBar::add-line:horizontal:on {
+    border-image: url(:/tech/resource/technology/right_arrow.png);
+    height: 10px;
+    width: 10px;
+    subcontrol-position: right;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:horizontal:hover,
+QScrollBar::sub-line:horizontal:on {
+    border-image: url(:/tech/resource/technology/left_arrow.png);
+    height: 10px;
+    width: 10px;
+    subcontrol-position: left;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::up-arrow:horizontal,
+QScrollBar::down-arrow:horizontal {
+    background: none;
+}
+
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal {
+    background: none;
+}
+
+QScrollBar:vertical {
+    background-color: #2A2929;
+    width: 15px;
+    margin: 15px 3px 15px 3px;
+    border: 1px transparent #2A2929;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #605F5F;
+    min-height: 5px;
+    border-radius: 4px;
+}
+
+QScrollBar::sub-line:vertical {
+    margin: 3px 0px 3px 0px;
+    border-image: url(:/tech/resource/technology/up_arrow_disabled.png);
+    height: 10px;
+    width: 10px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::add-line:vertical {
+    margin: 3px 0px 3px 0px;
+    border-image: url(:/tech/resource/technology/down_arrow_disabled.png);
+    height: 10px;
+    width: 10px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical:hover,
+QScrollBar::sub-line:vertical:on {
+    border-image: url(:/tech/resource/technology/up_arrow.png);
+    height: 10px;
+    width: 10px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::add-line:vertical:hover,
+QScrollBar::add-line:vertical:on {
+    border-image: url(:/tech/resource/technology/down_arrow.png);
+    height: 10px;
+    width: 10px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::up-arrow:vertical,
+QScrollBar::down-arrow:vertical {
+    background: none;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QTabWidget {
+
+}
+
+QTabWidget::pane {
+    border: 1px solid #718eb4;
+    padding: 5px;
+    margin: 0px;
+}
+
+QTabBar::tab:top {
+    color: #eff0f1;
+    padding-left:15px;
+    padding-right:15px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+}
+
+QTabBar::tab:top:selected {
+    color: #eff0f1;
+    border: 1px solid #76797C;
+    background-color: #02a1cb;
+    border: 1px solid #76797C;
+    padding: 5px;
+    border-bottom: 2px solid red;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    min-width: 50px;
+    padding-left:15px;
+    padding-right:15px;
+}
+
+QTabBar::tab:top:!selected:hover {
+    background-color: #052d46;
+    border-bottom: 1px solid #019dc6;
+}
+
+QTabBar::tab:bottom {
+    color: #eff0f1;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    padding-left:15px;
+    padding-right:15px;
+}
+
+QTabBar::tab:bottom:selected {
+    color: #eff0f1;
+    border: 1px solid #76797C;
+    background-color: #02a1cb;
+    border-top: 2px solid red;
+    padding: 5px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    min-width: 50px;
+    padding-left:15px;
+    padding-right:15px;
+}
+
+QTabBar::tab:bottom:!selected:hover {
+    background-color: #052d46;
+    border-top: 1px solid #019dc6;
+}
+
+QTabBar::tab:left {
+    color: #eff0f1;
+    border: 1px solid #76797C;
+    border-left: 1px transparent black;
+    background-color: #31363b;
+    padding: 5px;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    min-height: 50px;
+}
+
+QTabBar::tab:left:selected {
+    color: #eff0f1;
+    background-color: #54575B;
+    border: 1px solid #76797C;
+    border-left: 2px solid #3daee9;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+
+QTabBar::tab:left:!selected:hover {
+    background-color: #3daee9;
+}
+
+QTabBar::tab:right {
+    color: #eff0f1;
+    border: 1px solid #76797C;
+    border-right: 1px transparent black;
+    background-color: #31363b;
+    padding: 5px;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+    min-height: 50px;
+}
+
+QTabBar::tab:right:selected {
+    color: #eff0f1;
+    background-color: #54575B;
+    border: 1px solid #76797C;
+    border-right: 2px solid #3daee9;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+
+QTabBar::tab:right:!selected:hover {
+    background-color: #3daee9;
+}
+
+QTabBar QToolButton::right-arrow:enabled {
+    image: url(:/tech/resource/technology/right_arrow.png);
+}
+
+QTabBar QToolButton::left-arrow:enabled {
+    image: url(:/tech/resource/technology/left_arrow.png);
+}
+
+QTabBar QToolButton::right-arrow:disabled {
+    image: url(:/tech/resource/technology/right_arrow_disabled.png);
+}
+
+QTabBar QToolButton::left-arrow:disabled {
+    image: url(:/tech/resource/technology/left_arrow_disabled.png);
+}
+
+QListView::item{
+    height:30px;
+}
+
+QListView::item::selected{
+    background-color: #2a6e96;
+}
+
+QListView::item:!selected:hover,
+QTreeView::item:!selected:hover {
+    background: #18465d;
+    outline: 0;
+    color: #eff0f1
+}
+
+QListView::item:selected:hover,
+QTreeView::item:selected:hover {
+    background: #287399;
+    color: #eff0f1;
+}
+
+QTreeView::indicator:checked,
+QListView::indicator:checked {
+    image: url(:/tech/resource/technology/checkbox_checked.png);
+}
+
+QTreeView::indicator:unchecked,
+QListView::indicator:unchecked {
+    image: url(:/tech/resource/technology/checkbox_unchecked.png);
+}
+
+QTreeView::indicator:indeterminate,
+QListView::indicator:indeterminate {
+    image: url(:/tech/resource/technology/checkbox_indeterminate.png);
+}
+
+QTreeView::indicator:checked:hover,
+QTreeView::indicator:checked:focus,
+QTreeView::indicator:checked:pressed,
+QListView::indicator:checked:hover,
+QListView::indicator:checked:focus,
+QListView::indicator:checked:pressed {
+    image: url(:/tech/resource/technology/checkbox_checked_focus.png);
+}
+
+QTreeView::indicator:unchecked:hover,
+QTreeView::indicator:unchecked:focus,
+QTreeView::indicator:unchecked:pressed,
+QListView::indicator:unchecked:hover,
+QListView::indicator:unchecked:focus,
+QListView::indicator:unchecked:pressed {
+    image: url(:/tech/resource/technology/checkbox_unchecked_focus.png);
+}
+
+QTreeView::indicator:indeterminate:hover,
+QTreeView::indicator:indeterminate:focus,
+QTreeView::indicator:indeterminate:pressed,
+QListView::indicator:indeterminate:hover,
+QListView::indicator:indeterminate:focus,
+QListView::indicator:indeterminate:pressed {
+    image: url(:/tech/resource/technology/checkbox_indeterminate_focus.png);
+}

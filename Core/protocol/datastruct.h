@@ -11,9 +11,117 @@
 #ifndef DATASTRUCT_H
 #define DATASTRUCT_H
 
+/****************************new DataStruct***********************************/
+#include <QString>
+#include <QList>
+#include <QAbstractTableModel>
+#include <QVariant>
+#include <QSet>
+#include <QDebug>
+#include "calculater/commonalgorithms.h"
+using namespace Calculator;
+
+namespace Protocol
+{
+
+    namespace Data
+    {
+
+        /*! 控制数据元*/
+        struct Elem_Cntl{};
+        struct Elem{
+            QVariant data;          //数据
+            ushort   numBytes;      //字节数
+        };
+
+        /*!
+         * \brief The Elem_Core struct  核心数据元
+         * \attention  多数据报文-核心数据 每一个数据都为1列
+         */
+        struct Elem_Core{
+
+            /*!
+             * \brief Elem::getName    获取当前数据的列名信息
+             * \param index
+             * \return
+             */
+          virtual  QString getName(int index) = 0;
+
+          virtual int getCount() = 0;
+          virtual QVariant getData(int index) = 0;
+        };
+
+
+        /*! 多数据报文 *///--即含有多个重复性结构的大数据报文
+
+
+        struct HugeData_Gram{
+            HugeData_Gram(){isReverse = false;}
+
+
+            /*!
+              * \brief isReverse  反转标识
+              * \note 默认情况 coreData的个数为行，项中的个数为列个数--即项数为属性，list的子项个数随时间增长
+              */
+
+
+             bool isReverse;
+             /// -----默认标识头为第一个数据
+             Elem          markHead;  //标识头 e.g. 0x134F
+
+             Elem_Cntl*         cntlData;  //控制类型数据
+             QList<Elem_Core*>   coreData;  //核心数据
+
+             QList<Elem>   end;        /* 结尾数据--可能有包尾，校验和等*/
+
+             QString getHeadName(int index) const;
+
+             int getRowCount() const ;
+
+             int getColCount() const;
+
+             QVariant getData(int row,int col) const;
+
+
+        };
+
+
+        class HugeData_Model:public QAbstractTableModel
+        {
+            Q_OBJECT
+        public:
+            explicit HugeData_Model(HugeData_Gram *data = NULL);
+            void setDataSrc(HugeData_Gram *data){mdata = data;}          //设置数据源
+
+            virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+            virtual int columnCount(const QModelIndex &parent) const;
+            //inline virtual bool setData(const QModelIndex &index, const QVariant &value, int role);
+            virtual QVariant data(const QModelIndex &index, int role) const;
+            virtual QVariant headerData(int section, Qt::Orientation orientation,int role) const;
+
+            void openShowLatestMsg(int row){rowsLatestMsg = row;}        //显示最新消息
+            void colseShowLatestMsg(){rowsLatestMsg = -1;}
+
+            void addPointedColShow(int col){specifedCol.insert(col);}   //添加指定列显示
+            void closePointedColShow(){ specifedCol.clear();}
+        public:
+            HugeData_Gram *mdata;
+            ushort rowsLatestMsg;           /*!< 需要显示的最新消息行数 */
+            QSet<int> specifedCol;        /*!< 指定可显示列         */
+        };
+
+    }
+}
+
+
+/////////////////////////////////////////////////////
 #include <QString>
 #include <QMap>
 #include <QVector>
+#include <QDateTime>
+
+using namespace Protocol;
+
 
 namespace Datastruct {
 
@@ -236,17 +344,6 @@ enum DataDisplayMessageType
     MESSAGE_ALLPLUSE                /*!< 全脉冲信息*/
 };
 
-/*!
- *  @brief 全脉冲统计参数信息
- */
-struct AllPluseStatisticInfoBase
-{
-    char cStaInfoName;              /*!< 统计参数名称*/
-    double dMin;                    /*!< 最小值*/
-    double dMax;                    /*!< 最大值*/
-    double dAve;                    /*!< 均值*/
-    double dStd;                    /*!< 均方差*/
-};
 
 /*!
  * @brief 数据显示模块表格显示类型
@@ -279,10 +376,176 @@ enum TableCustomKind
     STATISTICAL_INFO=1,             /*!< 统计信息 */
     ORIGINAL_INFO,                  /*!< 原始数据 */
     MF_ACQUISITION_INFO             /*!< 中频数据 */
+};
 
+/*!
+ *  @brief 全脉冲统计参数信息基结构
+ */
+struct AllPluseStatisticInfoBase
+{
+    char arrStaInfoName[64];        /*!< 统计参数名称*/
+    double dMin;                    /*!< 最小值*/
+    double dMax;                    /*!< 最大值*/
+    double dAve;                    /*!< 均值*/
+    double dStd;                    /*!< 均方差*/
+};
+
+/*!
+ *  @brief 全脉冲统计参数信息列
+ */
+enum AllPluseStatisticInfoHead
+{
+    T_StatisticNo=0,                         /*!< 行号*/
+    T_StaInfoName,                  /*!< 统计参数名称*/
+    T_Min,                          /*!< 最小值*/
+    T_Max,                          /*!< 最大值*/
+    T_Ave,                          /*!< 均值*/
+    T_Std                           /*!< 均方差*/
 };
 
 
+
+/*!
+ *  @brief 全脉冲原始数据属性基结构
+ */
+struct AllPluseOriginalInfoAttributeBase
+{
+    char arrOrgInfoAttributeName[64];       /*!< 原始数据属性名称*/
+    int iDrawFlag;                          /*!< 属性是否绘图*/
+    double dValue;                          /*!< 属性值*/
+};
+
+/*!
+ *  @brief 全脉冲原始数据列
+ */
+enum AllPluseOriginalInfoAttributeHead
+{
+    T_OriginalNo=0,                             /*!< 行号*/
+    T_OrgInfoAttributeName,                     /*!< 原始数据属性名称*/
+    T_DrawFlag,                                 /*!< 属性是否绘图*/
+    T_Value                                     /*!< 属性值*/
+};
+
+
+/*!
+ *  @brief 全脉冲信息
+ */
+struct AllPluseInfo
+{
+
+    struct OriginData{/*! 原始数据*/
+
+        struct Cntl :public Data::Elem_Cntl{
+            struct Struct_Repeat{
+                char name[64];                      //属性名称
+                ulong ifDrawPic;                    //是否绘图
+            };
+
+            ulong ifValid;                      //是否有效
+            ulong count;                        //数据个数
+            QList<Struct_Repeat> details;       //重复性数据细节
+        };
+
+        struct Core:public Data::Elem_Core
+        {
+
+            QString        name;                //属性名
+            QList<double>  valuelist;          //属性值
+
+            virtual  QString getName(int index)
+            {
+                Q_UNUSED(index)
+                return QStringLiteral("属性");
+                //return name;
+            }
+
+            virtual int getCount(){
+                return 5;//valuelist.count();
+            }
+            virtual QVariant getData(int index);
+        };
+
+    };
+
+    struct Statistic{/*! 统计参数信息*/
+        struct Core:public Data::Elem_Core
+        {
+            QString name;                   /*! 属性名称  */
+            float maxVal;                   /*! 最大值   */
+            float minVal;                   /*! 最小值   */
+            float meanVal;                  /*! 平均值   */
+            float variance;                 /*! 方差     */
+
+            MaxValue clacMaxValue;     /*! 最大值计算器   */
+            MinValue clacMinValue;     /*! 最小值计算器   */
+            MeanValue clacMeanValue;   /*! 平均值计算器   */
+            Variance clacvariance;     /*! 方差计算器   */
+
+            virtual  QString getName(int index)
+            {
+                switch(index)
+                {
+                case 0:return QStringLiteral("最大值");
+                case 1:return QStringLiteral("最小值");
+                case 2:return QStringLiteral("平均值");
+                case 3:return QStringLiteral("方差");
+                }
+
+            }
+
+            virtual int getCount(){
+                return 4;
+            }
+            virtual QVariant getData(int index);
+        };
+    };
+};
+
+/*!
+ *  @brief 全脉冲原始数据属性
+ */
+struct AllPluseOriginalInfoAttribute
+{
+    int iDataOutsideNo;                                     /*!< 原始数据属性总批号(总数据帧依次递增)*/
+    int iDataInsideNo;                                      /*!< 原始数据属性分批号(一帧数据中有多条统计信息,首批号为1,批号依次递增) */
+    //QString strPulseArriveColck;                            /*!< 脉冲到达时间*/
+    QDateTime dtPulseArriveColck;                             /*!< 脉冲到达时间*/
+    AllPluseOriginalInfoAttributeBase allPluseOriginalInfoBase;         /*!< 原始数据属性*/
+};
+
+
+typedef QList<AllPluseOriginalInfoAttribute> AllPulseOriginalInfoList;  /*!< 全脉冲原始信息列表*/
+
+/*!
+ *  @brief 中频采集数据(表格显示使用，非协议格式)
+ */
+struct MidFreqInfo
+{
+    /*!
+     *  @brief 中频采集数据列
+     */
+    enum MFAcquisitionHead
+    {
+        T_MFInfoNo=0,                                       /*!< 行号*/
+        T_AcqTime,                                          /*!< 采集时间*/
+        T_AcqModel,                                         /*!< 采集模式*/
+        T_AcqNum,                                           /*!< 脉冲采集个数*/
+        T_AcqDotNum                                         /*!< 采集点数*/
+    };
+
+    QString strAcqTime;                                    /*!< 采集时间*/
+    short sAcqModel;                                        /*!< 采集模式,0xCF01:VP触发采,0xCF02:盲采,0xCF00:中频数据不采集*/
+    int iAcqNum;                                            /*!< 脉冲采集个数*/
+    int iAcqDotNum;                                         /*!< 采集点数*/
+};
+
+
+typedef QList<MidFreqInfo> MFAcquistionInfoList;      /*!< 中频采集数据列表*/
+
 } //namespace Datastruct
+
+
+
+
 
 #endif // DATASTRUCT_H

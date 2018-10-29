@@ -32,6 +32,10 @@ class QLineEdit;
 #include "Base/selfwidget/pageinfo.h"
 #include "Base/util/fileutils.h"
 
+//update
+#include <QStandardItemModel>
+#include <QTableView>
+
 #define MAX_WORKSTATE_NUMS 300                          //最大工作状态数量
 #define MAX_SubMACHINE_NUMS 20                          //最大分机数量
 #define MAX_COMPONENT_NUMS 20                           //最大分机组件个数
@@ -112,7 +116,14 @@ protected:
 
     QVector<QPair<QLabel*,QLineEdit*> > mWkStItems;                                    //工作状态的所有子控件
     QVector<QPair<QString,QList<QPair<QLabel*,StateLamp*> >* >>  mSubMchCmpntItems;    //分机组件的所有子控件
-    QVector<QWidget*> mWKObjPair;                                                     //工作状态中--标签与行编辑器组成的控件对
+    QVector<QWidget*> mWKObjPair;
+    //工作状态中--标签与行编辑器组成的控件对
+
+    //    update
+    QStandardItemModel *standItemModel;
+    QTableView *tableView;
+    //update
+
     QVector<QPair<QWidget*,QList<QWidget*>* > > mSubMPair;                             //分机组件--组件所有信息的包裹控件与组件对控件列表
     unsigned short wkRowCount,wkColcount;
     unsigned short subMRowCount,subMColCount;

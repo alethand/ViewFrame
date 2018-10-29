@@ -54,7 +54,7 @@ bool StaticLayoutByXml::readXMLFile()
 {
     RXmlFile file("test.xml");
     file.setParseMethod(mxmlData);
-    return file.startParse();
+    return file.startParse(QFile::ReadOnly);
 }
 
 void StaticLayoutByXml::compareStringOrder(HealthData &data)

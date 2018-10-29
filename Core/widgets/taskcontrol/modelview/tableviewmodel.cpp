@@ -3,6 +3,9 @@
 #include <QDebug>
 #include "Base/util/rsingleton.h"
 
+#include <iostream>
+using namespace std;
+
 namespace TaskControlModel {
 
 TableViewModel::TableViewModel(QObject *parent) :
@@ -38,6 +41,10 @@ bool TableViewModel::setData(const QModelIndex &index, const QVariant &value, in
     TaskInfo * taskInfo = taskList.at(row);
     
     switch (role) {
+        case Qt::CheckStateRole:
+            taskInfo->userChecked = value.toBool();
+        break;
+
         case Qt::EditRole:
             if (col == PARAMENTER) {
                 taskInfo->parameter = value.toString();
@@ -60,6 +67,11 @@ QVariant TableViewModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     int row = index.row();
+
+    if(static_cast<TaskHead>(index.column()) == T_No && role == Qt::CheckStateRole){
+        return taskList.at(row)->userChecked ? Qt::Checked : Qt::Unchecked;
+    }
+
     switch(role)
     {
         case Qt::TextAlignmentRole:
@@ -139,6 +151,9 @@ Qt::ItemFlags TableViewModel::flags(const QModelIndex &index) const
     Qt::ItemFlags flags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
     switch (static_cast<TaskHead>(index.column())) {
+        case T_No:
+                return Qt::ItemIsUserCheckable | flags;
+            break;
         case T_PARAMETERS:
         case T_E_TIME:
         case T_E_TIME_LONG:
@@ -176,6 +191,7 @@ void TableViewModel::resetData()
 
 void TableViewModel::retranslateUi()
 {
+//    cout<<"the2"<<endl;
     headInfo.clear();
     headInfo<<QObject::tr("Index")<<QObject::tr("Type")<<QObject::tr("Parameter")
                   <<QObject::tr("Dispatch Time")<<QObject::tr("Execute Time")<<QObject::tr("Issued status");
