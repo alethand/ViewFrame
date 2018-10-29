@@ -14,6 +14,7 @@
 #include <QString>
 #include <QList>
 #include <QDateTime>
+#include <QDataStream>
 
 #define LABEL_MIN_WIDTH 120
 #define LABEL_MIN_HEIGHT 25
@@ -72,8 +73,10 @@ struct TaskInfo
 {
     TaskInfo(){
         this->dstate = Not_Issued;
+        userChecked = false;
     }
     TaskInfo(const TaskInfo & info){
+        this->userChecked = info.userChecked;
         this->taskType = info.taskType;
         this->parameter = info.parameter;
         this->excuteTime = info.excuteTime;
@@ -81,10 +84,11 @@ struct TaskInfo
         this->dstate = info.dstate;
     }
     virtual ~TaskInfo(){}
+    bool userChecked;               /*!< 用户是否选中 */
     Type taskType;                  /*!< 任务类型 */
     QString parameter;              /*!< 任务参数 */
     QDateTime excuteTime;           /*!< 任务执行时间 */
-    long lastTime;                  /*!< 任务执行时长 */
+    quint32 lastTime;               /*!< 任务执行时长 */
     DistuributeState dstate;        /*!< 下发状态 */
 
     virtual void dispatch() = 0;
@@ -105,6 +109,10 @@ struct BandControl: public TaskInfo
         this->stopFrequency = info.stopFrequency;
         this->frequencyStopping = info.frequencyStopping;
     }
+
+    friend QDataStream & operator<<(QDataStream & stream,const BandControl & info);
+    friend QDataStream & operator>>(QDataStream & stream,BandControl & info);
+
     ~BandControl(){}
     double originFrequency;         /*!< 起始频率(HMz) */
     double stopFrequency;           /*!< 终止频率(HMz) */
@@ -160,6 +168,9 @@ struct StateControl  : public TaskInfo
     float attenuationCode9;          /*!< 衰减码9(dB) */
     float attenuationCode10;         /*!< 衰减码10(dB) */
 
+    friend QDataStream & operator<<(QDataStream & stream,const StateControl & info);
+    friend QDataStream & operator>>(QDataStream & stream,StateControl & info);
+
     void dispatch(){}
 };
 
@@ -207,6 +218,10 @@ struct GatherControl  : public TaskInfo
                                                       Bit2:0频率无效，1频率有效(默认0)
                                                       Bit3:0脉宽无效，1脉宽有效(默认0)
                                                       Bit4:0功率无效，1功率有效(默认0) */
+
+    friend QDataStream & operator<<(QDataStream & stream,const GatherControl & info);
+    friend QDataStream & operator>>(QDataStream & stream,GatherControl & info);
+
     void dispatch(){}
 };
 
@@ -258,6 +273,9 @@ struct SelfCheckControl  : public TaskInfo
     float attenuationCode8;          /*!< 衰减码8(dB) */
     float attenuationCode9;          /*!< 衰减码9(dB) */
     float attenuationCode10;         /*!< 衰减码10(dB) */
+
+    friend QDataStream & operator<<(QDataStream & stream,const SelfCheckControl & info);
+    friend QDataStream & operator>>(QDataStream & stream,SelfCheckControl & info);
 
     void dispatch(){}
 };
@@ -322,6 +340,9 @@ struct InstrumentControl  : public TaskInfo
     int powerCalibrationControl;     /*!< 功率校准控制  0：关  1：开 */
     int immediatePowerCalibration;   /*!< 功率立即校准  0：关  1：开 */
 
+    friend QDataStream & operator<<(QDataStream & stream,const InstrumentControl & info);
+    friend QDataStream & operator>>(QDataStream & stream,InstrumentControl & info);
+
     void dispatch(){}
 };
 
@@ -349,6 +370,9 @@ struct TurntableControl  : public TaskInfo
     short directionRotation;    /*!< 转台旋转方向 0顺时针  1逆时针 */
     short zeroPosSetting;       /*!< 转台零位设置  0不设置  1设置 */
 
+    friend QDataStream & operator<<(QDataStream & stream,const TurntableControl & info);
+    friend QDataStream & operator>>(QDataStream & stream,TurntableControl & info);
+
     void dispatch(){}
 };
 
@@ -374,9 +398,11 @@ struct PlayBackControl  : public TaskInfo
     double originPos;           /*!< 回放起始位置 0~1，表示相对整个文件的比例 */
     int speed;                  /*!< 回放速度(帧/分) */
 
+    friend QDataStream & operator<<(QDataStream & stream,const PlayBackControl & info);
+    friend QDataStream & operator>>(QDataStream & stream,PlayBackControl & info);
+
     void dispatch(){}
 };
-
 
 /**
  * @brief 存储下发任务

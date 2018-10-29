@@ -70,7 +70,8 @@ SOURCES += main.cpp \
     widgets/datadisplay/modelview/tableviewmodelcustom.cpp \
     widgets/datadisplay/modelview/tableviewmoderradiationsource.cpp \
     widgets/shortcutsettings.cpp \
-    file/programfilepath.cpp
+    file/programfilepath.cpp \
+    widgets/taskcontrol/head.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \

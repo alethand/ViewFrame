@@ -10,6 +10,8 @@
 #include <QGridLayout>
 #include <QList>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QDataStream>
 
 #include "Base/util/rsingleton.h"
 #include "modelview/tableview.h"
@@ -25,8 +27,151 @@
 #include "instrumentcontroldialog.h"
 #include "gathercontroldialog.h"
 #include "net/taskdispatcher.h"
+#include "Base/util/fileutils.h"
 
 namespace TaskControlModel {
+
+class TaskParsedMethod : public RTextParseMethod
+{
+public:
+    explicit TaskParsedMethod():magicNum("TASKCONTROL_LIST"){}
+    ~TaskParsedMethod(){}
+
+    void setTaskInfo(TaskInfoList list){this->taskList = list;}
+    TaskInfoList getTaskInfo(){return this->taskList;}
+
+    bool  startParse(RTextFile * file){
+        QDataStream stream(file);
+        QString flag;
+        stream >> flag;
+
+        if(flag != magicNum)
+            return false;
+
+        while(!stream.atEnd()){
+            int type;
+            stream >> type;
+
+            switch(static_cast<Type>(type)){
+                case Band :
+                    {
+                        BandControl * tmp = new BandControl;
+                        stream >> *tmp;
+                        taskList.push_back(tmp);
+                    }
+                    break;
+                case State :
+                    {
+                        StateControl * tmp = new StateControl;
+                        stream >> *tmp;
+                        taskList.push_back(tmp);
+                    }
+                    break;
+                case Gather :
+                    {
+                        GatherControl * tmp = new GatherControl;
+                        stream >> *tmp;
+                        taskList.push_back(tmp);
+                    }
+                    break;
+                case SelfCheck :
+                    {
+                        SelfCheckControl * tmp = new SelfCheckControl;
+                        stream >> *tmp;
+                        taskList.push_back(tmp);
+                    }
+                    break;
+                case Instrument :
+                    {
+                        InstrumentControl * tmp = new InstrumentControl;
+                        stream >> *tmp;
+                        taskList.push_back(tmp);
+                    }
+                    break;
+                case Turntable :
+                    {
+                        TurntableControl * tmp = new TurntableControl;
+                        stream >> *tmp;
+                        taskList.push_back(tmp);
+                    }
+                    break;
+                case PlayBack :
+                    {
+                        PlayBackControl * tmp = new PlayBackControl;
+                        stream >> *tmp;
+                        taskList.push_back(tmp);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        return true;
+    }
+
+    bool  startSave(RTextFile * file){
+        QDataStream stream(file);
+        stream << magicNum;
+
+        std::for_each(taskList.begin(),taskList.end(),[&](TaskInfo * info){
+
+            stream<<(int)info->taskType;
+
+            switch(static_cast<Type>(info->taskType)){
+                case Band :
+                    {
+                        BandControl * tmp = dynamic_cast<BandControl *>(info);
+                        stream << *tmp;
+                    }
+                    break;
+                case State :
+                    {
+                        StateControl * tmp = dynamic_cast<StateControl *>(info);
+                        stream << *tmp;
+                    }
+                    break;
+                case Gather :
+                    {
+                        GatherControl * tmp = dynamic_cast<GatherControl *>(info);
+                        stream << *tmp;
+                    }
+                    break;
+                case SelfCheck :
+                    {
+                        SelfCheckControl * tmp = dynamic_cast<SelfCheckControl *>(info);
+                        stream << *tmp;
+                    }
+                    break;
+                case Instrument :
+                    {
+                        InstrumentControl * tmp = dynamic_cast<InstrumentControl *>(info);
+                        stream << *tmp;
+                    }
+                    break;
+                case Turntable :
+                    {
+                        TurntableControl * tmp = dynamic_cast<TurntableControl *>(info);
+                        stream << *tmp;
+                    }
+                    break;
+                case PlayBack :
+                    {
+                        PlayBackControl * tmp = dynamic_cast<PlayBackControl *>(info);
+                        stream << *tmp;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        });
+        return true;
+    }
+
+private:
+    TaskInfoList taskList;
+    QString magicNum;
+
+};
 
 const char ACTION_TYPE[] = "ActionType";
 bool IsDistributing;            /*!< 是否正在下发任务 */
@@ -52,6 +197,8 @@ public:
 
     QPushButton * distrbuteButt;
     QPushButton * resetButt;
+    QPushButton * importButt;
+    QPushButton * exportButt;
     QWidget * m_centralWidget;
 
     QWidget * mainWidget;
@@ -82,20 +229,35 @@ void TaskControlPrivate::initView()
     mainWidget = new QWidget(q_ptr);
     mainWidget->setObjectName("Container");
 
+    const int buttWidth = 120;
+    const int buttHeight = 26;
+
+    importButt = new QPushButton(mainWidget);
+    QObject::connect(importButt, SIGNAL(pressed()), q_ptr, SLOT(importTask()));
+    importButt->setMinimumWidth(buttWidth);
+    importButt->setFixedHeight(buttHeight);
+
+    exportButt = new QPushButton(mainWidget);
+    QObject::connect(exportButt, SIGNAL(pressed()), q_ptr, SLOT(exportTask()));
+    exportButt->setMinimumWidth(buttWidth);
+    exportButt->setFixedHeight(buttHeight);
+
     distrbuteButt = new QPushButton(mainWidget);
     QObject::connect(distrbuteButt, SIGNAL(pressed()), q_ptr, SLOT(distributeTask()));
-    distrbuteButt->setMinimumWidth(120);
-    distrbuteButt->setFixedHeight(26);
+    distrbuteButt->setMinimumWidth(buttWidth);
+    distrbuteButt->setFixedHeight(buttHeight);
 
     resetButt = new QPushButton(mainWidget);
     QObject::connect(resetButt, SIGNAL(pressed()), q_ptr, SLOT(resetTask()));
-    resetButt->setMinimumWidth(120);
-    resetButt->setFixedHeight(26);
+    resetButt->setMinimumWidth(buttWidth);
+    resetButt->setFixedHeight(buttHeight);
 
     QWidget * toolWidget = new QWidget;
     QHBoxLayout * hlayout = new QHBoxLayout;
     hlayout->setContentsMargins(2,2,2,2);
     hlayout->addStretch(1);
+    hlayout->addWidget(importButt);
+    hlayout->addWidget(exportButt);
     hlayout->addWidget(distrbuteButt);
     hlayout->addWidget(resetButt);
     hlayout->addStretch(1);
@@ -120,6 +282,7 @@ void TaskControlPrivate::initView()
 void TaskControlPrivate::initTableView()
 {
     taskView = new TableView(q_ptr);
+    taskView->setMouseTracking(true);
     taskView->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
     taskViewModel = new TableViewModel;
@@ -129,6 +292,7 @@ void TaskControlPrivate::initTableView()
     taskView->setItemDelegate(taskViewDelegate);
     QObject::connect(taskView,SIGNAL(contextMenuPos(QPoint)),q_ptr,SLOT(tableContextPoint(QPoint)));
     QObject::connect(taskView, SIGNAL(tableCheckDoubleSignal(QModelIndex)), q_ptr, SLOT(viewTask(QModelIndex)));
+    QObject::connect(taskView,SIGNAL(entered(QModelIndex)),q_ptr,SLOT(mouseHoverItem(QModelIndex)));
 }
 
 void TaskControlPrivate::initTableViewMenu()
@@ -228,6 +392,9 @@ void TaskControl::retranslateUi()
         d->distrbuteButt->setText(QObject::tr("Suspend issued"));
     }
 
+    d->importButt->setText(QObject::tr("Import tasks..."));
+    d->exportButt->setText(QObject::tr("Export tasks..."));
+
     d->resetButt->setText(QObject::tr("Reset issued"));
 }
 
@@ -244,12 +411,19 @@ void TaskControl::onMessage(MessageType::MessType type)
 
 /*!
  * @brief 定时下发任务
+ * @details 只下发用户勾选的任务信息
  */
 void TaskControl::distributeTask()
 {
     Q_D(TaskControl);
+    TaskInfoList selectedList;
+    std::for_each(d->taskInfoList.begin(),d->taskInfoList.end(),[&](TaskInfo * taskInfo){
+        if(taskInfo->userChecked)
+            selectedList.push_back(taskInfo);
+    });
+
     if(d->taskInfoList.size() == 0){
-        QMessageBox::warning(this,tr("warning"),tr("Task list is empty!"),QMessageBox::Yes);
+        QMessageBox::warning(this,tr("warning"),tr("Selected task list is empty!"),QMessageBox::Yes);
         return;
     }
 
@@ -399,6 +573,42 @@ void TaskControl::showEditWindow(QModelIndex index)
 void TaskControl::viewTask(QModelIndex index)
 {
     showEditWindow(index);
+}
+
+/*!
+ * @brief 鼠标悬停在item上显示对应任务信息
+ * @warning 启用此功能时，需要开启鼠标跟踪功能; @n
+ * @details 为了避免鼠标的快速切换，导致显示窗口的快速创建或者销毁，此处采用定时器延迟的策略； @n
+ *          1.检测是否有定时器开启，但未到触发时间，若存在则终止定时器； @n
+ *          2.鼠标离开后，经过一定时间再关闭窗口。 @n
+ *          3.再次进入则提示 @n
+ * @param[in] index 鼠标悬停的item索引
+ */
+//TODO 20181010待添加对悬浮信息的显示
+void TaskControl::mouseHoverItem(QModelIndex index)
+{
+    Q_D(TaskControl);
+    if(index.row() > 0 && index.row() < d->taskInfoList.size()){
+        Type type = d->taskInfoList.at(index.row())->taskType;
+        switch(type){
+            case Band:
+                break;
+            case State:
+                break;
+            case Gather:
+                break;
+            case SelfCheck:
+                break;
+            case Instrument:
+                break;
+            case Turntable:
+                break;
+            case PlayBack:
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 /*!
@@ -597,6 +807,49 @@ void TaskControl::pasteTask()
     }
     d->cacheTaskInfo = NULL;
     d->taskViewModel->updateTaskList(d->taskInfoList);
+}
+
+/*!
+ * @brief 从本地导入保存的任务数据信息
+ * @warning 导入解析时需要判断文件头是否正确
+ */
+void TaskControl::importTask()
+{
+    Q_D(TaskControl);
+    QString localFileName = QFileDialog::getOpenFileName(this,tr("choose file"),QDir::homePath(),QString("*.bin"));
+    if(!localFileName.isEmpty()){
+        RTextFile file(localFileName);
+        TaskParsedMethod * method = new TaskParsedMethod;
+        file.setParseMethod(method);
+        if(file.startParse()){
+            d->taskInfoList.append(method->getTaskInfo());
+            d->taskViewModel->updateTaskList(d->taskInfoList);
+            QMessageBox::information(this,tr("information"),tr("import successfully!"));
+        }else{
+            QMessageBox::warning(this,tr("warning"),tr("import failed!"));
+        }
+    }
+}
+
+/*!
+ * @brief 导出任务信息至本地
+ * @warning 导出文件时采用特殊的文件头
+ */
+void TaskControl::exportTask()
+{
+    Q_D(TaskControl);
+    QString saveName = QFileDialog::getSaveFileName(this,tr("save file"),QDir::homePath(),QString("*.bin"));
+    if(!saveName.isEmpty()){
+        RTextFile file(saveName);
+        TaskParsedMethod * method = new TaskParsedMethod;
+        method->setTaskInfo(d->taskInfoList);
+        file.setParseMethod(method);
+        if(file.startSave(QFile::WriteOnly | QFile::Truncate)){
+            QMessageBox::information(this,tr("information"),tr("export successfully!"));
+        }else{
+            QMessageBox::warning(this,tr("warning"),tr("export failed!"));
+        }
+    }
 }
 
 template<class T>

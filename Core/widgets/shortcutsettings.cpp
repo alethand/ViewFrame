@@ -477,7 +477,7 @@ void ShortcutSettings::respOk()
         //[2] 将设置写入磁盘
         RXmlFile xmlfile(saveFileName);
         xmlfile.setParseMethod(new ShortcutParseMethod());
-        if(xmlfile.startSave()){
+        if(xmlfile.startSave(QFile::WriteOnly | QFile::Truncate | QFile::Text)){
             QMessageBox::warning(this,tr("warning"),tr("Save successfully!"),QMessageBox::Yes);
         }else{
             QMessageBox::warning(this,tr("warning"),tr("Save failed!"),QMessageBox::Yes);
@@ -586,7 +586,7 @@ bool ShortcutSettings::parsedLocalFile(QString fileName, bool userSelected)
     RXmlFile xmlfile(fileName);
     ShortcutParseMethod * method = new ShortcutParseMethod();
     xmlfile.setParseMethod(method);
-    if(xmlfile.startParse()){
+    if(xmlfile.startParse(QFile::ReadOnly)){
         QFileInfo  fileInfo(fileName);
         if(userSelected){
             ProgramFilePath filePath;
@@ -665,7 +665,7 @@ void ShortcutSettings::exportShortcuts()
     if(!saveFileName.isEmpty()){
         RXmlFile xmlfile(saveFileName);
         xmlfile.setParseMethod(new ShortcutParseMethod());
-        if(xmlfile.startSave()){
+        if(xmlfile.startSave(QFile::WriteOnly | QFile::Truncate | QFile::Text)){
             QMessageBox::information(this,tr("information"),tr("Export shortcut successfully!"),QMessageBox::Yes);
         }else{
             QMessageBox::warning(this,tr("warning"),tr("Export shortcut failed!"),QMessageBox::Yes);

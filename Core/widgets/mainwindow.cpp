@@ -340,7 +340,7 @@ void MainWindow::loadUserSetting()
         RXmlFile xmlfile(filePath.shortcutPath + QDir::separator() + RGlobal::G_GlobalConfigFile->systemConfigInfo.userKeySchemesName);
         ShortcutParseMethod * method = new ShortcutParseMethod();
         xmlfile.setParseMethod(method);
-        if(xmlfile.startParse()){
+        if(xmlfile.startParse(QFile::ReadOnly)){
             ShortcutParseMethod::ShortcutMappingList list = method->getParsedList();
             ActionManager::ActionMap actMap = ActionManager::instance()->getAllActions();
 
