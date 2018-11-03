@@ -53,7 +53,7 @@ QVariant TableViewModelCustom::data(const QModelIndex &index, int role) const
     {
         if(col==0)
         {
-            return QString("%1").arg(row+1);
+            return row+1;       /*！数据的序号修改为数字形式*/
             break;
         }
         if(tableCustomKind==MF_ACQUISITION_INFO)    //中频数据模式

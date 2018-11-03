@@ -257,16 +257,22 @@ void MainWindow::initMenu()
 }
 
 /*!
+ * \brief 关闭窗口事件
+ * \param event
+ */
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    exportView();
+    event->accept();
+    exit(0);
+}
+
+/*!
  * @brief   程序退出
  */
 void MainWindow::programExit()
 {
-
-//    settings.setValue("任务控制", saveState());
-
-
-//    QMainWindow::closeEvent(event);
-    exit(0);
+    emit close();
 }
 
 /*!
@@ -526,12 +532,6 @@ void MainWindow::screenshotSettings()
 
 void MainWindow::importView()
 {
-//    QSettings settings("NanJing RenGu", "ViewFrame");
-////    cout<<"2"<<endl;
-//    restoreGeometry(settings.value("myWidget/geometry").toByteArray());
-//    restoreState(settings.value("myWidget/windowState").toByteArray());
-//    QWidget::updateGeometry();
-//    QMainWindowLayout::setGeometry();
     QFile file("Layout.ini");
     if (file.open(QIODevice::ReadOnly))
     {
@@ -541,17 +541,12 @@ void MainWindow::importView()
         file.close();
         this->restoreState(ba);
     }
-
-
+    emit sendForHealthPanelResize();
 }
 
 
 void MainWindow::exportView()
 {
-//    QSettings settings("NanJing RenGu", "ViewFrame");
-//    cout<<"1"<<endl;
-//    settings.setValue("geometry", saveGeometry());
-//    settings.setValue("windowState", saveState());
     QFile file("Layout.ini");
     if(file.open(QIODevice::WriteOnly))
     {
@@ -660,4 +655,13 @@ void MainWindow::initComponent()
 
         iter++;
     }
+    connect(this,SIGNAL(sendForHealthPanelResize()),healthControl,SLOT(recForHealthPanelResize()));
+}
+
+/*!
+ * \brief 布局导入
+ */
+
+void MainWindow::displayResize(){
+    importView();
 }

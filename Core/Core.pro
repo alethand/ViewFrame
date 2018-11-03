@@ -79,7 +79,8 @@ SOURCES += main.cpp \
     protocol/layout_byxml.cpp \
     widgets/CustomWidget/energybar.cpp \
     calculater/commonalgorithms.cpp \
-    widgets/datadisplay/Graphics/scatterdiagram.cpp
+    widgets/datadisplay/Graphics/scatterdiagram.cpp \
+    widgets/datadisplay/filterdockpanel.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
@@ -131,7 +132,8 @@ HEADERS  += \
     protocol/layout_byxml.h \
     widgets/CustomWidget/energybar.h \
     calculater/commonalgorithms.h \
-    widgets/datadisplay/Graphics/scatterdiagram.h
+    widgets/datadisplay/Graphics/scatterdiagram.h \
+    widgets/datadisplay/filterdockpanel.h
 
 FORMS    += mainwindow.ui \
     widgets/taskcontrol/gathercontroldialog.ui \
@@ -140,7 +142,8 @@ FORMS    += mainwindow.ui \
     widgets/datadisplay/radiationsourcetable.ui \
     widgets/datadisplay/radiationsourcetablerenovate.ui \
     widgets/datadisplay/radiationsourcetablerenovatedialog.ui \
-    widgets/datadisplay/spectrumgraphics.ui
+    widgets/datadisplay/spectrumgraphics.ui \
+    widgets/datadisplay/filterdockpanel.ui
 
 win32-msvc2013{
     LIBS+= ../Lib/Base.lib

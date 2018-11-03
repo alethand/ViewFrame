@@ -91,7 +91,7 @@ QVariant TableViewModelRadiationSource::data(const QModelIndex &index, int role)
                 switch (static_cast<RadiationSourceHead>(col)) {
                 case T_No:
                 {
-                    return QString("%1").arg(row+1);
+                    return row+1;       /*！数据的序号修改为数字形式*/
                     break;
                 }
                 case T_SourceNo:    /*!< 辐射源序号,递增*/

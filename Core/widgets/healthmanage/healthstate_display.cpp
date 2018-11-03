@@ -96,6 +96,8 @@ layoutByNet:
     layout->setContentsMargins(1,1,1,1);
     layout->addWidget(mDisplayElem);
     this->setLayout(layout);
+
+    connect(this,SIGNAL(sendForHealthPanelResize()),mDisplayElem,SLOT(reLayout_BySize()));
 }
 
 /*!
@@ -151,6 +153,12 @@ void HealthState_Display::handleNetData(char *data, int size)
     {
         xlsPrinter->addData(mNetData);
     }
+}
+/**
+ * @brief 健康管理界面布局重置修复
+ */
+void HealthState_Display::recForHealthPanelResize(){
+    emit sendForHealthPanelResize();
 }
 
 /*!

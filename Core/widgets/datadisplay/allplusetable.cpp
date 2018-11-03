@@ -1,12 +1,13 @@
 ﻿#include "allplusetable.h"
 
-
+#include <QSortFilterProxyModel>
 //#include "table.h"
 #include "Base/constants.h"
 #include "Base/util/rsingleton.h"
 #include "modelview/tableviewdata.h"
 #include "modelview/tableviewmodelcustom.h"
 #include "../Util/dataexportandprint.h"
+#include "filterdockpanel.h"
 #include <iostream>
 #include <QHeaderView>
 using namespace std;
@@ -32,6 +33,10 @@ AllPluseDock::AllPluseDock(QWidget *parent) :
     //    QObject::connect(btn_search,SIGNAL(clicked()),q_ptr,SLOT(on_btn_search_clicked()));
     QObject::connect(radioButton_RealityShow,SIGNAL(clicked()),this,SLOT(on_radioButton_RealityShow_clicked()));
     QObject::connect(radioButton_HistoryShow,SIGNAL(clicked()),this,SLOT(on_radioButton_HistoryShow_clicked()));
+    //过滤器
+    QObject::connect(&viewRT_Origin, SIGNAL(tableCheckDoubleSignal(QModelIndex)), this, SLOT(filterRT(QModelIndex)));
+    QObject::connect(&viewHS_Origin, SIGNAL(tableCheckDoubleSignal(QModelIndex)), this, SLOT(filterHS(QModelIndex)));
+    QObject::connect(&view_Statistic, SIGNAL(tableCheckDoubleSignal(QModelIndex)), this, SLOT(filterStatistic(QModelIndex)));
 }
 
 AllPluseDock::~AllPluseDock()
@@ -163,6 +168,20 @@ void AllPluseDock::ininData()
     viewRT_Origin.setModel(&modelRT_originData);
     viewHS_Origin.setModel(&modelHS_orginData);
     view_Statistic.setModel(&model_StatisticData);
+
+    //排序功能
+    QSortFilterProxyModel *dataViewProxyRT = new QSortFilterProxyModel();
+    dataViewProxyRT->setSourceModel(&modelRT_originData);
+    viewRT_Origin.setModel(dataViewProxyRT);
+
+    QSortFilterProxyModel *dataViewProxyHS = new QSortFilterProxyModel();
+    dataViewProxyHS->setSourceModel(&modelHS_orginData);
+    viewHS_Origin.setModel(dataViewProxyHS);
+
+    QSortFilterProxyModel *dataViewProxyStatistic = new QSortFilterProxyModel();
+    dataViewProxyStatistic->setSourceModel(&model_StatisticData);
+    view_Statistic.setModel(dataViewProxyStatistic);
+
 }
 
 
@@ -432,6 +451,93 @@ QString AllPluseDock::getCurrentDate()
     QDateTime date=QDateTime::currentDateTime();
     strDate=date.toString("yyyy.MM.dd hh:mm:ss.zzz");
     return strDate;
+}
+
+
+/*!
+ * \brief 过滤页面，实时源数据
+ * \param 页面
+ */
+void AllPluseDock::filterRT(QModelIndex index){
+    filterDockPanel * dock = new filterDockPanel;
+    connect(dock,SIGNAL(sendFilterMessage(QList<double>)),this,SLOT(recFilterMessageRT(QList<double>)));
+    filterIndexRT = index;
+    dock->show();
+}
+/*!
+ * \brief 过滤功能实现
+ * \param filterMessage存储筛选功能上下界限
+ */
+void AllPluseDock::recFilterMessageRT(QList<double> filterMessage){
+    double filterLower = filterMessage.at(0);
+    double filterUpper = filterMessage.at(1);
+    double theData;
+//    qDebug()<<filterLower<<"and"<<filterUpper<<endl;
+    try{
+        for(int i =0;i<modelRT_originData.rowCount();i++){viewRT_Origin.showRow(i);}
+        for(int i =0;i<modelRT_originData.rowCount();i++){
+            theData=(modelRT_originData.index(i,filterIndexRT.column(),QModelIndex())).data().toDouble();
+            if(theData>filterUpper||theData<filterLower){viewRT_Origin.hideRow(i);}
+        }
+    }catch(const char* msg){qDebug()<<msg<<endl;}
+}
+
+/*!
+ * \brief 过滤页面，历史源数据
+ * \param 页面
+ */
+void AllPluseDock::filterHS(QModelIndex index){
+    filterDockPanel * dock = new filterDockPanel;
+    connect(dock,SIGNAL(sendFilterMessage(QList<double>)),this,SLOT(recFilterMessageHS(QList<double>)));
+    filterIndexHS = index;
+    dock->show();
+}
+
+/*!
+ * \brief 过滤功能实现
+ * \param filterMessage存储筛选功能上下界限
+ */
+void AllPluseDock::recFilterMessageHS(QList<double> filterMessage){
+    double filterLower = filterMessage.at(0);
+    double filterUpper = filterMessage.at(1);
+    double theData;
+//    qDebug()<<filterLower<<"and"<<filterUpper<<endl;
+    try{
+        for(int i =0;i<modelHS_orginData.rowCount();i++){viewHS_Origin.showRow(i);}
+        for(int i =0;i<modelHS_orginData.rowCount();i++){
+            theData=(modelHS_orginData.index(i,filterIndexHS.column(),QModelIndex())).data().toDouble();
+            if(theData>filterUpper||theData<filterLower){viewHS_Origin.hideRow(i);}
+        }
+    }catch(const char* msg){qDebug()<<msg<<endl;}
+}
+
+/*!
+ * \brief 过滤页面，统计数据
+ * \param 页面
+ */
+void AllPluseDock::filterStatistic(QModelIndex index){
+    filterDockPanel * dock = new filterDockPanel;
+    connect(dock,SIGNAL(sendFilterMessage(QList<double>)),this,SLOT(recFilterMessageStatistic(QList<double>)));
+    filterIndexStatistic = index;
+    dock->show();
+}
+
+/*!
+ * \brief 过滤功能实现
+ * \param filterMessage存储筛选功能上下界限
+ */
+void AllPluseDock::recFilterMessageStatistic(QList<double> filterMessage){
+    double filterLower = filterMessage.at(0);
+    double filterUpper = filterMessage.at(1);
+    double theData;
+//    qDebug()<<filterLower<<"and"<<filterUpper<<endl;
+    try{
+        for(int i =0;i<model_StatisticData.rowCount();i++){view_Statistic.showRow(i);}
+        for(int i =0;i<model_StatisticData.rowCount();i++){
+            theData=(model_StatisticData.index(i,filterIndexStatistic.column(),QModelIndex())).data().toDouble();
+            if(theData>filterUpper||theData<filterLower){view_Statistic.hideRow(i);}
+        }
+    }catch(const char* msg){qDebug()<<msg<<endl;}
 }
 
 } //namespace DataView
