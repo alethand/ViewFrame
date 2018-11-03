@@ -24,16 +24,20 @@ TableViewModelRadiationSource::~TableViewModelRadiationSource()
 
 int TableViewModelRadiationSource::rowCount(const QModelIndex &index) const
 {
+    Q_UNUSED(index)
     return tableTotalRows;
 }
 
 int TableViewModelRadiationSource::columnCount(const QModelIndex &index) const
 {
+    Q_UNUSED(index)
     return headInfo.size();
 }
 
 bool TableViewModelRadiationSource::setData(const QModelIndex &index, const QVariant &value, int role)
 {
+    Q_UNUSED(role)
+    Q_UNUSED(value)
     if (!index.isValid())
         return false;
     return true;
@@ -55,7 +59,7 @@ QVariant TableViewModelRadiationSource::data(const QModelIndex &index, int role)
         case Qt::DisplayRole:
             {
                 bool blRowEff=false;        //该行有效标识
-                RadiationSourceBase rsInfo; //数据源数据
+                RadiationSource::RadiationSourceBase rsInfo; //数据源数据
                 RadiationSourceRenovate rsRe;
                 if(refreshModel==SCROLL_RENOVATE) //滚动刷新
                 {

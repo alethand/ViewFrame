@@ -9,7 +9,20 @@
 #define MFACQUISTIONTABLE_H
 
 #include "Base/pluginmanager/rcomponent.h"
+#include "protocol/datastruct.h"
+#include "modelview/tableviewdata.h"
+#include "Graphics/waveform.h"
 #include <QAction>
+#include <QVBoxLayout>
+#include <QHeaderView>
+#include <QSortFilterProxyModel>
+#include <QFileDialog>
+#include <QDesktopServices>
+#include <QPushButton>
+
+using namespace Protocol::Data;
+using namespace Datastruct;
+using namespace Diagram;
 
 namespace DataView {
 class MFAcquistionTablePrivate;
@@ -28,17 +41,23 @@ public:
     void onMessage(MessageType::MessType type);
 
 public slots:
-    void recvMidFreqData(char *buff, int len);
-    void clearTable();
+    void recvMidFreqData(char *buff, int len);                                          /*! 接收网络数据 */
+    void clearTable();                                                                  /*! 文件另存为 */
     void on_btn_load_clicked();
 
+    void showTimeAreaFreq();                                                            /*! 时域频谱图 */
+    void showFFT();                                                                     /*! FFT频谱图 */
 private:
-    void initMFAcquistionTable();
     void retranslateUi();
-    QString getCurrentDate();
+    QDateTime getCurrentDate();
+
 
 private:
     MFAcquistionTablePrivate * d_ptr;
+    QPushButton * btn_load;
+    QWidget *     mainWidget;
+
+
 };
 
 } //namespace DataView

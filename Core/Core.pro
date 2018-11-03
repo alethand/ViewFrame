@@ -34,7 +34,6 @@ CONFIG(debug, debug|release) {
 SOURCES += main.cpp \
     widgets/mainwindow.cpp \
     protocol/datastruct.cpp \
-    protocol/protocoldata.cpp \
     file/globalconfigfile.cpp \
     global.cpp \
     widgets/taskcontrol/modelview/tableview.cpp \
@@ -60,11 +59,6 @@ SOURCES += main.cpp \
     widgets/datadisplay/allplusetable.cpp \
     widgets/datadisplay/mfacquisitiongraphics.cpp \
     widgets/datadisplay/mfacquistiontable.cpp \
-    widgets/datadisplay/radiasourcemap.cpp \
-    widgets/datadisplay/radiationsourcetable.cpp \
-    widgets/datadisplay/radiationsourcetablerenovate.cpp \
-    widgets/datadisplay/radiationsourcetablerenovatedialog.cpp \
-    widgets/datadisplay/spectrumgraphics.cpp \
     widgets/datadisplay/table.cpp \
     widgets/datadisplay/modelview/tableviewdata.cpp \
     widgets/datadisplay/modelview/tableviewmodelcustom.cpp \
@@ -77,14 +71,19 @@ SOURCES += main.cpp \
     widgets/Util/tipdialog.cpp \
     widgets/taskcontrol/taskcntldisplay_parsexml.cpp \
     protocol/layout_byxml.cpp \
-    widgets/CustomWidget/energybar.cpp \
     calculater/commonalgorithms.cpp \
-    widgets/datadisplay/Graphics/scatterdiagram.cpp
+    widgets/datadisplay/Graphics/scatterdiagram.cpp \
+    widgets/datadisplay/Graphics/waveform.cpp \
+    widgets/datadisplay/Graphics/superparent.cpp \
+    widgets/datadisplay/Graphics/histogram.cpp \
+    widgets/datadisplay/Graphics/energybar.cpp \
+    widgets/datadisplay/radiusSource/radiasourcemap.cpp \
+    widgets/datadisplay/radiusSource/radiationsourcetable.cpp \
+    widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
     protocol/datastruct.h \
-    protocol/protocoldata.h \
     file/globalconfigfile.h \
     global.h \
     widgets/taskcontrol/modelview/tableview.h \
@@ -113,11 +112,9 @@ HEADERS  += \
     widgets/datadisplay/allplusetable.h \
     widgets/datadisplay/mfacquisitiongraphics.h \
     widgets/datadisplay/mfacquistiontable.h \
-    widgets/datadisplay/radiasourcemap.h \
     widgets/datadisplay/radiationsourcetable.h \
     widgets/datadisplay/radiationsourcetablerenovate.h \
     widgets/datadisplay/radiationsourcetablerenovatedialog.h \
-    widgets/datadisplay/spectrumgraphics.h \
     widgets/datadisplay/table.h \
     widgets/datadisplay/modelview/tableviewdata.h \
     widgets/datadisplay/modelview/tableviewmodelcustom.h \
@@ -129,18 +126,22 @@ HEADERS  += \
     widgets/Util/tipdialog.h \
     widgets/taskcontrol/taskcntldisplay_parsexml.h \
     protocol/layout_byxml.h \
-    widgets/CustomWidget/energybar.h \
     calculater/commonalgorithms.h \
-    widgets/datadisplay/Graphics/scatterdiagram.h
+    widgets/datadisplay/Graphics/scatterdiagram.h \
+    widgets/datadisplay/Graphics/waveform.h \
+    widgets/datadisplay/Graphics/superparent.h \
+    widgets/datadisplay/Graphics/histogram.h \
+    widgets/datadisplay/Graphics/energybar.h \
+    widgets/datadisplay/radiusSource/radiasourcemap.h \
+    widgets/datadisplay/radiusSource/radiationsourcetable.h \
+    widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.h
 
 FORMS    += mainwindow.ui \
     widgets/taskcontrol/gathercontroldialog.ui \
     widgets/datadisplay/mfacquisitiongraphics.ui \
-    widgets/datadisplay/radiasourcemap.ui \
-    widgets/datadisplay/radiationsourcetable.ui \
-    widgets/datadisplay/radiationsourcetablerenovate.ui \
-    widgets/datadisplay/radiationsourcetablerenovatedialog.ui \
-    widgets/datadisplay/spectrumgraphics.ui
+    widgets/datadisplay/radiusSource/radiasourcemap.ui \
+    widgets/datadisplay/radiusSource/radiationsourcetable.ui \
+    widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.ui
 
 win32-msvc2013{
     LIBS+= ../Lib/Base.lib

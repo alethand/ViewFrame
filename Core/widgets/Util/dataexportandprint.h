@@ -1,4 +1,4 @@
-#ifndef DATAEXPORTANDPRINT_H
+﻿#ifndef DATAEXPORTANDPRINT_H
 #define DATAEXPORTANDPRINT_H
 
 #include <QObject>

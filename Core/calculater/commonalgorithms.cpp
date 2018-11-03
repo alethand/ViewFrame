@@ -1,4 +1,4 @@
-#include "commonalgorithms.h"
+﻿#include "commonalgorithms.h"
 
 Calculator::Super::Super()
     :QThread()
