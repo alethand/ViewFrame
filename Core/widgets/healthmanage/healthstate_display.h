@@ -61,6 +61,11 @@ public://测试用函数
 protected:
      void resizeEvent(QResizeEvent *event);
 
+signals:
+     void sendForHealthPanelResize();
+public slots:
+     void recForHealthPanelResize();
+
 private:
     void  analysisNetData(char* data,int size,HealthData &result);
 

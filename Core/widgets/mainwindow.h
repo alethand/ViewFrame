@@ -38,6 +38,11 @@ public:
 private:
     void initMenu();
 
+protected:
+    void closeEvent(QCloseEvent *event);
+
+signals:
+    void sendForHealthPanelResize();/*！导入布局信号*/
 private slots:
     void programExit();
 
@@ -87,6 +92,9 @@ private:
     QAction * screenshotAction;
     QAction * supportAction;
     QAction * aboutPorgramAction;
+
+public:
+    void displayResize();/*!健康管理表格重新布局*/
 
 };
 

@@ -9,6 +9,7 @@
 #define MFACQUISTIONTABLE_H
 
 #include "Base/pluginmanager/rcomponent.h"
+#include "protocol/datastruct.h"
 #include <QAction>
 
 namespace DataView {
@@ -39,6 +40,13 @@ private:
 
 private:
     MFAcquistionTablePrivate * d_ptr;
+    QModelIndex filterIndex;
+
+public slots:
+
+    void filter(QModelIndex index);
+    void recFilterMessage(QList<double> filterMessage);
+
 };
 
 } //namespace DataView

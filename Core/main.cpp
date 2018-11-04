@@ -1,4 +1,4 @@
-#include "widgets/mainwindow.h"
+﻿#include "widgets/mainwindow.h"
 
 #include <QApplication>
 #include <QTextCodec>
@@ -93,6 +93,7 @@ int main(int argc, char *argv[])
     QTimer::singleShot(550, &eventloop, SLOT(quit()));
     eventloop.exec();
     w.show();
+    w.displayResize();          /*！健康管理界面布局重置*/
     splash.finish(&w);
 
 //    XMLLayout_Static *limitDisplay;
