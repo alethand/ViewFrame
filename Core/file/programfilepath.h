@@ -22,6 +22,7 @@ public:
     QString programPath;
     QString configPath;
     QString translationPath;
+    QString protocolPath;
     QString shortcutPath;
 
     //配置文件信息

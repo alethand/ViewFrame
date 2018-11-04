@@ -29,7 +29,7 @@ public:
 
     bool initTask(TaskConfigInfo & info);
 
-    void bindTaskList(TaskInfoList list);
+    void bindTaskList(NewTaskList list);
 
     void startDispatch();
     void pauseDispatch();
@@ -47,7 +47,7 @@ private:
     QTimer * distributeTimer;           /*!< 下发定时器 */
     int hasDispatchIndex;               /*!< 已经下发的位置 */
 
-    TaskInfoList taskInfoList;
+    NewTaskList taskInfoList;
 };
 
 } //namespace TaskControlModel

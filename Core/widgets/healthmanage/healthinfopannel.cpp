@@ -5,6 +5,9 @@
 #include "Base/actionmanager/actioncontainer.h"
 #include "Base/actionmanager/actionmanager.h"
 #include "Base/util/rsingleton.h"
+//
+#include <iostream>
+using namespace std;
 
 HealthInfoDockPanel::HealthInfoDockPanel(QWidget *parent)
     :Base::RComponent(Constant::PLUGIN_HEALTH_MANAGER,parent)
@@ -34,6 +37,7 @@ bool HealthInfoDockPanel::initialize()
         SubMachine sm;
         Componet cp;
         sm.name = QStringLiteral("分机")+QString::number(i);
+//        sm.name = MachineName()+QString::number(i).toStdString().data();
         sm.componetNum = 10;
         for(int j = 0;j<sm.componetNum;j++)
         {
@@ -42,13 +46,21 @@ bool HealthInfoDockPanel::initialize()
         }
         netdata.smInfo.append(sm);
     }
+
     infoWidget->handleNetData(netdata);//注意这里调用的是测试接口
     return true;
 }
 
 QString HealthInfoDockPanel::pluginName()
 {
+//    cout<<"1"<<endl;
     return tr("HealthInfo panel");
+}
+
+QString HealthInfoDockPanel::MachineName()
+{
+//    cout<<"2"<<endl;
+    return tr("Machine");
 }
 
 void HealthInfoDockPanel::onMessage(MessageType::MessType type)
@@ -69,6 +81,7 @@ QSize HealthInfoDockPanel::sizeHint() const
 
 void HealthInfoDockPanel::retranslateUi()
 {
+//    cout<<"3"<<endl;
     m_name = tr("HealthInfo panel");
     setWindowTitle(m_name);
 }

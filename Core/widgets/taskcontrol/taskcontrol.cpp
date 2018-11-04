@@ -12,6 +12,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QDataStream>
+#include <QDir>
 
 #include "Base/util/rsingleton.h"
 #include "modelview/tableview.h"
@@ -28,153 +29,15 @@
 #include "gathercontroldialog.h"
 #include "net/taskdispatcher.h"
 #include "Base/util/fileutils.h"
+#include "Core/file/programfilepath.h"
+#include "taskdialogproxy.h"
+#include "taskparsedmethod.h"
 
 namespace TaskControlModel {
 
-class TaskParsedMethod : public RTextParseMethod
-{
-public:
-    explicit TaskParsedMethod():magicNum("TASKCONTROL_LIST"){}
-    ~TaskParsedMethod(){}
-
-    void setTaskInfo(TaskInfoList list){this->taskList = list;}
-    TaskInfoList getTaskInfo(){return this->taskList;}
-
-    bool  startParse(RTextFile * file){
-        QDataStream stream(file);
-        QString flag;
-        stream >> flag;
-
-        if(flag != magicNum)
-            return false;
-
-        while(!stream.atEnd()){
-            int type;
-            stream >> type;
-
-            switch(static_cast<Type>(type)){
-                case Band :
-                    {
-                        BandControl * tmp = new BandControl;
-                        stream >> *tmp;
-                        taskList.push_back(tmp);
-                    }
-                    break;
-                case State :
-                    {
-                        StateControl * tmp = new StateControl;
-                        stream >> *tmp;
-                        taskList.push_back(tmp);
-                    }
-                    break;
-                case Gather :
-                    {
-                        GatherControl * tmp = new GatherControl;
-                        stream >> *tmp;
-                        taskList.push_back(tmp);
-                    }
-                    break;
-                case SelfCheck :
-                    {
-                        SelfCheckControl * tmp = new SelfCheckControl;
-                        stream >> *tmp;
-                        taskList.push_back(tmp);
-                    }
-                    break;
-                case Instrument :
-                    {
-                        InstrumentControl * tmp = new InstrumentControl;
-                        stream >> *tmp;
-                        taskList.push_back(tmp);
-                    }
-                    break;
-                case Turntable :
-                    {
-                        TurntableControl * tmp = new TurntableControl;
-                        stream >> *tmp;
-                        taskList.push_back(tmp);
-                    }
-                    break;
-                case PlayBack :
-                    {
-                        PlayBackControl * tmp = new PlayBackControl;
-                        stream >> *tmp;
-                        taskList.push_back(tmp);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        return true;
-    }
-
-    bool  startSave(RTextFile * file){
-        QDataStream stream(file);
-        stream << magicNum;
-
-        std::for_each(taskList.begin(),taskList.end(),[&](TaskInfo * info){
-
-            stream<<(int)info->taskType;
-
-            switch(static_cast<Type>(info->taskType)){
-                case Band :
-                    {
-                        BandControl * tmp = dynamic_cast<BandControl *>(info);
-                        stream << *tmp;
-                    }
-                    break;
-                case State :
-                    {
-                        StateControl * tmp = dynamic_cast<StateControl *>(info);
-                        stream << *tmp;
-                    }
-                    break;
-                case Gather :
-                    {
-                        GatherControl * tmp = dynamic_cast<GatherControl *>(info);
-                        stream << *tmp;
-                    }
-                    break;
-                case SelfCheck :
-                    {
-                        SelfCheckControl * tmp = dynamic_cast<SelfCheckControl *>(info);
-                        stream << *tmp;
-                    }
-                    break;
-                case Instrument :
-                    {
-                        InstrumentControl * tmp = dynamic_cast<InstrumentControl *>(info);
-                        stream << *tmp;
-                    }
-                    break;
-                case Turntable :
-                    {
-                        TurntableControl * tmp = dynamic_cast<TurntableControl *>(info);
-                        stream << *tmp;
-                    }
-                    break;
-                case PlayBack :
-                    {
-                        PlayBackControl * tmp = dynamic_cast<PlayBackControl *>(info);
-                        stream << *tmp;
-                    }
-                    break;
-                default:
-                    break;
-            }
-        });
-        return true;
-    }
-
-private:
-    TaskInfoList taskList;
-    QString magicNum;
-
-};
-
 const char ACTION_TYPE[] = "ActionType";
 bool IsDistributing;            /*!< 是否正在下发任务 */
+
 
 class TaskControlPrivate
 {
@@ -203,18 +66,11 @@ public:
 
     QWidget * mainWidget;
 
-    TaskInfoList taskInfoList;          /*!< 任务集合 */
+    NewTaskList taskInfoList;           /*!< 任务集合 */
     QPoint contextPoint;                /*!< 表格右键事件菜单 */
-    TaskInfo * cacheTaskInfo;           /*!< 复制的任务信息 */
+    NewTaskInfo * cacheTaskInfo;        /*!< 复制的任务信息,做缓存用 */
     TaskDispatcher * taskDispatcher;    /*!< 任务下发 */
 
-    QAction *bandAction;
-    QAction *stateAction;
-    QAction *gatherAction;
-    QAction *selfCheckAction;
-    QAction *instrumentAction;
-    QAction *trunTableAction;
-    QAction *playBackAction;
     QAction *addTaskAction;
     QAction *delTaskAction;
     QAction *modifyAction;
@@ -222,6 +78,7 @@ public:
     QAction *pasteAction;
 
     TaskControl * q_ptr;
+
 };
 
 void TaskControlPrivate::initView()
@@ -237,20 +94,24 @@ void TaskControlPrivate::initView()
     importButt->setMinimumWidth(buttWidth);
     importButt->setFixedHeight(buttHeight);
 
+
     exportButt = new QPushButton(mainWidget);
     QObject::connect(exportButt, SIGNAL(pressed()), q_ptr, SLOT(exportTask()));
     exportButt->setMinimumWidth(buttWidth);
     exportButt->setFixedHeight(buttHeight);
+
 
     distrbuteButt = new QPushButton(mainWidget);
     QObject::connect(distrbuteButt, SIGNAL(pressed()), q_ptr, SLOT(distributeTask()));
     distrbuteButt->setMinimumWidth(buttWidth);
     distrbuteButt->setFixedHeight(buttHeight);
 
+
     resetButt = new QPushButton(mainWidget);
     QObject::connect(resetButt, SIGNAL(pressed()), q_ptr, SLOT(resetTask()));
     resetButt->setMinimumWidth(buttWidth);
     resetButt->setFixedHeight(buttHeight);
+
 
     QWidget * toolWidget = new QWidget;
     QHBoxLayout * hlayout = new QHBoxLayout;
@@ -295,43 +156,27 @@ void TaskControlPrivate::initTableView()
     QObject::connect(taskView,SIGNAL(entered(QModelIndex)),q_ptr,SLOT(mouseHoverItem(QModelIndex)));
 }
 
+/*!
+ * @brief 初始化表格右键菜单
+ * @details 系统检测指定目录(config/protocol/)中的xml文件，提取xml文件的文件名，作为任务的类型名 @n
+ *          在点选某种任务后，解析xml文件，组织界面程序显示，最终呈现给用户。
+ */
 void TaskControlPrivate::initTableViewMenu()
 {
     QMenu *m_AddMenu = new QMenu(q_ptr);
-    bandAction = new QAction();
-    bandAction->setProperty(ACTION_TYPE,Type::Band);
-    QObject::connect(bandAction, SIGNAL(triggered(bool)), q_ptr, SLOT(addNewTask()));
-    m_AddMenu->addAction(bandAction);
 
-    stateAction = new QAction();
-    stateAction->setProperty(ACTION_TYPE,Type::State);
-    QObject::connect(stateAction, SIGNAL(triggered(bool)), q_ptr, SLOT(addNewTask()));
-    m_AddMenu->addAction(stateAction);
-
-    gatherAction = new QAction();
-    gatherAction->setProperty(ACTION_TYPE,Type::Gather);
-    QObject::connect(gatherAction, SIGNAL(triggered(bool)), q_ptr, SLOT(addNewTask()));
-    m_AddMenu->addAction(gatherAction);
-
-    selfCheckAction = new QAction();
-    selfCheckAction->setProperty(ACTION_TYPE,Type::SelfCheck);
-    QObject::connect(selfCheckAction, SIGNAL(triggered(bool)), q_ptr, SLOT(addNewTask()));
-    m_AddMenu->addAction(selfCheckAction);
-
-    instrumentAction = new QAction();
-    instrumentAction->setProperty(ACTION_TYPE,Type::Instrument);
-    QObject::connect(instrumentAction, SIGNAL(triggered(bool)), q_ptr, SLOT(addNewTask()));
-    m_AddMenu->addAction(instrumentAction);
-
-    trunTableAction = new QAction();
-    trunTableAction->setProperty(ACTION_TYPE,Type::Turntable);
-    QObject::connect(trunTableAction, SIGNAL(triggered(bool)), q_ptr, SLOT(addNewTask()));
-    m_AddMenu->addAction(trunTableAction);
-
-    playBackAction = new QAction();
-    playBackAction->setProperty(ACTION_TYPE,Type::PlayBack);
-    QObject::connect(playBackAction, SIGNAL(triggered(bool)), q_ptr, SLOT(addNewTask()));
-    m_AddMenu->addAction(playBackAction);
+    ProgramFilePath programPath;
+    QDir dir(programPath.protocolPath);
+    QStringList filters;
+    filters << "*.xml";
+    QStringList files = dir.entryList(filters);
+    std::for_each(files.begin(),files.end(),[&](QString & fileName){
+        QAction * action = new QAction();
+        action->setProperty(ACTION_TYPE,fileName);
+        action->setText(fileName.left(fileName.indexOf(".")));
+        QObject::connect(action, SIGNAL(triggered(bool)), q_ptr, SLOT(showTaskWindow()));
+        m_AddMenu->addAction(action);
+    });
 
     addTaskAction = new QAction();
     addTaskAction->setMenu(m_AddMenu);
@@ -348,7 +193,7 @@ void TaskControlPrivate::initTableViewMenu()
 
     copyAction = new QAction();
     copyAction->setShortcut(QKeySequence::Copy);
-    QObject::connect(copyAction, SIGNAL(triggered(bool)), q_ptr, SLOT(copyTable()));
+    QObject::connect(copyAction, SIGNAL(triggered(bool)), q_ptr, SLOT(copyTask()));
     taskView->addAction(copyAction);
 
     pasteAction = new QAction();
@@ -372,14 +217,8 @@ TaskControl::~TaskControl()
 
 void TaskControl::retranslateUi()
 {
+
     Q_D(TaskControl);
-    d->bandAction->setText(QObject::tr("Band Control"));
-    d->stateAction->setText(QObject::tr("State Control"));
-    d->gatherAction->setText(QObject::tr("Gather Control"));
-    d->selfCheckAction->setText(QObject::tr("SelfCheck Control"));
-    d->instrumentAction->setText(QObject::tr("Instrument Control"));
-    d->trunTableAction->setText(QObject::tr("Turntable Control"));
-    d->playBackAction->setText(QObject::tr("PlayBack Control"));
     d->addTaskAction->setText(QObject::tr("Add task"));
     d->delTaskAction->setText(QObject::tr("Delete task"));
     d->modifyAction->setText(QObject::tr("Modify task"));
@@ -416,8 +255,8 @@ void TaskControl::onMessage(MessageType::MessType type)
 void TaskControl::distributeTask()
 {
     Q_D(TaskControl);
-    TaskInfoList selectedList;
-    std::for_each(d->taskInfoList.begin(),d->taskInfoList.end(),[&](TaskInfo * taskInfo){
+    NewTaskList selectedList;
+    std::for_each(d->taskInfoList.begin(),d->taskInfoList.end(),[&](NewTaskInfo * taskInfo){
         if(taskInfo->userChecked)
             selectedList.push_back(taskInfo);
     });
@@ -473,6 +312,35 @@ void TaskControl::dispatchOver()
 }
 
 /*!
+ * @brief 显示创建任务窗口
+ * @details 根据触发此事件的对象类型，解析对应的xml文件，创建不同的输入提示框，可供用户填写。
+ * @param[in]  无
+ * @return 无
+ */
+void TaskControl::showTaskWindow()
+{
+    Q_D(TaskControl);
+    ProgramFilePath programPath;
+    QString filename =  programPath.protocolPath + "/" +QObject::sender()->property(ACTION_TYPE).toString();
+    QFileInfo fileinfo(filename);
+    if(!fileinfo.exists()){
+        QMessageBox::warning(this,tr("warning"),tr("layout file doesn't existed!"),QMessageBox::Yes);
+        return;
+    }
+
+    TaskDialogProxy dialog(this);
+    if(dialog.parseLayout(filename)){
+        dialog.showMe();
+
+        NewTaskInfo * info = dialog.getTaskInfo();
+        if(info)
+            d->taskInfoList.append(info);
+    }
+
+    d->taskViewModel->updateTaskList(d->taskInfoList);
+}
+
+/*!
  * @brief 表格右键菜单触发的坐标
  * @param[in] point 右键事件触发位置
  */
@@ -501,65 +369,18 @@ QModelIndex TaskControl::currentIndex(bool & validIndex)
 void TaskControl::showEditWindow(QModelIndex index)
 {
     Q_D(TaskControl);
-    switch(d->taskInfoList.at(index.row())->taskType){
-        case Type::Band:
-            {
-                BandControlDialog dialog(this);
-                dialog.setWindowData(dynamic_cast<BandControl *>(d->taskInfoList.at(index.row())));
-                dialog.exec();
-                dialog.getWindowData();
-            }
-            break;
-        case Type::State:
-            {
-                StateControlDialog dialog(this);
-                dialog.setWindowData(dynamic_cast<StateControl *>(d->taskInfoList.at(index.row())));
-                dialog.exec();
-                dialog.getWindowData();
-            }
-            break;
-        case Type::Gather:
-            {
-                GatherControlDialog dialog(this);
-                dialog.setWindowData(dynamic_cast<GatherControl *>(d->taskInfoList.at(index.row())));
-                dialog.exec();
-                dialog.getWindowData();
-            }
-            break;
-        case Type::SelfCheck:
-            {
-                SelfCheckControlDialog dialog(this);
-                dialog.setWindowData(dynamic_cast<SelfCheckControl *>(d->taskInfoList.at(index.row())));
-                dialog.exec();
-                dialog.getWindowData();
-            }
-            break;
-        case Type::Instrument:
-            {
-                InstrumentControlDialog dialog(this);
-                dialog.setWindowData(dynamic_cast<InstrumentControl *>(d->taskInfoList.at(index.row())));
-                dialog.exec();
-                dialog.getWindowData();
-            }
-            break;
-        case Type::Turntable:
-            {
-                TurntableControlDialog dialog(this);
-                dialog.setWindowData(dynamic_cast<TurntableControl *>(d->taskInfoList.at(index.row())));
-                dialog.exec();
-                dialog.getWindowData();
-            }
-            break;
-        case Type::PlayBack:
-            {
-                PlayBackControlDialog dialog(this);
-                dialog.setWindowData(dynamic_cast<PlayBackControl *>(d->taskInfoList.at(index.row())));
-                dialog.exec();
-                dialog.getWindowData();
-            }
-            break;
-        default:
-            break;
+
+    Q_ASSERT_X(d->taskInfoList.size() > index.row(),"TaskControl","Error selected row!");
+
+    TaskDialogProxy dialog(this);
+    NewTaskInfo * taskInfo = d->taskInfoList.at(index.row());
+    if(dialog.parseLayout(taskInfo->localParsedFileName)){
+        dialog.setTaskInfo(taskInfo);
+        dialog.showMe();
+
+        NewTaskInfo * info = dialog.getTaskInfo();
+        if(info)
+            d->taskInfoList.replace(index.row(),info);
     }
 
     d->taskViewModel->updateTaskList(d->taskInfoList);
@@ -589,31 +410,30 @@ void TaskControl::mouseHoverItem(QModelIndex index)
 {
     Q_D(TaskControl);
     if(index.row() > 0 && index.row() < d->taskInfoList.size()){
-        Type type = d->taskInfoList.at(index.row())->taskType;
-        switch(type){
-            case Band:
-                break;
-            case State:
-                break;
-            case Gather:
-                break;
-            case SelfCheck:
-                break;
-            case Instrument:
-                break;
-            case Turntable:
-                break;
-            case PlayBack:
-                break;
-            default:
-                break;
-        }
+//        Type type = d->taskInfoList.at(index.row())->taskType;
+//        switch(type){
+//            case Band:
+//                break;
+//            case State:
+//                break;
+//            case Gather:
+//                break;
+//            case SelfCheck:
+//                break;
+//            case Instrument:
+//                break;
+//            case Turntable:
+//                break;
+//            case PlayBack:
+//                break;
+//            default:
+//                break;
+//        }
     }
 }
 
 /*!
  * @brief 删除指定任务
- * @return
  */
 void TaskControl::deleteTask()
 {
@@ -625,7 +445,7 @@ void TaskControl::deleteTask()
         QMessageBox::StandardButton butt = QMessageBox::information(this,tr("information"),tr("Delete selected task?"),QMessageBox::Yes|QMessageBox::No,QMessageBox::No);
         if(butt = QMessageBox::Yes)
         {
-            TaskInfo * deletedTask = d->taskInfoList.at(index.row());
+            NewTaskInfo * deletedTask = d->taskInfoList.at(index.row());
             d->taskInfoList.removeAt(index.row());
             d->taskViewModel->updateTaskList(d->taskInfoList);
             delete deletedTask;
@@ -648,100 +468,11 @@ void TaskControl::modifyTask()
 }
 
 /*!
- * @brief 添加新的任务信息
- * @details 根据触发此事件的对象类型，创建不同的输入提示框，可供用户填写。
- * @param[in]  无
- * @return 无
- */
-void TaskControl::addNewTask()
-{
-    Q_D(TaskControl);
-    Type tt =  static_cast<Type>(QObject::sender()->property(ACTION_TYPE).toInt());
-    switch(tt)
-    {
-        case Type::Band:
-            {
-                BandControlDialog dialog(this);
-                dialog.exec();
-                BandControl * info = dialog.getWindowData();
-                if(info){
-                    d->taskInfoList.append(info);
-                }
-            }
-            break;
-        case Type::State:
-            {
-                StateControlDialog dialog(this);
-                dialog.exec();
-                StateControl * info = dialog.getWindowData();
-                if(info){
-                    d->taskInfoList.append(info);
-                }
-            }
-            break;
-        case Type::Gather:
-            {
-                GatherControlDialog dialog(this);
-                dialog.exec();
-                GatherControl * info = dialog.getWindowData();
-                if(info){
-                    d->taskInfoList.append(info);
-                }
-            }
-            break;
-        case Type::SelfCheck:
-            {
-                SelfCheckControlDialog dialog(this);
-                dialog.exec();
-                SelfCheckControl * info = dialog.getWindowData();
-                if(info){
-                    d->taskInfoList.append(info);
-                }
-            }
-            break;
-        case Type::Instrument:
-            {
-                InstrumentControlDialog dialog(this);
-                dialog.exec();
-                InstrumentControl * info = dialog.getWindowData();
-                if(info){
-                    d->taskInfoList.append(info);
-                }
-            }
-            break;
-        case Type::Turntable:
-            {
-                TurntableControlDialog dialog(this);
-                dialog.exec();
-                TurntableControl * info = dialog.getWindowData();
-                if(info){
-                    d->taskInfoList.append(info);
-                }
-            }
-            break;
-        case Type::PlayBack:
-            {
-                PlayBackControlDialog dialog(this);
-                dialog.exec();
-                PlayBackControl * info = dialog.getWindowData();
-                if(info){
-                    d->taskInfoList.append(info);
-                }
-            }
-            break;
-        default:
-            break;
-    }
-
-    d->taskViewModel->updateTaskList(d->taskInfoList);
-}
-
-/*!
  * @brief 复制任务信息
  * @details 复制时根据当前的任务类型，创建对应的任务信息，并将复制行的内容拷贝至暂存区；
  *          每次复制时删除上一次复制的缓冲区内容，防止出现内存泄漏问题；
  */
-void TaskControl::copyTable()
+void TaskControl::copyTask()
 {
     Q_D(TaskControl);
     bool existed = false;
@@ -750,39 +481,9 @@ void TaskControl::copyTable()
         if(d->cacheTaskInfo)
             delete d->cacheTaskInfo;
 
-        bool copyResult = false;
-        TaskInfo * selectedTask = d->taskInfoList.at(index.row());
-        switch(selectedTask->taskType)
-        {
-            case Band:
-                       copyResult = executeCopy<BandControl>(selectedTask);
-                 break;
-            case State:
-                       copyResult = executeCopy<StateControl>(selectedTask);
-                 break;
-            case Gather:
-                       copyResult = executeCopy<GatherControl>(selectedTask);
-                 break;
-            case SelfCheck:
-                       copyResult = executeCopy<SelfCheckControl>(selectedTask);
-                 break;
-            case Instrument:
-                       copyResult = executeCopy<InstrumentControl>(selectedTask);
-                 break;
-            case Turntable:
-                       copyResult = executeCopy<TurntableControl>(selectedTask);
-                 break;
-            case PlayBack:
-                       copyResult = executeCopy<PlayBackControl>(selectedTask);
-                 break;
-            default:
-                break;
-        }
-
-        if(!copyResult){
-            d->cacheTaskInfo = NULL;
-            QMessageBox::warning(this,tr("warning"),tr("Copy task failed!"),QMessageBox::Yes);
-        }
+        NewTaskInfo * selectedTask = d->taskInfoList.at(index.row());
+        d->cacheTaskInfo = new NewTaskInfo;
+        *(d->cacheTaskInfo) = *selectedTask;
     }
 }
 
@@ -800,6 +501,7 @@ void TaskControl::pasteTask()
     }
     bool existed = false;
     QModelIndex index = currentIndex(existed);
+    d->cacheTaskInfo->excuteTime = QDateTime::currentDateTime();
     if(existed){
         d->taskInfoList.insert(index.row(),d->cacheTaskInfo);
     }else{
@@ -850,19 +552,6 @@ void TaskControl::exportTask()
             QMessageBox::warning(this,tr("warning"),tr("export failed!"));
         }
     }
-}
-
-template<class T>
-bool TaskControl::executeCopy(TaskInfo *selectedTask)
-{
-    Q_D(TaskControl);
-    T * copyTask = dynamic_cast<T *>(selectedTask);
-    if(copyTask){
-        T * control = new T(*copyTask);
-        d->cacheTaskInfo = control;
-        return true;
-    }
-    return false;
 }
 
 } //namespace TaskControlModel

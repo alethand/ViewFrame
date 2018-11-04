@@ -16,7 +16,13 @@
 #include <QLineEdit>
 #include <QPaintEvent>
 
+#include <QHeaderView>
+
 #include "Base/util/rsingleton.h"
+//test
+#include <iostream>
+using namespace std;
+//test
 
 QString  GetFontStyleSheetByInt(int value)
 {
@@ -172,8 +178,24 @@ void LayoutAndDisplay::reLayout_BySize()
 
 void LayoutAndDisplay::generateWSLayout(unsigned int start)
 {
+//    cout<<"thetest"<<endl;
     wkRowCount = mWorkStateWidget->height()/(mItemsHeight+minRowInterval);
     wkColcount = mWorkStateWidget->width()/(wkItemWidth+minColumnInterval);
+    //1
+    standItemModel->setColumnCount(wkColcount);
+    standItemModel->setRowCount(wkRowCount);
+
+    tableView->horizontalHeader()->setDefaultSectionSize(1.1*(wkItemWidth+minColumnInterval));
+    tableView->verticalHeader()->setDefaultSectionSize(0.9*(mItemsHeight+minRowInterval));
+
+    tableView->horizontalHeader()->hide();
+    tableView->verticalHeader()->hide();
+
+    tableView->setAlternatingRowColors(true);//设置变色
+    tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);//设置不可编辑
+
+
+    //1
     int wkPerPageItemsNum = wkRowCount*wkColcount;
     QGridLayout *layout = dynamic_cast<QGridLayout*>(mWorkStateWidget->layout());
     int index = 0;
@@ -184,17 +206,24 @@ void LayoutAndDisplay::generateWSLayout(unsigned int start)
             index = (start -1)* wkPerPageItemsNum+ i*wkColcount+j;
             if(i*wkColcount+j < mWKObjPair.size())
             {
-                layout->addWidget(mWKObjPair.at(i*wkColcount+j),i,j,1,1);
-                mWKObjPair.at(i*wkColcount+j)->setVisible(true);
+                //update
+                QList<QLabel*>tplabelFindOut = mWKObjPair.at(i*wkColcount+j)->findChildren<QLabel*>();
+                QList<QLineEdit*>tplineEditFindOut = mWKObjPair.at(i*wkColcount+j)->findChildren<QLineEdit*>();
+                QStandardItem *standItem1 = new QStandardItem(tplabelFindOut.at(0)->text()+"   "+ tplineEditFindOut.at(0)->text());
+//                QStandardItem *standItem1 = new QStandardItem(dataList[i*wkColcount+j]+"   "+ tplineEditFindOut.at(0)->text());
+                standItemModel->setItem(i,j,standItem1);
+                //update
+//                layout->addWidget(mWKObjPair.at(i*wkColcount+j),i,j,1,1);
+                mWKObjPair.at(i*wkColcount+j)->setVisible(false);
             }
             else
                 break;
-            if( index+1 <= mWKObjPair.size())
-            {
-                 mWkStItems.operator [](i*wkColcount+j).first->setText(mUpdatePara.data()->wsInfo.operator [](index).name);
-            }
-            else
-                 mWkStItems.operator [](i*wkColcount+j).first->setText("");
+//            if( index+1 <= mWKObjPair.size())
+//            {
+//                 mWkStItems.operator [](i*wkColcount+j).first->setText(mUpdatePara.data()->wsInfo.operator [](index).name);
+//            }
+//            else
+//                 mWkStItems.operator [](i*wkColcount+j).first->setText("");
         }
     }
     int totalPage  = mWKObjPair.size()/wkPerPageItemsNum + ((mWKObjPair.size()%wkPerPageItemsNum == 0)?0:1);
@@ -203,6 +232,11 @@ void LayoutAndDisplay::generateWSLayout(unsigned int start)
     else
          mSwPgWidget->show();
     mSwPgWidget->setTotalPageNums(totalPage);
+    //update2
+    tableView ->setModel(standItemModel);
+    layout->addWidget(tableView);
+
+
 }
 
 /*!
@@ -247,12 +281,15 @@ void LayoutAndDisplay:: ensureLayoutData(const HealthData &data)
     StateLamp *tpStateLamp = NULL;
     QWidget *outerWid = NULL;
     QHBoxLayout *layout = NULL;
+    //    theData = data;
+    QString *tpString = NULL;
 
     for(unsigned long i=0;i < data.workStateNums;i++)
     {   //生成显示对象
         tplabel = new QLabel(QString(data.wsInfo.at(i).name));
         tplineEdit = new QLineEdit();
         tplineEdit->setEnabled(false);
+
         mWkStItems.append( QPair<QLabel*,QLineEdit*>(tplabel,tplineEdit));
 
         //生成包裹对象
@@ -309,21 +346,51 @@ void LayoutAndDisplay:: ensureLayoutData(const HealthData &data)
 
 void LayoutAndDisplay::upDateSwitchPageInfo(int index)
 {
+//    cout<<"try"<<index<<";"<<wkRowCount<<";"<<wkColcount<<endl;
     int thisTime;
     int wkPerPageItemsNum = wkRowCount*wkColcount;
-    for(int i = 0;i < wkPerPageItemsNum;i++)
+
+//    int theindex = 0;
+//    cout<<"-----------------"<<endl;
+
+    for(int i=0;i < wkRowCount;i++)
     {
-        thisTime = (index -1)*wkPerPageItemsNum + i;
-        if((thisTime+1) <= mWKObjPair.size() && (thisTime+1) <= mUpdatePara.data()->wsInfo.count())
+        for(int j =0;j<wkColcount;j++)
         {
-            mWkStItems.operator [](i).first->setText(mUpdatePara.data()->wsInfo.operator [](thisTime).name);
-        }       
-        else
-        {
-            if(i < mWkStItems.count())
-                mWkStItems.operator [](i).first->setText("");
+//            theindex = (start -1)* wkPerPageItemsNum+ i*wkColcount+j;
+            if((i*wkColcount+j+(index-1)*wkPerPageItemsNum) < mWKObjPair.size())
+            {
+//                cout<<i<<";"<<j<<endl;
+                //update
+                QList<QLabel*>tplabelFindOut = mWKObjPair.at(i*wkColcount+j+(index-1)*wkPerPageItemsNum)->findChildren<QLabel*>();
+                QList<QLineEdit*>tplineEditFindOut = mWKObjPair.at(i*wkColcount+j+(index-1)*wkPerPageItemsNum)->findChildren<QLineEdit*>();
+                QStandardItem *standItem1 = new QStandardItem(tplabelFindOut.at(0)->text()+"   "+ tplineEditFindOut.at(0)->text());
+//                QStandardItem *standItem1 = new QStandardItem(dataList[i*wkColcount+j]+"   "+ tplineEditFindOut.at(0)->text());
+                standItemModel->setItem(i,j,standItem1);
+                //update
+            }
+            else{
+//                cout<<i<<";"<<j<<endl;
+                QStandardItem *standItem1 = new QStandardItem("   ");
+                standItemModel->setItem(i,j,standItem1);
+            }
         }
     }
+
+
+//    for(int i = 0;i < wkPerPageItemsNum;i++)
+//    {
+//        thisTime = (index -1)*wkPerPageItemsNum + i;
+//        if((thisTime+1) <= mWKObjPair.size() && (thisTime+1) <= mUpdatePara.data()->wsInfo.count())
+//        {
+//            mWkStItems.operator [](i).first->setText(mUpdatePara.data()->wsInfo.operator [](thisTime).name);
+//        }
+//        else
+//        {
+//            if(i < mWkStItems.count())
+//                mWkStItems.operator [](i).first->setText("");
+//        }
+//    }
 }
 
 void LayoutAndDisplay::choooseComponent(QModelIndex index)
@@ -377,6 +444,21 @@ void LayoutAndDisplay::initView()
     connect(tabWidget,SIGNAL(currentChanged(int)),this,SLOT(reLayout_BySize()));
 
     msubMachWidget->setCurrentIndex(0);
+
+    //update
+    tableView = new QTableView;
+    standItemModel = new QStandardItemModel();
+
+//    QTableView ta;
+
+//    QHeaderView hv(Qt::Vertical);
+
+//    hv.hide();
+//    tableView.setVerticalHeader(&hv);
+
+//    tableView->horizontalHeader()->hide();
+//    tableView->verticalHeader()->hide();
+//    QTableView::horizontalHeader()->hide();
 }
 
 void LayoutAndDisplay::retranslateUi()

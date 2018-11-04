@@ -27,7 +27,7 @@ bool TaskDispatcher::initTask(TaskConfigInfo &info)
     return true;
 }
 
-void TaskDispatcher::bindTaskList(TaskInfoList list)
+void TaskDispatcher::bindTaskList(NewTaskList list)
 {
     this->taskInfoList = list;
 }
@@ -85,7 +85,9 @@ void TaskDispatcher::checkDispatchTask()
     for(;i < taskInfoList.size(); i++ ){
         uint etime = taskInfoList.at(i)->excuteTime.toTime_t();
         if(etime == currTime){
-            taskInfoList.at(i)->dispatch();
+
+            //TODO 20181104对字段组织报文
+
             taskInfoList.at(i)->dstate = TaskControlModel::Issued;
             hasDispatchIndex = i;
             emit taskDispatch();

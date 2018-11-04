@@ -12,9 +12,12 @@
 #define TASK_CONTROL_HEAD_H
 
 #include <QString>
+#include <QVariant>
 #include <QList>
 #include <QDateTime>
 #include <QDataStream>
+
+#include <QDebug>
 
 #define LABEL_MIN_WIDTH 120
 #define LABEL_MIN_HEIGHT 25
@@ -64,6 +67,181 @@ enum DistuributeState{
     Issued,           /*!< 已下发 */
     Error_Issued      /*!< 下发错误 */
 };
+
+
+/*!
+ *  @brief 控件类型
+ */
+enum ControlType{
+
+    Empty = 0,
+    /*! 输入框 */
+    ComboBox = 1,         /*! 下拉框 */
+    CheckBox,            /*! 复选框 */
+    RadioButton,         /*! 单选框 */
+    TextEdit,            /*! 文本输入框 */
+    ValueIntEdit,        /*! 整形输入框 */
+    ValueFloatEdit,      /*! 浮点形输入框 */
+    DateEdit,            /*! 日期输入框 */
+    TimeEdit,            /*! 时间输入框 */
+
+    /*! 容器框 */
+    Dialog,              /*! 对话框 */
+    Widget,              /*! 普通框 */
+    Groupbox,            /*! */
+    Table,               /*! 表格 */
+    List,                /*! 列表 */
+
+    /*! 其它协议类型 */
+    Length,              /*! 长度 */
+    Count                /*! 计数个数 */
+};
+
+struct PubHead{
+    PubHead():widget(NULL){}
+    virtual ~PubHead(){}
+    QWidget  * widget;     /*!< 实际生成的控件 */
+    ControlType  type;     /*!< 字段类型 */
+};
+
+/*!
+ *  @brief 单个字段内容数据
+ */
+struct FieldData{
+public:
+    FieldData(){
+        bytes =0;isSigned = false;
+        bits = 0; offset = 0;
+        weight = 1;
+        precision = 1;
+        maxValue = USHRT_MAX;
+        minValue = 0;
+    }
+
+    friend QDataStream & operator<<(QDataStream & stream,const FieldData & data);
+    friend QDataStream & operator>>(QDataStream & stream,FieldData & data);
+
+    QString  name;         /*!< 控件前面label显示信息 */
+
+    /*! 以下内容只有1组有效：字节数-符号位，比特数-偏移量 */
+    int index;            /*!< 字段唯一标识符，初始为0。新添加字段后，此值+1 */
+    ushort bytes;         /*!< 字节数 */
+    bool   isSigned;      /*!< 有无符号位 */
+    ushort bits;          /*!< 比特位数 */
+    ushort offset;        /*!< 偏移量 */
+    float weight;         /*!< 权值 */
+    float precision;      /*!< 精度 */
+    QString unit;         /*!< 单位 */
+    ushort maxValue;      /*!< 最大值 */
+    ushort minValue;      /*!< 最小值 */
+    QString displayText;  /*!< 显示文本 */
+
+    ControlType  type;    /*!< 字段类型 */
+    QVariant value;       /*!< 值 */
+};
+
+/*!
+ *  @brief  协议字段信息
+ *  @details 协议每项的信息描述
+ */
+struct Field : public PubHead{
+    Field():PubHead(){}
+    ~Field(){}
+
+    FieldData data;        /*!< 字段属性 */
+};
+
+/*!
+ *  @brief 布局类型
+ *  @details 20181030暂支持3种类型
+ */
+enum Layout
+{
+    None,
+    Horizonal,          /*!< Gridlayout布局一行，多列 */
+    Vertical,           /*!< Gridlayout布局一列，多行 */
+    Grid                /*!< Gridlayout布局多行，多列 */
+};
+
+/*!
+ *  @brief 窗口数据信息
+ */
+struct WindowData{
+    WindowData(){
+        isShown = true;
+        isEnabled = true;
+        column = 1;
+    }
+
+    QString  name;        /*!< 控件前面label显示信息 */
+
+    Layout layout;        /*!< 布局类型 */
+    bool isShown;         /*!< 可进行显示 */
+    bool isEnabled;       /*!< 可编辑 */
+    ushort column;        /*!< 进行显示的列数 */
+    ushort width;         /*!< 宽度 */
+    ushort height;        /*!< 高度 */
+};
+
+/*!
+ *  @brief 容器信息显示描述
+ */
+struct Window : public PubHead{
+    Window():PubHead(){ }
+    ~Window(){}
+    WindowData data;       /*!< 窗口属性 */
+};
+
+/*!
+ *  @brief 节点容器
+ *  @details 1.容器可嵌套；
+ *           2.大的容器中可包含子容器，由 @see dataElem 来定义；
+ *           3.最内的容器只包含字段信息
+ */
+struct Container{
+    Window     continer;                  /*!< 描述当前容器的属性 */
+    QList<Field*> fileds;                 /*!< 节点集合 */
+    QList<Container*>  childContainer;    /*!< 子容器 */
+};
+
+/*!
+ *  @brief 新基本任务信息
+ *  @details 动态解析xml文件，保存不同的任务的字段信息。
+ */
+struct NewTaskInfo
+{
+    NewTaskInfo(){
+        this->dstate = Not_Issued;
+        userChecked = false;
+    }
+
+    NewTaskInfo(const NewTaskInfo & info){
+        this->userChecked = info.userChecked;
+        this->taskName = info.taskName;
+        this->parameter = info.parameter;
+        this->excuteTime = info.excuteTime;
+        this->lastTime = info.lastTime;
+        this->dstate = info.dstate;
+        this->fields = info.fields;
+        this->localParsedFileName = info.localParsedFileName;
+    }
+
+    friend QDataStream & operator<<(QDataStream & stream,const NewTaskInfo & info);
+    friend QDataStream & operator>>(QDataStream & stream,NewTaskInfo & info);
+
+    bool userChecked;               /*!< 用户是否选中 */
+    QString taskName;               /*!< 任务名称(从解析的xml文件名中提取) */
+    QString parameter;              /*!< 任务参数 */
+    QDateTime excuteTime;           /*!< 任务执行时间 */
+    quint32 lastTime;               /*!< 任务执行时长 */
+    DistuributeState dstate;        /*!< 下发状态 */
+    QMap<int,FieldData> fields;     /*!< 某个任务下字段集合,key:int对应当前字段在所有字段中的索引，value:QVaraint,对应字段的值 */
+
+    QString localParsedFileName;    /*!< 本地xml文件全路径 */
+
+};
+
+typedef QList<NewTaskInfo *> NewTaskList;
 
 /*!
  *  @brief 基本任务信息

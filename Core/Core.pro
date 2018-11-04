@@ -71,7 +71,16 @@ SOURCES += main.cpp \
     widgets/datadisplay/modelview/tableviewmoderradiationsource.cpp \
     widgets/shortcutsettings.cpp \
     file/programfilepath.cpp \
-    widgets/taskcontrol/head.cpp
+    widgets/taskcontrol/head.cpp \
+    widgets/Util/dataexportandprint.cpp \
+    widgets/Util/exporttoexcelthread.cpp \
+    widgets/Util/tipdialog.cpp \
+    widgets/CustomWidget/energybar.cpp \
+    calculater/commonalgorithms.cpp \
+    widgets/datadisplay/Graphics/scatterdiagram.cpp \
+    widgets/taskcontrol/tasklayout.cpp \
+    widgets/taskcontrol/taskdialogproxy.cpp \
+    widgets/taskcontrol/taskparsedmethod.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
@@ -115,7 +124,16 @@ HEADERS  += \
     widgets/datadisplay/modelview/tableviewmodelcustom.h \
     widgets/datadisplay/modelview/tableviewmoderradiationsource.h \
     widgets/shortcutsettings.h \
-    file/programfilepath.h
+    file/programfilepath.h \
+    widgets/Util/dataexportandprint.h \
+    widgets/Util/exporttoexcelthread.h \
+    widgets/Util/tipdialog.h \
+    widgets/CustomWidget/energybar.h \
+    calculater/commonalgorithms.h \
+    widgets/datadisplay/Graphics/scatterdiagram.h \
+    widgets/taskcontrol/tasklayout.h \
+    widgets/taskcontrol/taskdialogproxy.h \
+    widgets/taskcontrol/taskparsedmethod.h
 
 FORMS    += mainwindow.ui \
     widgets/taskcontrol/gathercontroldialog.ui \

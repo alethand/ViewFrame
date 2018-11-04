@@ -2,6 +2,7 @@
 #define UTILS_H
 
 #include <QByteArray>
+#include "Base/util/fileutils.h"
 
 //高低字节转换
 unsigned short RExchangeHLByte(unsigned short variate)
@@ -51,7 +52,6 @@ char RCheckSum(void *buff,int size)
     checkSum = RCheckSum(buff_temp);
     return checkSum;
 }
-
 
 
 #endif // UTILS_H

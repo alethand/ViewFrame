@@ -1,6 +1,151 @@
 #include "head.h"
 
+#include <QMap>
+
 namespace TaskControlModel {
+
+QDataStream & operator<<(QDataStream & stream,const FieldData & data)
+{
+    stream<<data.name<<data.index<<data.bytes<<data.isSigned<<data.bits<<data.offset
+         <<data.weight<<data.precision<<data.unit<<data.maxValue<<data.minValue<<data.displayText;
+
+    stream<<static_cast<int>(data.type);
+    switch(data.type){
+        case ComboBox :
+                stream<<data.value.toInt();
+                break;
+        case CheckBox :
+        case RadioButton :
+                stream<<data.value.toBool();
+            break;
+        case TextEdit :
+                stream<<data.value.toString();
+            break;
+        case ValueIntEdit :
+                stream<<data.value.toInt();
+            break;
+        case ValueFloatEdit :
+                stream<<data.value.toDouble();
+            break;
+        case DateEdit :
+                stream<<data.value.toDate();
+            break;
+        case TimeEdit :
+                stream<<data.value.toTime();
+            break;
+        case Empty :
+        default:
+            break;
+    }
+
+    return stream;
+}
+
+QDataStream & operator>>(QDataStream & stream,FieldData & data)
+{
+    stream>>data.name>>data.index>>data.bytes>>data.isSigned>>data.bits>>data.offset
+         >>data.weight>>data.precision>>data.unit>>data.maxValue>>data.minValue>>data.displayText;
+
+    int type = 0;
+    stream >> type;
+    data.type = static_cast<ControlType>(type);
+
+    switch(data.type){
+        case ComboBox :
+                {
+                    int tmp = 0;
+                    stream>>tmp;
+                    data.value = QVariant::fromValue(tmp);
+                }
+                break;
+        case CheckBox :
+        case RadioButton :
+                {
+                    bool tmp = false;
+                    stream>>tmp;
+                    data.value = QVariant::fromValue(tmp);
+                }
+                break;
+        case TextEdit :
+                {
+                    QString tmp;
+                    stream>>tmp;
+                    data.value = QVariant::fromValue(tmp);
+                }
+            break;
+        case ValueIntEdit :
+                {
+                    int tmp = 0;
+                    stream>>tmp;
+                    data.value = QVariant::fromValue(tmp);
+                }
+                break;
+        case ValueFloatEdit :
+                {
+                    double tmp = 0;
+                    stream>>tmp;
+                    data.value = QVariant::fromValue(tmp);
+                }
+                break;
+        case DateEdit :
+                {
+                    QDate tmp;
+                    stream>>tmp;
+                    data.value = QVariant::fromValue(tmp);
+                }
+                break;
+        case TimeEdit :
+                {
+                    QTime tmp;
+                    stream>>tmp;
+                    data.value = QVariant::fromValue(tmp);
+                }
+                break;
+        case Empty :
+        default:
+            break;
+    }
+
+
+    return stream;
+}
+
+QDataStream & operator<<(QDataStream & stream,const NewTaskInfo & info)
+{
+    stream<<info.userChecked<<info.taskName<<info.parameter<<info.excuteTime<<info.lastTime
+         <<static_cast<int>(info.dstate);
+
+    stream<<info.fields.size();
+    QMap<int,FieldData>::const_iterator iter = info.fields.cbegin();
+    while(iter != info.fields.cend()){
+        stream<<iter.value();
+        iter++;
+    }
+    stream<<info.localParsedFileName;
+
+    return stream;
+}
+
+QDataStream & operator>>(QDataStream & stream,NewTaskInfo & info)
+{
+    stream>>info.userChecked>>info.taskName>>info.parameter>>info.excuteTime>>info.lastTime;
+    int state = 0;
+
+    stream>>state;
+    info.dstate = static_cast<DistuributeState>(state);
+
+    int fieldSize = 0;
+    stream>>fieldSize;
+    for(int i = 0;i < fieldSize; i++){
+        FieldData data;
+        stream>>data;
+        info.fields.insert(i,data);
+    }
+
+    stream>>info.localParsedFileName;
+
+    return stream;
+}
 
 QDataStream & operator<<(QDataStream & stream,const BandControl & info)
 {

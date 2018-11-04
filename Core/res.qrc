@@ -3,6 +3,9 @@
         <file>resource/style/Black.qss</file>
         <file>resource/style/White.qss</file>
         <file>resource/style/Technology.qss</file>
+        <file>resource/style/TechnologyBig.qss</file>
+        <file>resource/style/WhiteBig.qss</file>
+        <file>resource/style/BlackBig.qss</file>
     </qresource>
     <qresource prefix="/tech">
         <file>resource/technology/background.png</file>
@@ -47,5 +50,6 @@
         <file>resource/technology/Vmovetoolbar.png</file>
         <file>resource/technology/Vsepartoolbar.png</file>
         <file>resource/technology/left_bottom.png</file>
+        <file>resource/technology/logo1.jpg</file>
     </qresource>
 </RCC>

@@ -3,6 +3,9 @@
 #include <QDebug>
 #include "Base/util/rsingleton.h"
 
+#include <iostream>
+using namespace std;
+
 namespace TaskControlModel {
 
 TableViewModel::TableViewModel(QObject *parent) :
@@ -35,7 +38,7 @@ bool TableViewModel::setData(const QModelIndex &index, const QVariant &value, in
     int col = index.column();
     int row = index.row();
     
-    TaskInfo * taskInfo = taskList.at(row);
+    NewTaskInfo * taskInfo = taskList.at(row);
     
     switch (role) {
         case Qt::CheckStateRole:
@@ -81,26 +84,7 @@ QVariant TableViewModel::data(const QModelIndex &index, int role) const
                     case T_No:
                         return QString("%1").arg(row+1);
                     case T_TYPE:
-                        {
-                            switch(taskList.at(row)->taskType){
-                                case Type::Band:
-                                        return QObject::tr("Band control");
-                                case Type::State:
-                                        return QObject::tr("State control");
-                                case Type::Gather:
-                                        return QObject::tr("Gather control");
-                                case Type::SelfCheck:
-                                        return QObject::tr("Selfcheck control");
-                                case Type::Instrument:
-                                        return QObject::tr("Instrument Control");
-                                case Type::Turntable:
-                                        return QObject::tr("Turning table control");
-                                case Type::PlayBack:
-                                        return QObject::tr("Playback control");
-                                default:
-                                    return QVariant("");
-                            }
-                        }
+                            return taskList.at(row)->taskName;
                         break;
                     case T_PARAMETERS:
                         return taskList.at(row)->parameter;
@@ -162,7 +146,7 @@ Qt::ItemFlags TableViewModel::flags(const QModelIndex &index) const
     return  flags;
 }
 
-void TableViewModel::updateTaskList(TaskInfoList &list)
+void TableViewModel::updateTaskList(NewTaskList &list)
 {
     taskList = list;
     resetData();
@@ -188,6 +172,7 @@ void TableViewModel::resetData()
 
 void TableViewModel::retranslateUi()
 {
+//    cout<<"the2"<<endl;
     headInfo.clear();
     headInfo<<QObject::tr("Index")<<QObject::tr("Type")<<QObject::tr("Parameter")
                   <<QObject::tr("Dispatch Time")<<QObject::tr("Execute Time")<<QObject::tr("Issued status");

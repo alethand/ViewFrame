@@ -62,12 +62,19 @@ public:
     RXmlFile(const QString & fileName);
     ~RXmlFile();
 
-    void setParseMethod(RXmlParseMethod * p){this->parseMethod = p;}
+    /*!
+     * @brief 设置解析方式
+     * @param[in] method 解析方式
+     * @param[in] autoRelease 是否解析结束自动释放method的内存，默认为true
+     */
+    void setParseMethod(RXmlParseMethod * method,bool autoRelease = true){this->parseMethod = method;
+                                                                          this->isAutoReleaseParseMethod = autoRelease;}
 
     virtual bool startParse(OpenMode  openMode = QFile::ReadOnly);
     virtual bool startSave(OpenMode  openMode = QFile::WriteOnly | QFile::Truncate | QFile::Text);
 
 protected:
+    bool isAutoReleaseParseMethod;
     RXmlParseMethod * parseMethod;
 };
 

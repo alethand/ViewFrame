@@ -25,7 +25,6 @@ bool RFile::startParse(OpenMode openMode)
         RLOG_INFO("File [%s] open error!",fileName().toLocal8Bit().data());
         return false;
     }
-
     return true;
 }
 
@@ -53,12 +52,13 @@ RXmlFile::RXmlFile(const QString &fileName):RFile(fileName),parseMethod(NULL)
 
 RXmlFile::~RXmlFile()
 {
-    if(parseMethod)
+    if(parseMethod && isAutoReleaseParseMethod)
         delete parseMethod;
 }
 
 bool RXmlFile::startParse(OpenMode  openMode)
 {
+    bool result = false;
     if(parseMethod  && RFile::startParse(openMode)){
 
         QDomDocument doc;
@@ -70,7 +70,12 @@ bool RXmlFile::startParse(OpenMode  openMode)
             return false;
         }
         close();
-        return parseMethod->startParse(doc.documentElement());
+        QDomElement root = doc.documentElement();
+        if(!root.isNull())
+        {
+             result =  parseMethod->startParse(root.toElement());
+             return result;
+         }
     }
     RLOG_INFO("Not set xml parseMethod!");
     return false;

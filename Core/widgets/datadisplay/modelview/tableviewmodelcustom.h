@@ -37,6 +37,9 @@ public:
 
     void resetHeadInfo(const QStringList& head);
     void setTableCustomKind(TableCustomKind kind);
+ //   void updateAllPluseStatisticInfoList(const AllPluseStatisticInfoList& list);
+    void updateAllPulseOriginalInfoList(const AllPulseOriginalInfoList& list);
+    void updateMFAcquistionInfoList(const MFAcquistionInfoList& list);
 
 private:
     void resetData();
@@ -46,6 +49,9 @@ private:
     QStringList headInfo;
     int tableTotalRows;             //总函数
     TableCustomKind tableCustomKind;//表格显示类型
+   // AllPluseStatisticInfoList allPluseStatisticInfoList;        //全脉冲统计信息列表
+    AllPulseOriginalInfoList allPulseOriginalInfoList;          //全脉冲原始信息列表
+    MFAcquistionInfoList mfAcquistionInfoList;                  //中频数据表格信息
 
 };
 

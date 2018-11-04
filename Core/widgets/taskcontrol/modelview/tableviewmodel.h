@@ -34,7 +34,7 @@ public:
     
     Qt::ItemFlags flags(const QModelIndex &index) const;
 
-    void updateTaskList(TaskInfoList & list);
+    void updateTaskList(NewTaskList &list);
 
     void onMessage(MessageType::MessType type);
   
@@ -54,7 +54,7 @@ private:
     
 private:
     QStringList headInfo;
-    TaskInfoList taskList;
+    NewTaskList taskList;
 };
 
 } //namespace TaskControlModel

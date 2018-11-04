@@ -36,7 +36,17 @@
 #include "widgets/taskcontrol/taskcontrolpanel.h"
 #include "shortcutsettings.h"
 
+#include <QDateTime>
+#include <QScreen>
+#include <QFileDialog>
+#include <QTimer>
+
+#include <iostream>
+using namespace std;
+
 using namespace Base;
+
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -50,6 +60,14 @@ MainWindow::MainWindow(QWidget *parent) :
     RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Technology style"),":/resource/style/Technology.qss",true));
     RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Dark style"),":/resource/style/Black.qss",false));
     RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Light style"),":/resource/style/White.qss",false));
+    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Technology(Big) style"),":/resource/style/TechnologyBig.qss",false));
+//    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Technology(Small) style"),":/resource/style/TechnologySmall.qss",true));
+    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Dark(Big) style"),":/resource/style/BlackBig.qss",false));
+//    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Dark(Small) style"),":/resource/style/BlackSmall.qss",false));
+
+    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Light(Big) style"),":/resource/style/WhiteBig.qss",false));
+//    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Light(Small) style"),":/resource/style/WhiteSmall.qss",false));
+
 
     RSingleton<Subject>::instance()->attach(this);
 
@@ -60,6 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     loadUserSetting();
     showMaximized();
+    QWidget::setWindowFlags(Qt::WindowMaximizeButtonHint|Qt::WindowCloseButtonHint|Qt::WindowMinimizeButtonHint);
 }
 
 MainWindow::~MainWindow()
@@ -83,6 +102,7 @@ void MainWindow::initMenu()
     ActionContainer *menubar = ActionManager::instance()->createMenuBar(Constant::MENU_BAR);
 
     setMenuBar(menubar->menuBar());
+//    QMenu *file = menuBar()->addMenu(tr("&file"));
     menubar->appendGroup(Constant::MENU_PROGRAM);
     menubar->appendGroup(Constant::MENU_VIEW);
     menubar->appendGroup(Constant::MENU_SETTING);
@@ -205,6 +225,14 @@ void MainWindow::initMenu()
     shortcut->setDefaultKey(QKeySequence("Ctrl+Shift+K"));
     settingsMenu->addAction(shortcut,Constant::SYSTEM_SHORTCUT);
 
+    //截图
+    settingsMenu->appendGroup(Constant::SYSTEM_ScreenShot);
+    screenshotAction = new QAction(this);
+    connect(screenshotAction,SIGNAL(triggered()),this,SLOT(screenshotSettings()));
+    Action * screenshot = ActionManager::instance()->registAction(Constant::SYSTEM_ScreenShot,screenshotAction);
+//    shortcut->setDefaultKey(QKeySequence("Ctrl+Shift+K"));
+    settingsMenu->addAction(screenshot,Constant::SYSTEM_ScreenShot);
+
 
     //帮助菜单
     helpMenu = ActionManager::instance()->createMenu(Constant::MENU_HELP);
@@ -229,6 +257,11 @@ void MainWindow::initMenu()
  */
 void MainWindow::programExit()
 {
+
+//    settings.setValue("任务控制", saveState());
+
+
+//    QMainWindow::closeEvent(event);
     exit(0);
 }
 
@@ -367,41 +400,65 @@ void MainWindow::loadUserSetting()
 
 void MainWindow::retranslateUi()
 {
+//    QFont font;
+//    font.setPointSize(20);
+//    QFont font( “Microsoft YaHei”, 10, 75);
     serverMenu->menu()->setTitle(tr("Program(&P)"));
     exitAction->setText(tr("Exit(&X)"));
+//    serverMenu->menu()->setFont(font);
+//    exitAction->setFont(font);
 
     viewMenu->menu()->setTitle(tr("View(&V)"));
     viewManagerMenu->menu()->setTitle(tr("View manager"));
     importViewAction->setText(tr("Import view"));
     exportViewAction->setText(tr("Export view"));
+//    viewMenu->menu()->setFont(font);
+//    viewManagerMenu->menu()->setFont(font);
+//    importViewAction->setFont(font);
+//    exportViewAction->setFont(font);
 
     settingsMenu->menu()->setTitle(tr("Settings(&S)"));
     topHintAction->setText(tr("Top hint"));
     fullScreenAction->setText(tr("Full screen"));
+//    settingsMenu->menu()->setFont(font);
+//    topHintAction->setFont(font);
+//    fullScreenAction->setFont(font);
 
     styleMenu->menu()->setTitle(tr("Styles(&Y)"));
     lanMenu->menu()->setTitle(tr("Language(&L)"));
     shortcutAction->setText(tr("Shortcut settings(&T)"));
+    screenshotAction->setText(tr("Screenshot(&S)"));
+//    styleMenu->menu()->setFont(font);
+//    lanMenu->menu()->setFont(font);
+//    shortcutAction->setFont(font);
+//    screenshotAction->setFont(font);
 
     helpMenu->menu()->setTitle(tr("Help(&H)"));
     supportAction->setText(tr("Technical support(&T)"));
     aboutPorgramAction->setText(tr("About program(&A)"));
+//    helpMenu->menu()->setFont(font);
+//    supportAction->setFont(font);
+//    aboutPorgramAction->setFont(font);
 
     PluginManager::ComponentMap maps = RSingleton<PluginManager>::instance()->plugins();
     PluginManager::ComponentMap::iterator iter = maps.begin();
     while(iter != maps.end()){
         Id id = iter.value()->id();
         Action * act = ActionManager::instance()->action(id);
-        if(act)
+        if(act){
             act->action()->setText(iter.value()->name());
+//            act->action()->setFont(font);
+        }
 
         QStringList slist = id.toString().split(".");
         QString menuId = slist.at(0)+"."+slist.at(1);
         char mid[128] = {0};
         memcpy(mid,menuId.toLocal8Bit().data(),menuId.toLocal8Bit().size());
         Action * module = ActionManager::instance()->action(mid);
-        if(module)
+        if(module){
             module->action()->setText(iter.value()->pluginName());
+//            module->action()->setFont(font);
+        }
         iter++;
     }
 }
@@ -426,14 +483,78 @@ void MainWindow::showShortcutSettings()
     ss.exec();
 }
 
-void MainWindow::importView()
+/*!
+ *@brief 截屏功能
+ */
+void MainWindow::screenshotSettings()
 {
+    QString saveName = QFileDialog::getSaveFileName(this,tr("save screenshot"),QDir::homePath(),QString("*.jpg"));
+    if(!saveName.isEmpty()){
+        cout<<saveName.toStdString()<<endl;
+        QEventLoop eventloop;
+        QTimer::singleShot(50, &eventloop, SLOT(quit()));
+        eventloop.exec();
+
+        QScreen *screen = QGuiApplication::primaryScreen();
+        QString filePathName = saveName;
+//        filePathName += QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss-zzz");
+//        filePathName += ".jpg";
+
+        if(!screen->grabWindow(0).save(filePathName, "jpg"))
+        {
+            QMessageBox::warning(this,QCoreApplication::tr("warning"),tr("save screenshot failed!"));
+        }else{
+            QMessageBox::information(this,tr("information"),tr("save screenshot successfully!"));
+        }
+
+//        RTextFile file(saveName);
+//        TaskParsedMethod * method = new TaskParsedMethod;
+//        method->setTaskInfo(d->taskInfoList);
+//        file.setParseMethod(method);
+//        if(file.startSave(QFile::WriteOnly | QFile::Truncate)){
+//            QMessageBox::information(this,tr("information"),tr("save successfully!"));
+//        }else{
+//            QMessageBox::warning(this,tr("warning"),tr("save failed!"));
+//        }
+    }
 
 }
 
+void MainWindow::importView()
+{
+//    QSettings settings("NanJing RenGu", "ViewFrame");
+////    cout<<"2"<<endl;
+//    restoreGeometry(settings.value("myWidget/geometry").toByteArray());
+//    restoreState(settings.value("myWidget/windowState").toByteArray());
+//    QWidget::updateGeometry();
+//    QMainWindowLayout::setGeometry();
+    QFile file("Layout.ini");
+    if (file.open(QIODevice::ReadOnly))
+    {
+        QByteArray ba;
+        QDataStream in(&file);
+        in >> ba;
+        file.close();
+        this->restoreState(ba);
+    }
+
+
+}
+
+
 void MainWindow::exportView()
 {
-
+//    QSettings settings("NanJing RenGu", "ViewFrame");
+//    cout<<"1"<<endl;
+//    settings.setValue("geometry", saveGeometry());
+//    settings.setValue("windowState", saveState());
+    QFile file("Layout.ini");
+    if(file.open(QIODevice::WriteOnly))
+    {
+        QDataStream out(&file);
+        out << this->saveState();
+        file.close();
+    }
 }
 
 /*!
@@ -452,12 +573,27 @@ void MainWindow::initComponent()
 
     //数据显示模块，每个页面都是dock
     DataView::RadiationSourceTable * radiationTable = new DataView::RadiationSourceTable;
-    DataView::AllPluseTable * allPluseTable = new DataView::AllPluseTable;
+    DataView::AllPluseDock * allPluseTable = new DataView::AllPluseDock;
     DataView::MFAcquistionTable * acquistionTable = new DataView::MFAcquistionTable;
     DataView::RadiaSourceMap * radiaSourceMap = new DataView::RadiaSourceMap;
     DataView::AllPluseGraphics * allPluseGraphics = new DataView::AllPluseGraphics;
     DataView::MFAcquisitionGraphics * mfGraphics = new DataView::MFAcquisitionGraphics;
     DataView::SpectrumGraphics * spectrumGraphics = new DataView::SpectrumGraphics;
+
+    taskControl->setObjectName("taskControl");
+//    taskControl->setStyleSheet("QDockWidget::title{font: 75 21pt;}");
+//            MyDock->setStyleSheet("QDockWidget::title { font: 75 11pt"Ubuntu";}");
+//    label->setStyleSheet("color: orange; font-size: 14pt; font-weight: bold;");
+//    taskControl->setWidget(bodyWidget);
+//    taskControl->setTitleBarWidget(label);
+    healthControl->setObjectName("healthControl");
+    radiationTable->setObjectName("radiationTable");
+    allPluseTable->setObjectName("allPluseTable");
+    acquistionTable->setObjectName("acquistionTable");
+    radiaSourceMap->setObjectName("radiaSourceMap");
+    allPluseGraphics->setObjectName("allPluseGraphics");
+    mfGraphics->setObjectName("mfGraphics");
+    spectrumGraphics->setObjectName("spectrumGraphics");
 
     addDockWidget(Qt::LeftDockWidgetArea,taskControl);
     splitDockWidget(taskControl,healthControl,Qt::Vertical);
@@ -466,9 +602,9 @@ void MainWindow::initComponent()
     tabifyDockWidget(radiationTable,allPluseTable);
     tabifyDockWidget(allPluseTable,acquistionTable);
     tabifyDockWidget(acquistionTable,radiaSourceMap);
-    tabifyDockWidget(radiaSourceMap,allPluseGraphics);
-    tabifyDockWidget(allPluseGraphics,mfGraphics);
-    tabifyDockWidget(mfGraphics,spectrumGraphics);
+//    tabifyDockWidget(radiaSourceMap,allPluseGraphics);
+//    tabifyDockWidget(allPluseGraphics,mfGraphics);
+//    tabifyDockWidget(mfGraphics,spectrumGraphics);
 
     radiationTable->raise();
 
@@ -479,9 +615,9 @@ void MainWindow::initComponent()
     RSingleton<PluginManager>::instance()->addPlugin(allPluseTable);
     RSingleton<PluginManager>::instance()->addPlugin(acquistionTable);
     RSingleton<PluginManager>::instance()->addPlugin(radiaSourceMap);
-    RSingleton<PluginManager>::instance()->addPlugin(allPluseGraphics);
-    RSingleton<PluginManager>::instance()->addPlugin(mfGraphics);
-    RSingleton<PluginManager>::instance()->addPlugin(spectrumGraphics);
+//    RSingleton<PluginManager>::instance()->addPlugin(allPluseGraphics);
+//    RSingleton<PluginManager>::instance()->addPlugin(mfGraphics);
+//    RSingleton<PluginManager>::instance()->addPlugin(spectrumGraphics);
 
     RSingleton<PluginManager>::instance()->load();
     PluginManager::ComponentMap maps = RSingleton<PluginManager>::instance()->plugins();

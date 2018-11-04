@@ -625,9 +625,9 @@ void TableViewModelRadiationSource::updateTableData(const RSDataList &rsList,con
             }
             else
             {
-                if(rsDataList.size()<40)
+                if(rsDataList.size()<INIT_TABLE_RADIASOURCE_ROW)
                 {
-                    tableTotalRows=40;
+                    tableTotalRows=INIT_TABLE_RADIASOURCE_ROW;
                 }
             }
         }
@@ -639,9 +639,9 @@ void TableViewModelRadiationSource::updateTableData(const RSDataList &rsList,con
             }
             else
             {
-                if(rsDataMap.size()<40)
+                if(rsDataMap.size()<INIT_TABLE_RADIASOURCE_ROW)
                 {
-                    tableTotalRows=40;
+                    tableTotalRows=INIT_TABLE_RADIASOURCE_ROW;
                 }
             }
         }

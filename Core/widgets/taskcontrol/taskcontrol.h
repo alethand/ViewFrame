@@ -40,17 +40,18 @@ private slots:
     void mouseHoverItem(QModelIndex index);
     void modifyTask();
     void deleteTask();
-    void copyTable();
+    void copyTask();
     void pasteTask();
 
     void importTask();
     void exportTask();
-    void addNewTask();
     void distributeTask();
     void resetTask();
 
     void updateTaskState();
     void dispatchOver();
+
+    void showTaskWindow();
 
     void tableContextPoint(QPoint point);
 
@@ -60,11 +61,9 @@ private:
 
     void initDispatch();
 
-    template<class T>
-    bool executeCopy(TaskInfo * selectedTask);
-
 private:
     QSharedPointer<TaskControlPrivate> d_ptr;
+
 };
 
 } //namespace TaskControlModel

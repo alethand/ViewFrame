@@ -29,6 +29,7 @@ class MainWindow : public QMainWindow , public Base::Observer
     Q_OBJECT
 
 public:
+    QFont font;
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
@@ -50,6 +51,7 @@ private slots:
     void aboutProgram();
 
     void showShortcutSettings();
+    void screenshotSettings();
 
     void importView();
     void exportView();
@@ -82,6 +84,7 @@ private:
     QAction * topHintAction;
     QAction * fullScreenAction;
     QAction * shortcutAction;
+    QAction * screenshotAction;
     QAction * supportAction;
     QAction * aboutPorgramAction;
 
