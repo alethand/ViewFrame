@@ -94,6 +94,18 @@ private:
     HugeData_Model model_StatisticData;
 
     EnergyBar  *energvGraphics;       /*! 能量图 - 单条统计信息*/
+    QModelIndex filterIndexRT;
+    QModelIndex filterIndexHS;
+    QModelIndex filterIndexStatistic;
+
+public slots:
+    void filterRT(QModelIndex index);
+    void recFilterMessageRT(QList<double> filterMessage);
+    void filterHS(QModelIndex index);
+    void recFilterMessageHS(QList<double> filterMessage);
+    void filterStatistic(QModelIndex index);
+    void recFilterMessageStatistic(QList<double> filterMessage);
+
 };
 
 

@@ -30,6 +30,10 @@ public:
 
 private slots:
      void retranslateUi();
+signals:
+     void sendForHealthPanelResize();
+public slots:
+     void recForHealthPanelResize();
 
 private:
      HealthState_Display *infoWidget;

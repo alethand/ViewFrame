@@ -19,6 +19,7 @@
 #include "modelview/tableviewmoderradiationsource.h"
 #include "radiationsourcetablerenovatedialog.h"
 #include "../Util/dataexportandprint.h"
+#include "filterdockpanel.h"
 
 #include <iostream>
 using namespace std;
@@ -132,6 +133,8 @@ void RadiationSourceTablePrivate::initTableViewMenu()
     dataView->addAction(clearAction);
 //    dataView->resizeColumnsToContents();
     QObject::connect(clearAction, SIGNAL(triggered(bool)), q_ptr, SLOT(clearTable()));
+    //过滤器
+    QObject::connect(dataView, SIGNAL(tableCheckDoubleSignal(QModelIndex)), q_ptr, SLOT(filter(QModelIndex)));
 }
 
 RadiationSourceTable::RadiationSourceTable(QWidget *parent) :
@@ -477,4 +480,34 @@ void RadiationSourceTable::on_btn_load_clicked()
         return;
     DataExportAndPrint::exportToExcel(d->dataView,filepath);
 }
+
+/*!
+ * \brief 过滤页面
+ * \param 页面
+ */
+void RadiationSourceTable::filter(QModelIndex index){
+    filterDockPanel * dock = new filterDockPanel;
+    connect(dock,SIGNAL(sendFilterMessage(QList<double>)),this,SLOT(recFilterMessage(QList<double>)));
+    filterIndex = index;
+    dock->show();
+}
+
+/*!
+ * \brief 过滤功能实现
+ * \param filterMessage存储筛选功能上下界限
+ */
+void RadiationSourceTable::recFilterMessage(QList<double> filterMessage){
+    double filterLower = filterMessage.at(0);
+    double filterUpper = filterMessage.at(1);
+    double theData;
+//    qDebug()<<filterLower<<"and"<<filterUpper<<endl;
+    try{
+        for(int i =0;i<d_ptr->dataViewModel->rowCount();i++){d_ptr->dataView->showRow(i);}
+        for(int i =0;i<d_ptr->dataViewModel->rowCount();i++){
+            theData=(d_ptr->dataViewModel->index(i,filterIndex.column(),QModelIndex())).data().toDouble();
+            if(theData>filterUpper||theData<filterLower){d_ptr->dataView->hideRow(i);}
+        }
+    }catch(const char* msg){qDebug()<<msg<<endl;}
+}
+
 } //namespace DataView

@@ -10,8 +10,10 @@
 
 #include "Base/pluginmanager/rcomponent.h"
 #include "protocol/datastruct.h"
+
 #include "modelview/tableviewdata.h"
 #include "Graphics/waveform.h"
+
 #include <QAction>
 #include <QVBoxLayout>
 #include <QHeaderView>
@@ -54,8 +56,14 @@ private:
 
 private:
     MFAcquistionTablePrivate * d_ptr;
+
     QPushButton * btn_load;
     QWidget *     mainWidget;
+    QModelIndex filterIndex;
+
+public slots:
+    void filter(QModelIndex index);
+    void recFilterMessage(QList<double> filterMessage);
 
 
 };

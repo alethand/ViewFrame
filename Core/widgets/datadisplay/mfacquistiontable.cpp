@@ -1,12 +1,19 @@
 ﻿#include "mfacquistiontable.h"
 
-
+#include <QVBoxLayout>
+#include <QHeaderView>
+#include <QSortFilterProxyModel>
+#include <QFileDialog>
+#include <QDesktopServices>
+#include <QPushButton>
+#include <QDebug>
 
 #include "Base/constants.h"
 #include "Base/util/rsingleton.h"
 #include "modelview/tableviewdata.h"
 #include "modelview/tableviewmodelcustom.h"
 #include "../Util/dataexportandprint.h"
+#include "filterdockpanel.h"
 
 namespace DataView {
 
@@ -46,6 +53,15 @@ void MFAcquistionTablePrivate::initData()
     viewList->setModel(dataViewProxy);
 }
 
+void MFAcquistionTablePrivate::initTableViewMenu()
+{
+    clearAction = new QAction();
+    dataView->addAction(clearAction);
+    QObject::connect(clearAction, SIGNAL(triggered(bool)), q_ptr, SLOT(clearTable()));
+    clearAction->setText(QObject::tr("Clear Table"));
+    //过滤器
+    QObject::connect(dataView, SIGNAL(tableCheckDoubleSignal(QModelIndex)), q_ptr, SLOT(filter(QModelIndex)));
+}
 
 MFAcquistionTable::MFAcquistionTable(QWidget *parent) :
     Base::RComponent(Constant::PLUGIN_MF_ACQUISTION_TABLE,parent),d_ptr(new MFAcquistionTablePrivate(this))
@@ -231,6 +247,35 @@ void MFAcquistionTable::clearTable()
 {
 //    d_ptr->midFreqData.clear();
 //    d_ptr->model_MidFreq->updateMFAcquistionInfoList(d_ptr->midFreqData);
+}
+
+/*!
+ * \brief 过滤页面
+ * \param 页面
+ */
+void MFAcquistionTable::filter(QModelIndex index){
+    filterDockPanel * dock = new filterDockPanel;
+    connect(dock,SIGNAL(sendFilterMessage(QList<double>)),this,SLOT(recFilterMessage(QList<double>)));
+    filterIndex = index;
+    dock->show();
+}
+
+/*!
+ * \brief 过滤功能实现
+ * \param filterMessage存储筛选功能上下界限
+ */
+void MFAcquistionTable::recFilterMessage(QList<double> filterMessage){
+    double filterLower = filterMessage.at(0);
+    double filterUpper = filterMessage.at(1);
+    double theData;
+//    qDebug()<<filterLower<<"and"<<filterUpper<<endl;
+    try{
+        for(int i =0;i<d_ptr->dataViewModel->rowCount();i++){d_ptr->dataView->showRow(i);}
+        for(int i =0;i<d_ptr->dataViewModel->rowCount();i++){
+            theData=(d_ptr->dataViewModel->index(i,filterIndex.column(),QModelIndex())).data().toDouble();
+            if(theData>filterUpper||theData<filterLower){d_ptr->dataView->hideRow(i);}
+        }
+    }catch(const char* msg){qDebug()<<msg<<endl;}
 }
 
 } //namespace DataView

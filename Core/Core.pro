@@ -80,7 +80,8 @@ SOURCES += main.cpp \
     widgets/datadisplay/radiusSource/radiasourcemap.cpp \
     widgets/datadisplay/radiusSource/radiationsourcetable.cpp \
     widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.cpp
-
+    widgets/datadisplay/filterdockpanel.cpp
+    
 HEADERS  += \
     widgets/mainwindow.h \
     protocol/datastruct.h \
@@ -135,6 +136,7 @@ HEADERS  += \
     widgets/datadisplay/radiusSource/radiasourcemap.h \
     widgets/datadisplay/radiusSource/radiationsourcetable.h \
     widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.h
+    widgets/datadisplay/filterdockpanel.h
 
 FORMS    += mainwindow.ui \
     widgets/taskcontrol/gathercontroldialog.ui \
@@ -142,6 +144,12 @@ FORMS    += mainwindow.ui \
     widgets/datadisplay/radiusSource/radiasourcemap.ui \
     widgets/datadisplay/radiusSource/radiationsourcetable.ui \
     widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.ui
+    widgets/datadisplay/radiasourcemap.ui \
+    widgets/datadisplay/radiationsourcetable.ui \
+    widgets/datadisplay/radiationsourcetablerenovate.ui \
+    widgets/datadisplay/radiationsourcetablerenovatedialog.ui \
+    widgets/datadisplay/spectrumgraphics.ui \
+    widgets/datadisplay/filterdockpanel.ui
 
 win32-msvc2013{
     LIBS+= ../Lib/Base.lib

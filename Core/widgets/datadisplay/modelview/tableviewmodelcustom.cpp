@@ -42,6 +42,7 @@
 //    if (!index.isValid())
 //        return QVariant();
 
+
 //    int row = index.row();
 //    int col=index.column();
 //    switch(role)
@@ -61,6 +62,81 @@
 //            bool blRowEff=false;                    //该行有效标识
 //            MidFreqInfo::Core mfInfo;               //中频信息
 //            if(mfAcquistionInfoList.size()>row)
+
+    int row = index.row();
+    int col=index.column();
+    switch(role)
+    {
+    case Qt::TextAlignmentRole:
+        return int(Qt::AlignHCenter | Qt::AlignVCenter);
+        break;
+    case Qt::DisplayRole:
+    {
+        if(col==0)
+        {
+            return row+1;       /*！数据的序号修改为数字形式*/
+            break;
+        }
+        if(tableCustomKind==MF_ACQUISITION_INFO)    //中频数据模式
+        {
+            bool blRowEff=false;                    //该行有效标识
+            MidFreqInfo mfInfo;               //中频信息
+            if(mfAcquistionInfoList.size()>row)
+            {
+                blRowEff=true;
+                mfInfo=mfAcquistionInfoList.at(row);
+            }
+            if(blRowEff)
+            {
+                switch (static_cast<MidFreqInfo::MFAcquisitionHead>(col)) {
+                case MidFreqInfo::T_AcqTime:                 /*!< 采集时间*/
+                {
+                    return mfInfo.strAcqTime;
+                    break;
+                }
+                case MidFreqInfo::T_AcqModel:                 /*!< 采集模式 0xCF01:VP触发采,0xCF02:盲采,0xCF00:中频数据不采集*/
+                {
+                    QString strValue;
+                    if(mfInfo.sAcqModel==0xCF01)
+                    {
+                       strValue=QStringLiteral("VP触发采");
+                    }
+                    else if(mfInfo.sAcqModel==0xCF02)
+                    {
+                        strValue=QStringLiteral("盲采");
+                    }
+                    else if(mfInfo.sAcqModel==0xCF00)
+                    {
+                        strValue=QStringLiteral("中频数据不采集");
+                    }
+                    else
+                    {
+                        return mfInfo.sAcqModel;
+                    }
+                    return strValue;
+                    break;
+                }
+                case MidFreqInfo::T_AcqNum:                  /*!< 脉冲采集个数*/
+                {
+                    return mfInfo.iAcqNum;
+                    break;
+                }
+                case MidFreqInfo::T_AcqDotNum:                 /*!< 采集点数*/
+                {
+                    return mfInfo.iAcqDotNum;
+                    break;
+                }
+                default:
+                    break;
+                }
+            }
+        }
+        else if(tableCustomKind==STATISTICAL_INFO)  //统计信息模式
+        {
+            bool blRowEff=false;                    //该行有效标识
+//            AllPluseStatisticInfo statisticInfo;    //统计信息
+//            if(allPluseStatisticInfoList.size()>row)
+
 //            {
 //                blRowEff=true;
 //                mfInfo=mfAcquistionInfoList.at(row);

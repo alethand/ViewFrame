@@ -52,6 +52,12 @@ signals:
     void sendRSDataList(RSDataList* rsList);
 private:
     RadiationSourceTablePrivate * d_ptr;
+    QModelIndex filterIndex;
+
+public slots:
+    void filter(QModelIndex index);
+    void recFilterMessage(QList<double> filterMessage);
+
 };
 
 } //namespace DataView
