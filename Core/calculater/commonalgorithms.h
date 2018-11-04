@@ -1,4 +1,4 @@
-#ifndef COMMONALGORITHMS_H
+﻿#ifndef COMMONALGORITHMS_H
 #define COMMONALGORITHMS_H
 #include <QThread>
 

@@ -87,6 +87,7 @@ void AllPluseGraphicsPrivate::initView()
 }
 
 AllPluseGraphics::AllPluseGraphics(QWidget *parent) :timeScatter(QStringLiteral("时间特性图")),freqHistogram(QStringLiteral("频度直方图")),
+    timeAreaWaveForm(QStringLiteral("时域波形图")),
     Base::RComponent(Constant::PLUGIN_ALL_PLUS_GRAPHICS,parent),d_ptr(new AllPluseGraphicsPrivate(this))
 {
     RSingleton<Base::Subject>::instance()->attach(this);
@@ -105,6 +106,28 @@ AllPluseGraphics::AllPluseGraphics(QWidget *parent) :timeScatter(QStringLiteral(
 //    freqHistogram.addData(0,1);
 //     freqHistogram.addData(1,2);
 //      freqHistogram.show();
+
+    //HugeData_Model model =new HugeData_Model(new HugeData_Gram());
+
+
+//    QList<QDateTime> times;
+//    times.append(QDateTime(QDate(2008,1,1)));
+//    times.append(QDateTime(QDate(2009,1,1)));
+////    timeAreaWaveForm.addAxis(AxisType::xAxis,DataType::DateTime,Qt::AlignBottom,QStringLiteral("时间"));
+////    timeAreaWaveForm.setRange(AxisType::xAxis,times.at(0),times.at(1),"M/dd");
+////    timeAreaWaveForm.setTickCount(AxisType::xAxis,10);
+
+//    timeAreaWaveForm.addAxis(AxisType::xAxis,DataType::value,Qt::AlignBottom,QStringLiteral("时间"));
+//    timeAreaWaveForm.setRange(AxisType::xAxis,0,1500);
+//     timeAreaWaveForm.setTickCount(AxisType::xAxis,20);
+
+//    timeAreaWaveForm.addAxis(AxisType::yAxis,DataType::value,Qt::AlignLeft,QStringLiteral("幅度"));
+//    timeAreaWaveForm.setRange(AxisType::yAxis,0,500);
+//    //timeAreaWaveForm.useDataSrc(NULL);
+//   // timeAreaWaveForm.setTimeLables(times);
+
+//   // timeAreaWaveForm.setYRange(0,100);
+//    timeAreaWaveForm.show();
 
 }
 
@@ -146,7 +169,6 @@ void AllPluseGraphics::onMessage(MessageType::MessType type)
  */
 void AllPluseGraphicsPrivate::initTimeParaGraphis()
 {
-    int maxSize=50;
 
     QChart* m_chart;
     m_chart=new QChart();
@@ -324,69 +346,6 @@ void AllPluseGraphics::retranslateUi()
 //    drawBarGraphis();
 //}
 
-/*!
- * \brief 绘制时间特性图
- */
-void AllPluseGraphics::drawTimeParaGraphis()
-{
-    //获取最大值、最小值
-    double max=10;
-    double min=0;
-    AllPluseStatisticInfoBase statistcInfo; //统计信息
-    //AllPluseOriginalInfoAttributeBase originalInfo; //原始信息
-    QDateTime minTime;
-    QDateTime maxTime;
-    double value;
-//    for(int i=0;i<allPluseStatisticInfoList.size();i++)
-//    {
-//        statistcInfo=allPluseStatisticInfoList.at(i).allPluseStatisticInfoBase;
-//        if(0==i)
-//        {
-//            max=statistcInfo.dMax;
-//            min=statistcInfo.dMin;
-//        }
-
-//        if(statistcInfo.dMax>max)
-//        {
-//            max=statistcInfo.dMax;
-//        }
-
-//        if(statistcInfo.dMin>min)
-//        {
-//            min=statistcInfo.dMin;
-//        }
-//    }
-    d_ptr->axisY_Time->setRange(int(min-1),int(max+1));
-
-    int orgSize=allPluseOriginalInfoList.size();
-    if(orgSize>0)
-    {
-        minTime=allPluseOriginalInfoList.at(0).dtPulseArriveColck;
-        maxTime=allPluseOriginalInfoList.at(orgSize-1).dtPulseArriveColck;
-    }
-    else
-    {
-        return ;
-    }
-
-    d_ptr->m_series_Time->clear();
-
-    d_ptr->axisX_Time->setMin(minTime);
-    d_ptr->axisX_Time->setMax(maxTime);
-    //d_ptr->axisX_Time->setMin(minTime);
-
-    //d_ptr->m_series_Time->detachAxis(d_ptr->axisX_Time);
-    //d_ptr->m_series_Time->attachAxis(d_ptr->axisX_Time);
-
-
-    for(int i=0;i<orgSize;i++)
-    {
-        value=allPluseOriginalInfoList.at(i).allPluseOriginalInfoBase.dValue;
-        double time=allPluseOriginalInfoList.at(i).dtPulseArriveColck.toMSecsSinceEpoch();
-        //time=allPluseOriginalInfoList.at(i).dtPulseArriveColck.msecsTo(minTime);
-        d_ptr->m_series_Time->append(time,value);
-    }
-}
 
 /*!
  * \brief 绘制频度直方图

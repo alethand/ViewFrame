@@ -22,13 +22,12 @@
 #include "Base/util/fileutils.h"
 #include "healthmanage/healthinfopannel.h"
 
-#include "datadisplay/radiationsourcetable.h"
+#include "widgets/datadisplay/radiusSource/radiationsourcetable.h"
 #include "datadisplay/allplusetable.h"
 #include "datadisplay/mfacquistiontable.h"
-#include "datadisplay/radiasourcemap.h"
+#include "widgets/datadisplay/radiusSource/radiasourcemap.h"
 #include "datadisplay/allplusegraphics.h"
 #include "datadisplay/mfacquisitiongraphics.h"
-#include "datadisplay/spectrumgraphics.h"
 
 #include "global.h"
 #include "file/globalconfigfile.h"
@@ -577,7 +576,7 @@ void MainWindow::initComponent()
     DataView::RadiaSourceMap * radiaSourceMap = new DataView::RadiaSourceMap;
     DataView::AllPluseGraphics * allPluseGraphics = new DataView::AllPluseGraphics;
     DataView::MFAcquisitionGraphics * mfGraphics = new DataView::MFAcquisitionGraphics;
-    DataView::SpectrumGraphics * spectrumGraphics = new DataView::SpectrumGraphics;
+   // DataView::SpectrumGraphics * spectrumGraphics = new DataView::SpectrumGraphics;
 
     taskControl->setObjectName("taskControl");
 //    taskControl->setStyleSheet("QDockWidget::title{font: 75 21pt;}");
@@ -592,7 +591,7 @@ void MainWindow::initComponent()
     radiaSourceMap->setObjectName("radiaSourceMap");
     allPluseGraphics->setObjectName("allPluseGraphics");
     mfGraphics->setObjectName("mfGraphics");
-    spectrumGraphics->setObjectName("spectrumGraphics");
+   // spectrumGraphics->setObjectName("spectrumGraphics");
 
     addDockWidget(Qt::LeftDockWidgetArea,taskControl);
     splitDockWidget(taskControl,healthControl,Qt::Vertical);
@@ -603,7 +602,7 @@ void MainWindow::initComponent()
     tabifyDockWidget(acquistionTable,radiaSourceMap);
     tabifyDockWidget(radiaSourceMap,allPluseGraphics);
     tabifyDockWidget(allPluseGraphics,mfGraphics);
-    tabifyDockWidget(mfGraphics,spectrumGraphics);
+   // tabifyDockWidget(mfGraphics,spectrumGraphics);
 
     radiationTable->raise();
 
@@ -616,7 +615,7 @@ void MainWindow::initComponent()
     RSingleton<PluginManager>::instance()->addPlugin(radiaSourceMap);
     RSingleton<PluginManager>::instance()->addPlugin(allPluseGraphics);
     RSingleton<PluginManager>::instance()->addPlugin(mfGraphics);
-    RSingleton<PluginManager>::instance()->addPlugin(spectrumGraphics);
+  //  RSingleton<PluginManager>::instance()->addPlugin(spectrumGraphics);
 
     RSingleton<PluginManager>::instance()->load();
     PluginManager::ComponentMap maps = RSingleton<PluginManager>::instance()->plugins();

@@ -1,4 +1,4 @@
-#include "dataexportandprint.h"
+﻿#include "dataexportandprint.h"
 #include <QFileDialog>
 #include <QTextEdit>
 #include <QTextStream>

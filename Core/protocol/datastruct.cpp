@@ -10,16 +10,21 @@ namespace Protocol
          {
              mdata = data;
              rowsLatestMsg = -1;
+             specifedCol = -1;
          }
 
          int HugeData_Model::rowCount(const QModelIndex &parent) const
          {
-             return 50;// mdata->getRowCount();
+             Q_UNUSED(parent)
+             return 50;//mdata->getRowCount();
          }
 
          int HugeData_Model::columnCount(const QModelIndex &parent) const
          {
-             return mdata->getColCount();
+              Q_UNUSED(parent)
+             if(specifedCol == -1)
+                return mdata->getColCount();
+             return 1;
          }
 
          QVariant HugeData_Model::data(const QModelIndex &index, int role) const
@@ -27,7 +32,7 @@ namespace Protocol
              if (!index.isValid())
                  return QVariant();
 
-             int row = index.row();
+             int row = index.row()+1;
              int col=index.column();
              switch(role)
              {
@@ -37,17 +42,17 @@ namespace Protocol
              case Qt::DisplayRole:
                  if(rowsLatestMsg == -1) //未设置仅显示最新消息
                  {
-                    if(row+1 < mdata->getRowCount() && col < mdata->getColCount())
+                    if(row < mdata->getRowCount() && col < mdata->getColCount())
                     {
-                        if(specifedCol.find(col) != specifedCol.end())
+                        if(specifedCol == -1 ||specifedCol == col)
                               return mdata->getData(row,col);
                     }
                  }
                  else
                      if(row < rowsLatestMsg &&
-                             row+1 < mdata->getRowCount() &&col < mdata->getColCount() )
+                             row < mdata->getRowCount() &&col < mdata->getColCount() )
                      {
-                         if(specifedCol.find(col) != specifedCol.end())
+                         if(specifedCol == -1 ||specifedCol == col)
                             return  mdata->getData(mdata->getRowCount() - row,col);
                      }
 
@@ -64,9 +69,13 @@ namespace Protocol
 
              if(!mdata->coreData.isEmpty())
              {
-                 if (Qt::Horizontal == orientation && section < mdata->coreData.first()->getCount()){
-                     return mdata->getHeadName(section);
+                 if(specifedCol == -1) {
+                     if (Qt::Horizontal == orientation && section < mdata->coreData.first()->getCount()){
+                         return mdata->getHeadName(section);
+                     }
                  }
+                 else
+                      return mdata->getHeadName(section);
              }
              else
                  qDebug()<<"Error-HugeData_Model::when you pass by 'HugeData_Gram' into the class,/n"
@@ -134,7 +143,8 @@ namespace Protocol
 QVariant Datastruct::AllPluseInfo::OriginData::Core::getData(int index)
 {
     if(index < valuelist.count())
-    return valuelist.at(index);
+        return valuelist.at(index);
+    return QVariant();
 }
 
 QVariant Datastruct::AllPluseInfo::Statistic::Core::getData(int index)
@@ -145,5 +155,22 @@ QVariant Datastruct::AllPluseInfo::Statistic::Core::getData(int index)
     case 1:return minVal;
     case 2:return meanVal;
     case 3:return variance;
+    default:return QVariant();
+    }
+}
+
+QVariant Datastruct::MidFreqInfo::Core::getData(int index)
+{
+    switch((MidFreqInfo::MFAcquisitionHead)index) {
+    case T_AcqTime:  return acqTime;
+    case T_AcqModel: return acqMode;
+    case T_AcqNum:   return listInfo.count();
+    case T_AcqDotNum:
+        {   int sum = 0;
+            for(int i=0; i < listInfo.count(); i++)
+                sum += listInfo.at(i).adData.count();
+            return sum;
+        }
+    default:return QVariant();
     }
 }

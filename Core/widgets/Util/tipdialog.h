@@ -1,4 +1,4 @@
-#ifndef TIPDIALOG_H
+﻿#ifndef TIPDIALOG_H
 #define TIPDIALOG_H
 
 #include <QObject>
