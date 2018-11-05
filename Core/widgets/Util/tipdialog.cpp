@@ -35,4 +35,5 @@ int TipDialog::TipMessageBox(QString str,int type)
         else
             return 0;
     }
+    return 0;
 }

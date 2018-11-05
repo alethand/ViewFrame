@@ -1,6 +1,6 @@
-/*!
- *  @details   Êı¾İÏÔÊ¾Ä£¿é½Ó¿Ú
- *  @author    ×¯À×
+ï»¿/*!
+ *  @details   æ•°æ®æ˜¾ç¤ºæ¨¡å—æ¥å£
+ *  @author    åº„é›·
  *  @version   1.0
  *  @date      2018.09.10
  *  @copyright NanJing RenGu.

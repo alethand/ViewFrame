@@ -22,13 +22,12 @@
 #include "Base/util/fileutils.h"
 #include "healthmanage/healthinfopannel.h"
 
-#include "datadisplay/radiationsourcetable.h"
+#include "widgets/datadisplay/radiusSource/radiationsourcetable.h"
 #include "datadisplay/allplusetable.h"
 #include "datadisplay/mfacquistiontable.h"
-#include "datadisplay/radiasourcemap.h"
+#include "widgets/datadisplay/radiusSource/radiasourcemap.h"
 #include "datadisplay/allplusegraphics.h"
 #include "datadisplay/mfacquisitiongraphics.h"
-#include "datadisplay/spectrumgraphics.h"
 
 #include "global.h"
 #include "file/globalconfigfile.h"
@@ -253,16 +252,22 @@ void MainWindow::initMenu()
 }
 
 /*!
+ * \brief 关闭窗口事件
+ * \param event
+ */
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    exportView();
+    event->accept();
+    exit(0);
+}
+
+/*!
  * @brief   程序退出
  */
 void MainWindow::programExit()
 {
-
-//    settings.setValue("任务控制", saveState());
-
-
-//    QMainWindow::closeEvent(event);
-    exit(0);
+    emit close();
 }
 
 /*!
@@ -522,12 +527,6 @@ void MainWindow::screenshotSettings()
 
 void MainWindow::importView()
 {
-//    QSettings settings("NanJing RenGu", "ViewFrame");
-////    cout<<"2"<<endl;
-//    restoreGeometry(settings.value("myWidget/geometry").toByteArray());
-//    restoreState(settings.value("myWidget/windowState").toByteArray());
-//    QWidget::updateGeometry();
-//    QMainWindowLayout::setGeometry();
     QFile file("Layout.ini");
     if (file.open(QIODevice::ReadOnly))
     {
@@ -537,17 +536,12 @@ void MainWindow::importView()
         file.close();
         this->restoreState(ba);
     }
-
-
+    emit sendForHealthPanelResize();
 }
 
 
 void MainWindow::exportView()
 {
-//    QSettings settings("NanJing RenGu", "ViewFrame");
-//    cout<<"1"<<endl;
-//    settings.setValue("geometry", saveGeometry());
-//    settings.setValue("windowState", saveState());
     QFile file("Layout.ini");
     if(file.open(QIODevice::WriteOnly))
     {
@@ -578,7 +572,7 @@ void MainWindow::initComponent()
     DataView::RadiaSourceMap * radiaSourceMap = new DataView::RadiaSourceMap;
     DataView::AllPluseGraphics * allPluseGraphics = new DataView::AllPluseGraphics;
     DataView::MFAcquisitionGraphics * mfGraphics = new DataView::MFAcquisitionGraphics;
-    DataView::SpectrumGraphics * spectrumGraphics = new DataView::SpectrumGraphics;
+   // DataView::SpectrumGraphics * spectrumGraphics = new DataView::SpectrumGraphics;
 
     taskControl->setObjectName("taskControl");
 //    taskControl->setStyleSheet("QDockWidget::title{font: 75 21pt;}");
@@ -593,7 +587,7 @@ void MainWindow::initComponent()
     radiaSourceMap->setObjectName("radiaSourceMap");
     allPluseGraphics->setObjectName("allPluseGraphics");
     mfGraphics->setObjectName("mfGraphics");
-    spectrumGraphics->setObjectName("spectrumGraphics");
+   // spectrumGraphics->setObjectName("spectrumGraphics");
 
     addDockWidget(Qt::LeftDockWidgetArea,taskControl);
     splitDockWidget(taskControl,healthControl,Qt::Vertical);
@@ -615,9 +609,11 @@ void MainWindow::initComponent()
     RSingleton<PluginManager>::instance()->addPlugin(allPluseTable);
     RSingleton<PluginManager>::instance()->addPlugin(acquistionTable);
     RSingleton<PluginManager>::instance()->addPlugin(radiaSourceMap);
+
 //    RSingleton<PluginManager>::instance()->addPlugin(allPluseGraphics);
 //    RSingleton<PluginManager>::instance()->addPlugin(mfGraphics);
 //    RSingleton<PluginManager>::instance()->addPlugin(spectrumGraphics);
+
 
     RSingleton<PluginManager>::instance()->load();
     PluginManager::ComponentMap maps = RSingleton<PluginManager>::instance()->plugins();
@@ -656,4 +652,13 @@ void MainWindow::initComponent()
 
         iter++;
     }
+    connect(this,SIGNAL(sendForHealthPanelResize()),healthControl,SLOT(recForHealthPanelResize()));
+}
+
+/*!
+ * \brief 布局导入
+ */
+
+void MainWindow::displayResize(){
+    importView();
 }

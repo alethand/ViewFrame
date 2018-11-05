@@ -181,14 +181,29 @@ void LayoutAndDisplay::generateWSLayout(unsigned int start)
 //    cout<<"thetest"<<endl;
     wkRowCount = mWorkStateWidget->height()/(mItemsHeight+minRowInterval);
     wkColcount = mWorkStateWidget->width()/(wkItemWidth+minColumnInterval);
-    //1
-    standItemModel->setColumnCount(wkColcount);
+
+    int realUseColCount = 2*wkColcount;
+    QStringList headInfo;
+
+    standItemModel->setColumnCount(realUseColCount);
     standItemModel->setRowCount(wkRowCount);
 
-    tableView->horizontalHeader()->setDefaultSectionSize(1.1*(wkItemWidth+minColumnInterval));
+    for(int i = 0;i< realUseColCount;i++){
+        if(i%2==0) {
+            tableView->setColumnWidth(i,mWorkStateWidget->width()/wkColcount*5/12);
+            headInfo<<QStringLiteral("部件名");
+        }
+        else {
+            tableView->setColumnWidth(i,mWorkStateWidget->width()/wkColcount*7/12);
+            headInfo<<QStringLiteral("工作状态");
+        }
+    }
+    standItemModel->setHorizontalHeaderLabels(headInfo);
+
+//    tableView->horizontalHeader()->setDefaultSectionSize(1.1*(wkItemWidth+minColumnInterval));
     tableView->verticalHeader()->setDefaultSectionSize(0.9*(mItemsHeight+minRowInterval));
 
-    tableView->horizontalHeader()->hide();
+//    tableView->horizontalHeader()->hide();
     tableView->verticalHeader()->hide();
 
     tableView->setAlternatingRowColors(true);//设置变色
@@ -209,9 +224,14 @@ void LayoutAndDisplay::generateWSLayout(unsigned int start)
                 //update
                 QList<QLabel*>tplabelFindOut = mWKObjPair.at(i*wkColcount+j)->findChildren<QLabel*>();
                 QList<QLineEdit*>tplineEditFindOut = mWKObjPair.at(i*wkColcount+j)->findChildren<QLineEdit*>();
-                QStandardItem *standItem1 = new QStandardItem(tplabelFindOut.at(0)->text()+"   "+ tplineEditFindOut.at(0)->text());
-//                QStandardItem *standItem1 = new QStandardItem(dataList[i*wkColcount+j]+"   "+ tplineEditFindOut.at(0)->text());
-                standItemModel->setItem(i,j,standItem1);
+
+                QStandardItem *standItem1 = new QStandardItem(tplabelFindOut.at(0)->text());
+                QStandardItem *standItem2 = new QStandardItem(tplineEditFindOut.at(0)->text());
+                standItemModel->setItem(i,2*j,standItem1);
+                standItemModel->item(i,2*j)->setTextAlignment(Qt::AlignCenter);
+                standItemModel->setItem(i,2*j+1,standItem2);
+                standItemModel->item(i,2*j+1)->setTextAlignment(Qt::AlignCenter);
+
                 //update
 //                layout->addWidget(mWKObjPair.at(i*wkColcount+j),i,j,1,1);
                 mWKObjPair.at(i*wkColcount+j)->setVisible(false);
@@ -346,33 +366,34 @@ void LayoutAndDisplay:: ensureLayoutData(const HealthData &data)
 
 void LayoutAndDisplay::upDateSwitchPageInfo(int index)
 {
-//    cout<<"try"<<index<<";"<<wkRowCount<<";"<<wkColcount<<endl;
     int thisTime;
     int wkPerPageItemsNum = wkRowCount*wkColcount;
-
-//    int theindex = 0;
-//    cout<<"-----------------"<<endl;
 
     for(int i=0;i < wkRowCount;i++)
     {
         for(int j =0;j<wkColcount;j++)
         {
-//            theindex = (start -1)* wkPerPageItemsNum+ i*wkColcount+j;
             if((i*wkColcount+j+(index-1)*wkPerPageItemsNum) < mWKObjPair.size())
             {
-//                cout<<i<<";"<<j<<endl;
                 //update
                 QList<QLabel*>tplabelFindOut = mWKObjPair.at(i*wkColcount+j+(index-1)*wkPerPageItemsNum)->findChildren<QLabel*>();
                 QList<QLineEdit*>tplineEditFindOut = mWKObjPair.at(i*wkColcount+j+(index-1)*wkPerPageItemsNum)->findChildren<QLineEdit*>();
-                QStandardItem *standItem1 = new QStandardItem(tplabelFindOut.at(0)->text()+"   "+ tplineEditFindOut.at(0)->text());
-//                QStandardItem *standItem1 = new QStandardItem(dataList[i*wkColcount+j]+"   "+ tplineEditFindOut.at(0)->text());
-                standItemModel->setItem(i,j,standItem1);
+
+                QStandardItem *standItem1 = new QStandardItem(tplabelFindOut.at(0)->text());
+                QStandardItem *standItem2 = new QStandardItem(tplineEditFindOut.at(0)->text());
+                standItemModel->setItem(i,2*j,standItem1);
+                standItemModel->item(i,2*j)->setTextAlignment(Qt::AlignCenter);
+                standItemModel->setItem(i,2*j+1,standItem2);
+                standItemModel->item(i,2*j+1)->setTextAlignment(Qt::AlignCenter);
+
                 //update
             }
             else{
-//                cout<<i<<";"<<j<<endl;
                 QStandardItem *standItem1 = new QStandardItem("   ");
-                standItemModel->setItem(i,j,standItem1);
+                standItemModel->setItem(i,2*j,standItem1);
+                standItemModel->item(i,2*j)->setTextAlignment(Qt::AlignCenter);
+                standItemModel->setItem(i,2*j+1,standItem1);
+                standItemModel->item(i,2*j+1)->setTextAlignment(Qt::AlignCenter);
             }
         }
     }

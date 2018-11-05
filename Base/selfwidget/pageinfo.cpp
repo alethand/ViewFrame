@@ -200,7 +200,6 @@ uint SwitchPage::getLastPage()
 
 void SwitchPage::onMessage(MessageType::MessType type)
 {
-    Q_D(SwitchPage);
     switch(type){
         case MessageType::MESS_LAN_CHANGED:
             retranslateUi();

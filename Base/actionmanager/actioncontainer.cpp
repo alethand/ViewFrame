@@ -92,7 +92,7 @@ void ActionContainerProxy::addAction(Command *command, Id groupId)
     if(groupIt == m_groups.constEnd())
         return;
 
-    QAction *beforeAction = insertLocation(groupIt);
+    insertLocation(groupIt);
     m_groups[groupIt - m_groups.constBegin()].items.append(command);
 
     insertAction(0, command->action());
@@ -111,7 +111,7 @@ void ActionContainerProxy::addMenu(ActionContainer *menu, Id groupId)
     insertMenu(beforeAction, container->menu());
 }
 
-void ActionContainerProxy::addMenu(ActionContainer *before, ActionContainer *menu, Id group)
+void ActionContainerProxy::addMenu(ActionContainer * /*before*/, ActionContainer * /*menu*/, Id /*group*/)
 {
 
 }

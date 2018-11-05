@@ -15,11 +15,10 @@
 //#include "table.h"
 #include "Base/constants.h"
 #include "Base/util/rsingleton.h"
-#include "modelview/tableviewdata.h"
-#include "modelview/tableviewmoderradiationsource.h"
+#include "widgets/datadisplay/modelview/tableviewdata.h"
+#include "widgets/datadisplay/modelview/tableviewmoderradiationsource.h"
 #include "radiationsourcetablerenovatedialog.h"
-#include "../Util/dataexportandprint.h"
-#include "filterdockpanel.h"
+#include "widgets/Util/dataexportandprint.h"
 
 #include <iostream>
 using namespace std;
@@ -133,8 +132,6 @@ void RadiationSourceTablePrivate::initTableViewMenu()
     dataView->addAction(clearAction);
 //    dataView->resizeColumnsToContents();
     QObject::connect(clearAction, SIGNAL(triggered(bool)), q_ptr, SLOT(clearTable()));
-    //过滤器
-    QObject::connect(dataView, SIGNAL(tableCheckDoubleSignal(QModelIndex)), q_ptr, SLOT(filter(QModelIndex)));
 }
 
 RadiationSourceTable::RadiationSourceTable(QWidget *parent) :
@@ -284,13 +281,13 @@ void RadiationSourceTable::recvRSPara(char *buff, int len)
     }
 
     int rsNum;
-    RadiationSourceBase rsData;
+    RadiationSource::RadiationSourceBase rsData;
     RadiationSourceRenovate rsReData;
     memcpy(&rsNum,buff+RADIASOURCE_START_POINT-4,4);
     for(int i=0;i<rsNum;i++)
     {
         bool blExist=false;
-        memcpy(&rsData,buff+RADIASOURCE_START_POINT,sizeof(RadiationSourceBase));
+        memcpy(&rsData,buff+RADIASOURCE_START_POINT,sizeof(RadiationSource::RadiationSourceBase));
         if(d->enRSReKind==COVER_RENOVATE) //覆盖刷新模式
         {
             int num=rsData.usSourceNo; //数据源批号
@@ -337,7 +334,7 @@ void RadiationSourceTable::recvRSPara(char *buff, int len)
  * @brief 显示辐射源信息
  * @param[in] rsData 辐射源信息
  */
-void RadiationSourceTable::showTSPara(const RadiationSourceBase& rsData)
+void RadiationSourceTable::showTSPara(const RadiationSource::RadiationSourceBase& rsData)
 {
     Q_D(RadiationSourceTable);
 
@@ -480,34 +477,4 @@ void RadiationSourceTable::on_btn_load_clicked()
         return;
     DataExportAndPrint::exportToExcel(d->dataView,filepath);
 }
-
-///*!
-// * \brief 过滤页面
-// * \param 页面
-// */
-//void RadiationSourceTable::filter(QModelIndex index){
-//    filterDockPanel * dock = new filterDockPanel;
-//    connect(dock,SIGNAL(sendFilterMessage(QList<double>)),this,SLOT(recFilterMessage(QList<double>)));
-//    filterIndex = index;
-//    dock->show();
-//}
-
-///*!
-// * \brief 过滤功能实现
-// * \param filterMessage存储筛选功能上下界限
-// */
-//void RadiationSourceTable::recFilterMessage(QList<double> filterMessage){
-//    double filterLower = filterMessage.at(0);
-//    double filterUpper = filterMessage.at(1);
-//    double theData;
-////    qDebug()<<filterLower<<"and"<<filterUpper<<endl;
-//    try{
-//        for(int i =0;i<d_ptr->dataViewModel->rowCount();i++){d_ptr->dataView->showRow(i);}
-//        for(int i =0;i<d_ptr->dataViewModel->rowCount();i++){
-//            theData=(d_ptr->dataViewModel->index(i,filterIndex.column(),QModelIndex())).data().toDouble();
-//            if(theData>filterUpper||theData<filterLower){d_ptr->dataView->hideRow(i);}
-//        }
-//    }catch(const char* msg){qDebug()<<msg<<endl;}
-//}
-
 } //namespace DataView

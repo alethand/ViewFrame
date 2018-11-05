@@ -48,6 +48,9 @@ bool HealthInfoDockPanel::initialize()
     }
 
     infoWidget->handleNetData(netdata);//注意这里调用的是测试接口
+
+    connect(this,SIGNAL(sendForHealthPanelResize()),infoWidget,SLOT(recForHealthPanelResize()));
+
     return true;
 }
 
@@ -84,4 +87,11 @@ void HealthInfoDockPanel::retranslateUi()
 //    cout<<"3"<<endl;
     m_name = tr("HealthInfo panel");
     setWindowTitle(m_name);
+}
+
+/**
+ * @brief 健康管理界面布局重置
+ */
+void HealthInfoDockPanel::recForHealthPanelResize(){
+    emit sendForHealthPanelResize();
 }

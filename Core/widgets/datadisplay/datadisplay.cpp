@@ -1,4 +1,4 @@
-#include <QAction>
+ï»¿#include <QAction>
 
 #include "datadisplay.h"
 
@@ -36,12 +36,12 @@ private:
 void DataDisplayPrivate::initView()
 {
 
-//    spectrumGraphics=new SpectrumGraphics(q_ptr);  //ÆµÆ×Êı¾İÍ¼ĞÎ
+//    spectrumGraphics=new SpectrumGraphics(q_ptr);  //é¢‘è°±æ•°æ®å›¾å½¢
 //    spectrumGraphics->hide();
 }
 
 /*!
- * @brief ³õÊ¼»¯°´Å¥
+ * @brief åˆå§‹åŒ–æŒ‰é’®
  */
 void DataDisplayPrivate::initAction()
 {
@@ -119,8 +119,8 @@ void DataDisplay::onMessage(MessageType::MessType type)
 }
 
 /*!
- * @brief ÇĞ»»ÏÔÊ¾dock
- * @param[in] flag ÏÔÊ¾»òÒş²ØÖ¸¶¨dock
+ * @brief åˆ‡æ¢æ˜¾ç¤ºdock
+ * @param[in] flag æ˜¾ç¤ºæˆ–éšè—æŒ‡å®šdock
  */
 void DataDisplay::switchDockVisible(bool flag)
 {

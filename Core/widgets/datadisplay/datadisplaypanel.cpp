@@ -1,4 +1,4 @@
-#include "datadisplaypanel.h"
+﻿#include "datadisplaypanel.h"
 
 #include "Base/constants.h"
 #include "Base/util/rsingleton.h"

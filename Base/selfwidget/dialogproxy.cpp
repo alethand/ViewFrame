@@ -145,7 +145,7 @@ void DialogProxy::setContentWidget(QWidget *widget)
  * @details 子类应覆写此类，用于响应点击操作
  * @param[in]  butt 发生点击按钮的类型
  */
-void DialogProxy::respButtClicked(DialogProxy::StandardButton butt)
+void DialogProxy::respButtClicked(DialogProxy::StandardButton /*butt*/)
 {
 
 }

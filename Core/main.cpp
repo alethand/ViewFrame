@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
 
     MainWindow w;
     w.show();
+    w.displayResize();          /*！健康管理界面布局重置*/
     splash.finish(&w);
 
     return a.exec();

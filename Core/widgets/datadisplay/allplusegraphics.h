@@ -11,6 +11,8 @@
 #include "protocol/datastruct.h"
 #include "Base/pluginmanager/rcomponent.h"
 #include "widgets/datadisplay/Graphics/scatterdiagram.h"
+#include "widgets/datadisplay/Graphics/histogram.h"
+#include "widgets/datadisplay/Graphics/waveform.h"
 using namespace Datastruct;
 using namespace Diagram;
 namespace DataView {
@@ -41,9 +43,10 @@ private slots:
 private:
     AllPluseGraphicsPrivate * d_ptr;
    // AllPluseStatisticInfoList allPluseStatisticInfoList;
-    AllPulseOriginalInfoList allPluseOriginalInfoList;
+
     Diagram::Scatter  timeScatter;
     Diagram::Histogram freqHistogram;
+    Diagram::WaveForm  timeAreaWaveForm;
 };
 
 

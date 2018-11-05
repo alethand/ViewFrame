@@ -293,6 +293,7 @@ int HexToOct(QString s)
         }
         return total;
     }
+    return 0;
 }
 
 

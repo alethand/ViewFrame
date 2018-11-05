@@ -1,15 +1,22 @@
 ﻿#include "allplusetable.h"
 
-
+#include <QSet>
+#include <QMap>
+#include <QSortFilterProxyModel>
 //#include "table.h"
 #include "Base/constants.h"
 #include "Base/util/rsingleton.h"
 #include "modelview/tableviewdata.h"
 #include "modelview/tableviewmodelcustom.h"
 #include "../Util/dataexportandprint.h"
+#include "filterdockpanel.h"
 #include <iostream>
 #include <QHeaderView>
+
+#include "widgets/datadisplay/Graphics/scatterdiagram.h"
+#include "widgets/datadisplay/Graphics/histogram.h"
 using namespace std;
+using namespace Diagram;
 
 namespace DataView {
 const int PACKAGE_START=0x1ACF1ACF; //包头
@@ -29,9 +36,13 @@ AllPluseDock::AllPluseDock(QWidget *parent) :
     retranslateUi();
 
     QObject::connect(btn_load,SIGNAL(clicked()),this,SLOT(on_btn_load_clicked()));
-    //    QObject::connect(btn_search,SIGNAL(clicked()),q_ptr,SLOT(on_btn_search_clicked()));
+    QObject::connect(&view_Statistic,SIGNAL(clicked(QModelIndex)),this,SLOT(statistic_ShowOrginInfo(QModelIndex)));
     QObject::connect(radioButton_RealityShow,SIGNAL(clicked()),this,SLOT(on_radioButton_RealityShow_clicked()));
     QObject::connect(radioButton_HistoryShow,SIGNAL(clicked()),this,SLOT(on_radioButton_HistoryShow_clicked()));
+    //过滤器
+    QObject::connect(&viewRT_Origin, SIGNAL(tableCheckDoubleSignal(QModelIndex)), this, SLOT(filterRT(QModelIndex)));
+    QObject::connect(&viewHS_Origin, SIGNAL(tableCheckDoubleSignal(QModelIndex)), this, SLOT(filterHS(QModelIndex)));
+    QObject::connect(&view_Statistic, SIGNAL(tableCheckDoubleSignal(QModelIndex)), this, SLOT(filterStatistic(QModelIndex)));
 }
 
 AllPluseDock::~AllPluseDock()
@@ -132,11 +143,11 @@ void AllPluseDock::initView()
 
 
     temp = new QWidget();
-    temp->setLayout(new QHBoxLayout);
-    temp->layout()->addWidget(&view_Statistic);
-    temp->layout()->addWidget(&viewHS_Origin);
+    QHBoxLayout *hlayout = new QHBoxLayout();
+    temp->setLayout(hlayout);
+    hlayout->addWidget(&view_Statistic,4);
+    hlayout->addWidget(&viewHS_Origin,1);
     mWidget->insertWidget(1,temp);
-    viewHS_Origin.hide();
 
 
     vlayout->addWidget(mWidget);
@@ -155,14 +166,28 @@ void AllPluseDock::ininData()
     modelRT_originData.openShowLatestMsg(50);
 
     modelHS_orginData.setDataSrc(originData);
-
+    modelHS_orginData.openPointedColShow(0);
     staticsData = new HugeData_Gram();
     staticsData->coreData.append(new AllPluseInfo::Statistic::Core());
     model_StatisticData.setDataSrc(staticsData);
 
+    updateView();
     viewRT_Origin.setModel(&modelRT_originData);
     viewHS_Origin.setModel(&modelHS_orginData);
     view_Statistic.setModel(&model_StatisticData);
+
+    //排序功能
+    QSortFilterProxyModel *dataViewProxyRT = new QSortFilterProxyModel();
+    dataViewProxyRT->setSourceModel(&modelRT_originData);
+    viewRT_Origin.setModel(dataViewProxyRT);
+
+    QSortFilterProxyModel *dataViewProxyHS = new QSortFilterProxyModel();
+    dataViewProxyHS->setSourceModel(&modelHS_orginData);
+    viewHS_Origin.setModel(dataViewProxyHS);
+
+    QSortFilterProxyModel *dataViewProxyStatistic = new QSortFilterProxyModel();
+    dataViewProxyStatistic->setSourceModel(&model_StatisticData);
+    view_Statistic.setModel(dataViewProxyStatistic);
 }
 
 
@@ -194,8 +219,10 @@ void AllPluseDock::retranslateUi()
 //    {
 //        d_ptr->dataViewOriginal->setColumnWidth(i, d_ptr->dataViewOriginal->columnWidth(i) + 40);
 ////        d_ptr->dataView->setColumnWidth(i,90);
-//    }
+    //    }
 }
+
+
 
 /*!
  * @brief 实时模式单选框槽
@@ -228,8 +255,7 @@ if((buff==NULL)||(len<MIN_PACKAGE_LEN))
     int endCode;            //包尾
     int bufMemcpyPos=0;     //缓冲拷贝位置
     int iPackageLen;        //缓冲区总长度(从包头至包尾)
-    AllPluseStatisticInfoBase statisticInfoBase;
-    AllPluseOriginalInfoAttributeBase originalInfoBase;
+    AllPluseInfo::Statistic::Core statisticInfoBase;
 //    AllPluseStatisticInfo statisticInfo;
 //    AllPluseOriginalInfoAttribute originalInfo;
 //    AllPluseStatisticInfoList statisticInfoTempList;    //统计信息临时链表,绘图使用
@@ -263,22 +289,25 @@ if((buff==NULL)||(len<MIN_PACKAGE_LEN))
     if(statisticInfoEff==1) //统计信息有效
     {
         bufMemcpyPos+=sizeof(int);
-        if((bufMemcpyPos+sizeof(AllPluseStatisticInfoBase)*statisticInfoNumN)>=iPackageLen)    //判断长度,防止缓冲越界
+        if((bufMemcpyPos+sizeof(AllPluseInfo::Statistic)*statisticInfoNumN)>=iPackageLen)    //判断长度,防止缓冲越界
         {
             return;
         }
-
+        AllPluseInfo::Statistic::Core *pStatisticData;
         for(int i=0;i<statisticInfoNumN;i++)
         {
-            memset(&statisticInfoBase,0x00,sizeof(AllPluseStatisticInfoBase));
-            memcpy(&statisticInfoBase,buff+bufMemcpyPos,sizeof(AllPluseStatisticInfoBase));
-
-//            statisticInfo.iDataOutsideNo=d_ptr->dataOutsideNo;
-//            statisticInfo.iDataInsideNo=i;
-//            statisticInfo.allPluseStatisticInfoBase=statisticInfoBase;
-//            d_ptr->allPluseStatisticInfoList.append(statisticInfo);
-//            statisticInfoTempList.append(statisticInfo);
-//            bufMemcpyPos+=sizeof(AllPluseStatisticInfoBase);
+            pStatisticData = NULL;
+            memset(&statisticInfoBase,0x00,sizeof(AllPluseInfo::Statistic::Core));
+            memcpy(&statisticInfoBase,buff+bufMemcpyPos,sizeof(AllPluseInfo::Statistic::Core));
+            if(i > staticsData->coreData.count())
+                staticsData->coreData.append(new AllPluseInfo::Statistic::Core());
+            /* 更新统计值 */
+            pStatisticData = dynamic_cast <AllPluseInfo::Statistic::Core*>(staticsData->coreData.at(i));
+            pStatisticData->name = statisticInfoBase.name;
+            pStatisticData->maxVal = statisticInfoBase.maxVal;
+            pStatisticData->minVal = statisticInfoBase.minVal;
+            pStatisticData->meanVal = statisticInfoBase.meanVal;
+            pStatisticData->variance = statisticInfoBase.variance;
         }
     }
 
@@ -299,48 +328,35 @@ if((buff==NULL)||(len<MIN_PACKAGE_LEN))
         bufMemcpyPos+=sizeof(int);
         for(int l=0;l<attributeInfoNumL;l++)
         {
+            AllPluseInfo::OriginData::Core *originD = new AllPluseInfo::OriginData::Core();
             int drawFlag; //是否绘图
-            memset(&originalInfoBase,0x00,sizeof(AllPluseOriginalInfoAttributeBase));
-            memcpy(originalInfoBase.arrOrgInfoAttributeName,(char*)buff+bufMemcpyPos,64);
+            memcpy(&originD->name,(char*)buff+bufMemcpyPos,64);
             bufMemcpyPos+=64;
             memcpy(&drawFlag,buff+bufMemcpyPos,sizeof(int));
-            originalInfoBase.iDrawFlag=drawFlag;
+            originD->ifDrawPic=drawFlag;
             bufMemcpyPos+=sizeof(int);
-            for(int m=0;m<originalInfoNumM;m++)
-            {
-//                originalInfo.allPluseOriginalInfoBase=originalInfoBase;
-//                originalInfo.iDataOutsideNo=d_ptr->dataOutsideNo;
-//                originalInfo.iDataInsideNo=l;
-//                originalInfo.dtPulseArriveColck=QDateTime::currentDateTime();
-//                //originalInfo.strPulseArriveColck=getCurrentDate();
-//                originalInfoTempList.append(originalInfo);
+
+            if(l > originData->coreData.count()) {
+                originData->coreData.append(originD);
+            }
+            else
+                delete originD;
+            ////!!!!!!!!!不支持在网络传输过程中更改属性数值
+        }
+        /* 添加实际数值 */
+        double valueTemp;
+        for(int m=0;m<originalInfoNumM;m++) //原始数据M
+        {
+            for(int k=0;k<attributeInfoNumL;k++) {//属性K
+              valueTemp =0;
+              memcpy(&valueTemp,buff+bufMemcpyPos,sizeof(valueTemp));
+              bufMemcpyPos += sizeof(valueTemp);
+              dynamic_cast<AllPluseInfo::OriginData::Core*>(originData->coreData.at(k))
+                      ->valuelist.append(valueTemp);
             }
         }
-
-//        for(int m=0;m<originalInfoNumM;m++)
-//        {
-//            int move;   //偏移量,从包头到当前值
-//            double value;
-//            for(int ll=0;ll<attributeInfoNumL;ll++)
-//            {
-//               move=18+sizeof(AllPluseStatisticInfoBase)*statisticInfoNumN+12+68*attributeInfoNumL+sizeof(double)*m+ll;
-//               memcpy(&value,buff+move,sizeof(double));
-//               originalInfo=originalInfoTempList.at(m*attributeInfoNumL+ll);
-//               originalInfo.allPluseOriginalInfoBase.dValue=value;
-//               originalInfoTempList.replace(m*attributeInfoNumL+ll,originalInfo);
-//            }
-//        }
-
-//        for(int i=0;i<originalInfoTempList.size();i++)  //将原始数据信息存放到全局列表
-//        {
-//            originalInfo=originalInfoTempList.at(i);
-//            d_ptr->allPulseOriginalInfoList.append(originalInfo);
-//        }
     }
-
-    setTableData();
-   // sendAllPulseInfoList(&statisticInfoTempList,&originalInfoTempList);
-   // d_ptr->dataOutsideNo++;
+    updateView();
 }
 
 
@@ -355,72 +371,80 @@ void AllPluseDock::on_btn_load_clicked()
     if(filepath.isEmpty())
         return;
 }
-void AllPluseDock::setTableData()
+
+
+
+void AllPluseDock::statistic_ShowOrginInfo(QModelIndex index)
 {
-//    if(d_ptr->showTableMode == RealTimeDisplay) //实时显示模式
-//    {
-//        d_ptr->dataViewModelStatictis->updateAllPluseStatisticInfoList(d_ptr->allPluseStatisticInfoList);
-//        int size=d_ptr->allPluseStatisticInfoList.size();
-//        if(size>0)
-//        {
-//            int outsideNo=d_ptr->allPluseStatisticInfoList.at(size-1).iDataOutsideNo;
-//            int insideNo=d_ptr->allPluseStatisticInfoList.at(size-1).iDataInsideNo;
-//            AllPulseOriginalInfoList originalList;
-//            AllPluseOriginalInfoAttribute originalInfo;
-//            for(int i=0;i<d_ptr->allPulseOriginalInfoList.size();i++)
-//            {
-//                if((d_ptr->allPulseOriginalInfoList.at(i).iDataOutsideNo==outsideNo)
-//                   &&(d_ptr->allPulseOriginalInfoList.at(i).iDataInsideNo==insideNo))
-//                {
-//                    originalInfo=d_ptr->allPulseOriginalInfoList.at(i);
-//                    originalList.append(originalInfo);
-//                }
-//            }
-//            d_ptr->dataViewModelOriginal->updateAllPulseOriginalInfoList(originalList);
-//        }
-//    }
+    int row=index.column();
+    if(mWidget->currentIndex() == (int)Historical) //历史显示模式
+    {
+        model_StatisticData.openPointedColShow(row);
+        viewHS_Origin.setModel(&modelHS_orginData);
+    }
 }
 
 /*!
- * \brief 双击统计信息表格
- * \param index 信息
+ * \brief AllPluseDock::show_ParamTimeProperties        显示时间特性图
+ * \param cycleStart        周期开始
+ * \param cycleEnd          周期结束
+ * \param properties        特性序列号-即列号
  */
-void AllPluseDock::doubleClickedTable(QModelIndex index)
+void AllPluseDock::showTimeProperties(double cycleStart, double cycleEnd, int properties)
 {
-//    int row=index.column();
-//    if(d_ptr->showTableMode == HistoricalDisplay) //历史显示模式
-//    {
-//        int size=d_ptr->allPluseStatisticInfoList.size();
-//        if(size>row)
-//        {
-//            int outsideNo=d_ptr->allPluseStatisticInfoList.at(row).iDataOutsideNo;
-//            int insideNo=d_ptr->allPluseStatisticInfoList.at(row).iDataInsideNo;
-//            AllPulseOriginalInfoList originalList;
-//            AllPluseOriginalInfoAttribute originalInfo;
-//            for(int i=0;i<d_ptr->allPulseOriginalInfoList.size();i++)
-//            {
-//                if((d_ptr->allPulseOriginalInfoList.at(i).iDataOutsideNo==outsideNo)
-//                   &&(d_ptr->allPulseOriginalInfoList.at(i).iDataInsideNo==insideNo))
-//                {
-//                    originalInfo=d_ptr->allPulseOriginalInfoList.at(i);
-//                    originalList.append(originalInfo);
-//                }
-//            }
-//            d_ptr->dataViewModelOriginal->updateAllPulseOriginalInfoList(originalList);
-//        }
-//    }
+      QString tittle(QStringLiteral("全脉冲时间特性图"));
+      tittle += originData->getHeadName(properties);
+      Diagram::Scatter  timeScatter(tittle);
+      timeScatter.addAxis(AxisType::xAxis,DataType::value,Qt::AlignBottom,QStringLiteral("到达时间"));
+      timeScatter.addAxis(AxisType::yAxis,DataType::value,Qt::AlignLeft,QStringLiteral("脉冲参数"));
+      timeScatter.addData(cycleStart,cycleEnd, dynamic_cast<AllPluseInfo::OriginData::Core*>
+                          (originData->coreData.at(properties) )->valuelist);
+      timeScatter.show();
 }
 
 /*!
- * @brief 清空表格
+ * \brief AllPluseDock::showFreqHistogram  显示对应的参数频度直方图
+ * \param properties        特性序列号-即列号
  */
-void AllPluseDock::clearTable()
+void AllPluseDock::showFreqHistogram(int properties)
 {
-//    d_ptr->allPluseStatisticInfoList.clear();
-//    d_ptr->allPulseOriginalInfoList.clear();
+    QString tittle(QStringLiteral("全脉冲频度直方图"));
+    tittle += originData->getHeadName(properties);
+    Diagram::Histogram freqHistogram(tittle);
 
-//    d_ptr->dataViewModelStatictis->updateAllPluseStatisticInfoList(d_ptr->allPluseStatisticInfoList);
-//    d_ptr->dataViewModelOriginal->updateAllPulseOriginalInfoList(d_ptr->allPulseOriginalInfoList);
+    QMap<int,int> freqMap;
+    QMap<int,int>::iterator ite;
+    AllPluseInfo::OriginData::Core *data =  dynamic_cast<AllPluseInfo::OriginData::Core*>
+            (originData->coreData.at(properties) );
+    for(int i=0;i< data->valuelist.count();i++){
+        ite = freqMap.find(data->valuelist.at(i));
+        if( ite == freqMap.end())
+            freqMap.insert(data->valuelist.at(i),1);
+        else
+            ite.value()++;
+    }
+
+    QStringList freqList;
+    ite = freqMap.begin();
+    while(ite != freqMap.end()) {
+        freqList.append(QString::number(ite.key()));
+        ite++;
+    }
+    freqHistogram.setXAxisLabels(freqList,QStringLiteral("参数分布"));
+    freqHistogram.addAxis(AxisType::yAxis,DataType::value,Qt::AlignLeft,QStringLiteral("统计次数"));
+    ite = freqMap.begin();
+    while(ite != freqMap.end()) {
+        freqHistogram.addData(ite.key(),ite.value());
+        ite++;
+    }
+    freqHistogram.show();
+}
+
+void AllPluseDock::updateView()
+{
+    viewRT_Origin.setModel(&modelRT_originData);
+    viewHS_Origin.setModel(&modelHS_orginData);
+    view_Statistic.setModel(&model_StatisticData);
 }
 
 /*!
@@ -432,6 +456,93 @@ QString AllPluseDock::getCurrentDate()
     QDateTime date=QDateTime::currentDateTime();
     strDate=date.toString("yyyy.MM.dd hh:mm:ss.zzz");
     return strDate;
+}
+
+
+/*!
+ * \brief 过滤页面，实时源数据
+ * \param 页面
+ */
+void AllPluseDock::filterRT(QModelIndex index){
+    filterDockPanel * dock = new filterDockPanel;
+    connect(dock,SIGNAL(sendFilterMessage(QList<double>)),this,SLOT(recFilterMessageRT(QList<double>)));
+    filterIndexRT = index;
+    dock->show();
+}
+/*!
+ * \brief 过滤功能实现
+ * \param filterMessage存储筛选功能上下界限
+ */
+void AllPluseDock::recFilterMessageRT(QList<double> filterMessage){
+    double filterLower = filterMessage.at(0);
+    double filterUpper = filterMessage.at(1);
+    double theData;
+//    qDebug()<<filterLower<<"and"<<filterUpper<<endl;
+    try{
+        for(int i =0;i<modelRT_originData.rowCount();i++){viewRT_Origin.showRow(i);}
+        for(int i =0;i<modelRT_originData.rowCount();i++){
+            theData=(modelRT_originData.index(i,filterIndexRT.column(),QModelIndex())).data().toDouble();
+            if(theData>filterUpper||theData<filterLower){viewRT_Origin.hideRow(i);}
+        }
+    }catch(const char* msg){qDebug()<<msg<<endl;}
+}
+
+/*!
+ * \brief 过滤页面，历史源数据
+ * \param 页面
+ */
+void AllPluseDock::filterHS(QModelIndex index){
+    filterDockPanel * dock = new filterDockPanel;
+    connect(dock,SIGNAL(sendFilterMessage(QList<double>)),this,SLOT(recFilterMessageHS(QList<double>)));
+    filterIndexHS = index;
+    dock->show();
+}
+
+/*!
+ * \brief 过滤功能实现
+ * \param filterMessage存储筛选功能上下界限
+ */
+void AllPluseDock::recFilterMessageHS(QList<double> filterMessage){
+    double filterLower = filterMessage.at(0);
+    double filterUpper = filterMessage.at(1);
+    double theData;
+//    qDebug()<<filterLower<<"and"<<filterUpper<<endl;
+    try{
+        for(int i =0;i<modelHS_orginData.rowCount();i++){viewHS_Origin.showRow(i);}
+        for(int i =0;i<modelHS_orginData.rowCount();i++){
+            theData=(modelHS_orginData.index(i,filterIndexHS.column(),QModelIndex())).data().toDouble();
+            if(theData>filterUpper||theData<filterLower){viewHS_Origin.hideRow(i);}
+        }
+    }catch(const char* msg){qDebug()<<msg<<endl;}
+}
+
+/*!
+ * \brief 过滤页面，统计数据
+ * \param 页面
+ */
+void AllPluseDock::filterStatistic(QModelIndex index){
+    filterDockPanel * dock = new filterDockPanel;
+    connect(dock,SIGNAL(sendFilterMessage(QList<double>)),this,SLOT(recFilterMessageStatistic(QList<double>)));
+    filterIndexStatistic = index;
+    dock->show();
+}
+
+/*!
+ * \brief 过滤功能实现
+ * \param filterMessage存储筛选功能上下界限
+ */
+void AllPluseDock::recFilterMessageStatistic(QList<double> filterMessage){
+    double filterLower = filterMessage.at(0);
+    double filterUpper = filterMessage.at(1);
+    double theData;
+//    qDebug()<<filterLower<<"and"<<filterUpper<<endl;
+    try{
+        for(int i =0;i<model_StatisticData.rowCount();i++){view_Statistic.showRow(i);}
+        for(int i =0;i<model_StatisticData.rowCount();i++){
+            theData=(model_StatisticData.index(i,filterIndexStatistic.column(),QModelIndex())).data().toDouble();
+            if(theData>filterUpper||theData<filterLower){view_Statistic.hideRow(i);}
+        }
+    }catch(const char* msg){qDebug()<<msg<<endl;}
 }
 
 } //namespace DataView
