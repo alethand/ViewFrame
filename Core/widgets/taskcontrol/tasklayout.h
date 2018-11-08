@@ -33,35 +33,36 @@
 #include <QByteArray>
 
 #include "Base/util/fileutils.h"
-#include "head.h"
+//#include "head.h"
+#include "../../protocol/datastruct.h"
 
 namespace TaskControlModel
 {
-class  TaskLayoutParse : public RXmlParseMethod
+class  TaskLayoutParse : public Base::RXmlParseMethod
 {
 public:
      TaskLayoutParse();
      ~TaskLayoutParse();
      virtual bool  startParse(QDomNode & node);
 
-     Container * getContainer(){return windowContainer;}
+     Datastruct::Container * getContainer(){return windowContainer;}
 
 private:
-    void parseContainer(QDomNode &node,Container *element);
-    void parseLayout(QDomNode &node,Container *element);
-    void parseItems(QDomNode &node,Container *element);
-    void parseItem(QDomNode &node,Container *element);
+    void parseContainer(QDomNode &node,Datastruct::Container *element);
+    void parseLayout(QDomNode &node,Datastruct::Container *element);
+    void parseItems(QDomNode &node,Datastruct::Container *element);
+    void parseItem(QDomNode &node,Datastruct::Container *element);
 
-    Field* parseAttributes(QDomNode &node);              //  解析特性
-    void parseType(QDomNode &node,PubHead *element);       //解析类型
-    void generateWidget(Container *container);
+    Datastruct::Field* parseAttributes(QDomNode &node);
+    void parseType(QDomNode &node,Datastruct::PubHead *element);
+    void generateWidget(Datastruct::Container *container);
 
-    Layout parseLayout(QString  layoutText);
+    Datastruct::Layout parseLayout(QString  layoutText);
 
-    void releaseContainer(Container * container);
+    void releaseContainer(Datastruct::Container * container);
 
 private:
-    Container * windowContainer;    /*!< 保存解析xml文件后的 */
+    Datastruct::Container * windowContainer;    /*!< 保存解析xml文件后的 */
     int filedIndex;                 /*!< 字段类型索引,默认从0开始，每次累加1 */
 };
 

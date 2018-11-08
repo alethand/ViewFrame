@@ -52,7 +52,7 @@ void StaticLayoutByXml::flushScreen(HealthData &data)
 
 bool StaticLayoutByXml::readXMLFile()
 {
-    RXmlFile file("test.xml");
+    Base::RXmlFile file("test.xml");
     file.setParseMethod(mxmlData);
     return file.startParse(QFile::ReadOnly);
 }

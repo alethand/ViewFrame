@@ -21,6 +21,8 @@
 
 #include "../base_global.h"
 
+namespace Base{
+
 class BASESHARED_EXPORT RFile : public QFile
 {
     Q_OBJECT
@@ -118,5 +120,6 @@ protected:
     RTextParseMethod * parseMethod;
 };
 
+}
 
 #endif // FILEUTILS_H

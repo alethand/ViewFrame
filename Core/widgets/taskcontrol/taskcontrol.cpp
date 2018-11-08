@@ -166,7 +166,7 @@ void TaskControlPrivate::initTableViewMenu()
     QMenu *m_AddMenu = new QMenu(q_ptr);
 
     ProgramFilePath programPath;
-    QDir dir(programPath.protocolPath);
+    QDir dir(programPath.taskControlPath);
     QStringList filters;
     filters << "*.xml";
     QStringList files = dir.entryList(filters);
@@ -321,7 +321,7 @@ void TaskControl::showTaskWindow()
 {
     Q_D(TaskControl);
     ProgramFilePath programPath;
-    QString filename =  programPath.protocolPath + "/" +QObject::sender()->property(ACTION_TYPE).toString();
+    QString filename =  programPath.taskControlPath + "/" +QObject::sender()->property(ACTION_TYPE).toString();
     QFileInfo fileinfo(filename);
     if(!fileinfo.exists()){
         QMessageBox::warning(this,tr("warning"),tr("layout file doesn't existed!"),QMessageBox::Yes);
@@ -520,7 +520,7 @@ void TaskControl::importTask()
     Q_D(TaskControl);
     QString localFileName = QFileDialog::getOpenFileName(this,tr("choose file"),QDir::homePath(),QString("*.bin"));
     if(!localFileName.isEmpty()){
-        RTextFile file(localFileName);
+        Base::RTextFile file(localFileName);
         TaskParsedMethod * method = new TaskParsedMethod;
         file.setParseMethod(method);
         if(file.startParse()){
@@ -542,7 +542,7 @@ void TaskControl::exportTask()
     Q_D(TaskControl);
     QString saveName = QFileDialog::getSaveFileName(this,tr("save file"),QDir::homePath(),QString("*.bin"));
     if(!saveName.isEmpty()){
-        RTextFile file(saveName);
+        Base::RTextFile file(saveName);
         TaskParsedMethod * method = new TaskParsedMethod;
         method->setTaskInfo(d->taskInfoList);
         file.setParseMethod(method);

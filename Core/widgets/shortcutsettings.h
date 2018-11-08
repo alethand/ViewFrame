@@ -24,7 +24,7 @@ struct ShortcutMapping
     QString keySequence;
 };
 
-class ShortcutParseMethod : public RXmlParseMethod
+class ShortcutParseMethod : public Base::RXmlParseMethod
 {
 public:
     ShortcutParseMethod(){}

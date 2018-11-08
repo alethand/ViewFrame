@@ -33,7 +33,7 @@ QColor transformFrHexToRGB(QString strColor);
 /*!
  * \brief 解析健康管理的xml文件
  */
-class  ParseXML_HealthStateLayout : public RXmlParseMethod
+class  ParseXML_HealthStateLayout : public Base::RXmlParseMethod
 {
 public:
     ParseXML_HealthStateLayout();

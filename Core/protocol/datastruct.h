@@ -18,6 +18,8 @@
 #include <QVariant>
 #include <QSet>
 #include <QDebug>
+#include <QDataStream>
+
 #include "calculater/commonalgorithms.h"
 using namespace Calculator;
 
@@ -516,10 +518,289 @@ struct MidFreqInfo
     };
 };
 
+
+/*****************新框架*********************/
+
+
+
+/*!
+ *  @brief 控件类型
+ */
+enum ControlType{
+    Empty = 0,
+    /*! 输入框 */
+    ComboBox = 1,        /*! 下拉框 */
+    CheckBox,            /*! 复选框 */
+    RadioButton,         /*! 单选框 */
+    TextEdit,            /*! 文本输入框 */
+    ValueIntEdit,        /*! 整形输入框 */
+    ValueFloatEdit,      /*! 浮点形输入框 */
+    DateEdit,            /*! 日期输入框 */
+    TimeEdit,            /*! 时间输入框 */
+
+    /*! 容器框 */
+    Dialog,              /*! 对话框 */
+    Widget,              /*! 普通框 */
+    Groupbox,            /*! */
+    Table,               /*! 表格 */
+    List                 /*! 列表 */
+};
+
+struct PubHead{
+    PubHead():widget(NULL){}
+    virtual ~PubHead(){}
+    QWidget  * widget;     /*!< 实际生成的控件 */
+    ControlType  type;     /*!< 字段类型 */
+};
+
+/*!
+ * @brief 数据范围
+ * @details 根据Field的type来转换为对应的值，可转换的包括int、double、date等
+ */
+struct DataRange{
+    QVariant minValue;
+    QVariant maxValue;
+};
+
+/*!
+ *  @brief 单个字段内容数据
+ *  @warning (字节数-符号位) 与 (比特数-偏移量) 这两对值不能同时使用，属于互斥关系
+ */
+struct FieldData{
+public:
+    FieldData(){
+        bytes =0;isSigned = false;
+        bits = 0; offset = 0;
+        weight = 1;
+        precision = 1;
+        enable = true;
+    }
+
+    friend QDataStream & operator<<(QDataStream & stream,const FieldData & data);
+    friend QDataStream & operator>>(QDataStream & stream,FieldData & data);
+
+    QString  name;        /*!< 控件显示信息 */
+    ControlType  type;    /*!< 字段类型 */
+    int index;            /*!< 字段唯一标识符，初始为0。新添加字段后，此值+1 */
+
+    ushort bytes;         /*!< 字节数 */
+    bool   isSigned;      /*!< 有无符号位 */
+
+    ushort bits;          /*!< 比特位数 */
+    ushort offset;        /*!< 偏移量 */
+
+    bool enable;          /*!< 控件是否可用 */
+    float weight;         /*!< 权值 */
+    float precision;      /*!< 精度 */
+    QString unit;         /*!< 单位 */
+    DataRange range;      /*!< 数值范围 */
+    QString displayText;  /*!< 显示文本 */
+    QVariant defaultValue; /*!< 默认值 */
+    QVariant value;       /*!< 控件中显示值 */
+    QStringList list;     /*!< type为ComboBox时，保存下拉框中子项名称 */
+};
+
+/*!
+ *  @brief  协议字段信息
+ *  @details 协议每项的信息描述
+ */
+struct Field : public PubHead{
+    Field():PubHead(){}
+    ~Field(){}
+
+    FieldData data;        /*!< 字段属性 */
+};
+
+struct NodeInfo{
+    NodeInfo():window("window"),name("name"),width("width"),height("height"),layout("layout")
+    ,type("type"),widget("widget"),groupBox("groupbox"),item("item"),items("items"),nodeShow("show"),nodeColumn("column"),nodeEnabled("enabled"),
+    itemName("name"),itemBytes("bytes"),itemSigned("signed"),itemBits("bits"),itemOffset("offset"),itemText("text"),
+    itemWeight("weight"),itemPrecision("precision"),itemUnit("unit"),itemType("type"),itemComboxList("list"),itemRange("range"){
+
+    }
+    QString window;
+    QString name;
+    QString width;
+    QString height;
+    QString layout;
+    QString type;
+
+    QString widget;
+    QString groupBox;
+
+    QString item;
+    QString items;
+
+    QString nodeShow;
+    QString nodeColumn;
+    QString nodeEnabled;
+
+    QString itemName;
+    QString itemBytes;
+    QString itemSigned;
+    QString itemBits;
+    QString itemOffset;
+    QString itemText;
+    QString itemWeight;
+    QString itemPrecision;
+    QString itemUnit;
+    QString itemType;
+    QString itemComboxList;
+    QString itemRange;
+};
+
+/*!
+ *  @brief xml文件中控件类型名称
+ */
+struct WidgetType{
+    WidgetType():combox("combox"),checkBox("checkBox"),radioButton("radioButton"),textEdit("textEdit"),valueint("valueint"),
+        valuefloat("valuefloat"),dateEdit("dateEdit"),timeEdit("timeEdit"),dialog("dialog"),widget("widget"),table("table"),list("list"){}
+
+    QString combox;
+    QString checkBox;
+    QString radioButton;
+    QString textEdit;
+    QString valueint;
+    QString valuefloat;
+    QString dateEdit;
+    QString timeEdit;
+    QString dialog;
+    QString widget;
+    QString table;
+    QString list;
+
+};
+
+/******************************任务控制模块*****************************************/
+
+/*!
+ *  @brief 布局类型
+ *  @details 20181030暂支持3种类型
+ */
+enum Layout
+{
+    None,
+    Horizonal,          /*!< Gridlayout布局一行，多列 */
+    Vertical,           /*!< Gridlayout布局一列，多行 */
+    Grid                /*!< Gridlayout布局多行，多列 */
+};
+
+/*!
+ *  @brief 窗口数据信息
+ */
+struct WindowData{
+    WindowData(){
+        isShown = true;
+        isEnabled = true;
+        column = 1;
+    }
+
+    QString  name;        /*!< 控件前面label显示信息 */
+
+    Layout layout;        /*!< 布局类型 */
+    bool isShown;         /*!< 可进行显示 */
+    bool isEnabled;       /*!< 可编辑 */
+    ushort column;        /*!< 进行显示的列数 */
+    ushort width;         /*!< 宽度 */
+    ushort height;        /*!< 高度 */
+};
+
+/*!
+ *  @brief 容器信息显示描述
+ */
+struct Window : public PubHead{
+    Window():PubHead(){ }
+    ~Window(){}
+    WindowData data;       /*!< 窗口属性 */
+};
+
+/*!
+ *  @brief 节点容器
+ *  @details 1.容器可嵌套；
+ *           2.大的容器中可包含子容器，由 @see dataElem 来定义；
+ *           3.最内的容器只包含字段信息
+ */
+struct Container{
+    Window     continer;                  /*!< 描述当前容器的属性 */
+    QList<Field*> fileds;                 /*!< 节点集合 */
+    QList<Container*>  childContainer;    /*!< 子容器 */
+};
+/******************************任务控制模块*****************************************/
+
+
+/**************************健康管理/数据显示模块************************************/
+/*!
+ *  @brief 单个协议描述
+ */
+struct SignalProtocol{
+    int length;                 /*!< 协议长度 */
+    QList<FieldData> fields;    /*!< 协议字段集合 */
+};
+
+/*!
+ *  @brief 基本协议
+ */
+struct BaseProtocol{
+    QString name;       /*!< 协议名 */
+    int startCode;      /*!< 开始标志码 */
+    int type;           /*!< 协议类型 */
+    int length;         /*!< 整包数据长度 */
+    SignalProtocol protocol;    /*!< 协议 */
+    int endCode;        /*!< 结束标志码 */
+};
+/**************************健康管理/数据显示模块************************************/
+
+struct ProtocolInfo{
+    QString id;             /*!< 协议ID */
+};
+
+enum NetworkType{
+    N_TCP,
+    N_UDP
+};
+
+/*!
+ *  @brief 网络连接类型
+ */
+enum NetworkConnectionType{
+    N_Server,
+    N_Client
+};
+
+/*!
+ *  @brief 网络基本信息
+ */
+struct NetworkBase{
+    QString ip;
+    ushort port;
+    NetworkConnectionType connectionType;
+    bool multicast;         /*!< 是否开启组播 */
+    QString multicastIp;    /*!< 组播Ip */
+};
+
+/*!
+ *  @brief 网络配置信息
+ *  @details 初始化网络模块
+ */
+struct NetworkInfo{
+    QString id;             /*!< 网络Id */
+    NetworkType type;       /*!< 类型 */
+    NetworkBase baseInfo;   /*!< 基础信息 */
+};
+
+/*!
+ *  @brief  模块信息
+ *  @details
+ */
+struct ModuleInfo{
+    QString id;             /*!< 模块ID */
+    QString pluginId;       /*!< 内部插件ID */
+    QString name;           /*!< 模块名称 */
+    QString networkId;      /*!< 网络模块id， @see NetworkInfo */
+    QStringList protocols;  /*!< 协议id， @see  ProtocolInfo */
+};
+
+
 } //namespace Datastruct
-
-
-
-
 
 #endif // DATASTRUCT_H

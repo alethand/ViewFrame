@@ -61,7 +61,7 @@ bool TaskDialogProxy::parseLayout(QString &fileName)
     Q_D(TaskDialogProxy);
     d->limitDisplay = new TaskLayoutParse();
 
-    RXmlFile file(fileName);
+    Base::RXmlFile file(fileName);
     file.setParseMethod(d->limitDisplay,false);
     d->parseResult = file.startParse();
 
@@ -88,7 +88,7 @@ void TaskDialogProxy::setTaskInfo(NewTaskInfo *info)
     Q_D(TaskDialogProxy);
     if(d->parseResult){
         d->taskInfo = info;
-        Container * container = d->limitDisplay->getContainer();
+        Datastruct::Container * container = d->limitDisplay->getContainer();
         fillFiled(container);
     }
 }
@@ -99,63 +99,63 @@ void TaskDialogProxy::setTaskInfo(NewTaskInfo *info)
  *          则将值设置至对应的控件中。
  * @param[in]  container 待填充的容器
  */
-void TaskDialogProxy::fillFiled(Container *container)
+void TaskDialogProxy::fillFiled(Datastruct::Container *container)
 {
     Q_D(TaskDialogProxy);
     if(container->childContainer.size() == 0){
-        std::for_each(container->fileds.begin(),container->fileds.end(),[&](Field * filed){
-            FieldData curFieldDesc = d->taskInfo->fields.value(filed->data.index);
+        std::for_each(container->fileds.begin(),container->fileds.end(),[&](Datastruct::Field * filed){
+            Datastruct::FieldData curFieldDesc = d->taskInfo->fields.value(filed->data.index);
             switch(filed->type){
-                case ComboBox:
+                case Datastruct::ComboBox:
                     {
                         QComboBox * widget = dynamic_cast<QComboBox *>(filed->widget);
                         if(widget)
                             widget->setCurrentIndex(curFieldDesc.value.toInt());
                     }
                     break;
-                case CheckBox:
+                case Datastruct::CheckBox:
                     {
                         QCheckBox * widget = dynamic_cast<QCheckBox *>(filed->widget);
                         if(widget)
                             widget->setChecked(curFieldDesc.value.toBool());
                     }
                     break;
-                case RadioButton:
+                case Datastruct::RadioButton:
                     {
                         QRadioButton * widget = dynamic_cast<QRadioButton *>(filed->widget);
                         if(widget)
                             widget->setChecked(curFieldDesc.value.toBool());
                     }
                     break;
-                case TextEdit:
+                case Datastruct::TextEdit:
                     {
                         QLineEdit * widget = dynamic_cast<QLineEdit *>(filed->widget);
                         if(widget)
                             widget->setText(curFieldDesc.value.toString());
                     }
                     break;
-                case ValueIntEdit:
+                case Datastruct::ValueIntEdit:
                     {
                         QSpinBox * widget = dynamic_cast<QSpinBox *>(filed->widget);
                         if(widget)
                             widget->setValue(curFieldDesc.value.toInt());
                     }
                     break;
-                case ValueFloatEdit:
+                case Datastruct::ValueFloatEdit:
                     {
                         QDoubleSpinBox * widget = dynamic_cast<QDoubleSpinBox *>(filed->widget);
                         if(widget)
                             widget->setValue(curFieldDesc.value.toDouble());
                     }
                     break;
-                case DateEdit:
+                case Datastruct::DateEdit:
                     {
                         QDateEdit * widget = dynamic_cast<QDateEdit *>(filed->widget);
                         if(widget)
                             widget->setDate(curFieldDesc.value.toDate());
                     }
                     break;
-                case TimeEdit:
+                case Datastruct::TimeEdit:
                     {
                         QTimeEdit * widget = dynamic_cast<QTimeEdit *>(filed->widget);
                         if(widget)
@@ -167,7 +167,7 @@ void TaskDialogProxy::fillFiled(Container *container)
             }
         });
     }else{
-        std::for_each(container->childContainer.begin(),container->childContainer.end(),[&](Container * cont){
+        std::for_each(container->childContainer.begin(),container->childContainer.end(),[&](Datastruct::Container * cont){
             fillFiled(cont);
         });
     }
@@ -210,16 +210,16 @@ void TaskDialogProxy::respOk()
     d->taskInfo->taskName = d->parsedFileName;
     d->taskInfo->localParsedFileName = d->parsedFileFullName;
 
-    Container * container = d->limitDisplay->getContainer();
+    Datastruct::Container * container = d->limitDisplay->getContainer();
     findFiled(container);
 
-    QMap<int,FieldData>::iterator iter = d->taskInfo->fields.begin();
+    QMap<int,Datastruct::FieldData>::iterator iter = d->taskInfo->fields.begin();
     RAndCombineValidator validator;
     //TODO 20181102对字段详细信息进行验证
     while(iter != d->taskInfo->fields.end()){
-        FieldData data = iter.value();
+        Datastruct::FieldData data = iter.value();
         switch(data.type){
-            case ValueIntEdit:
+            case Datastruct::ValueIntEdit:
                 validator.addValidator(new RNumericValidator<int>(data.value.toInt(),RValid::Ge,0));
                 break;
             //待扩充对不同的类型验证
@@ -240,63 +240,63 @@ void TaskDialogProxy::respOk()
  * @brief 查找容器中存在的字段，并按照索引保存
  * @param[in] container 待查找的容器
  */
-void TaskDialogProxy::findFiled(TaskControlModel::Container * container)
+void TaskDialogProxy::findFiled(Datastruct::Container * container)
 {
     Q_D(TaskDialogProxy);
     if(container->childContainer.size() == 0){
-        std::for_each(container->fileds.begin(),container->fileds.end(),[&](Field * field){
+        std::for_each(container->fileds.begin(),container->fileds.end(),[&](Datastruct::Field * field){
             QVariant fieldValue;
             switch(field->type){
-                case ComboBox:
+                case Datastruct::ComboBox:
                     {
                         QComboBox * widget = dynamic_cast<QComboBox *>(field->widget);
                         if(widget)
                             fieldValue = QVariant::fromValue(widget->currentIndex());
                     }
                     break;
-                case CheckBox:
+                case Datastruct::CheckBox:
                     {
                         QCheckBox * widget = dynamic_cast<QCheckBox *>(field->widget);
                         if(widget)
                             fieldValue = QVariant::fromValue(widget->isChecked());
                     }
                     break;
-                case RadioButton:
+                case Datastruct::RadioButton:
                     {
                         QRadioButton * widget = dynamic_cast<QRadioButton *>(field->widget);
                         if(widget)
                             fieldValue = QVariant::fromValue(widget->isChecked());
                     }
                     break;
-                case TextEdit:
+                case Datastruct::TextEdit:
                     {
                         QLineEdit * widget = dynamic_cast<QLineEdit *>(field->widget);
                         if(widget)
                             fieldValue = QVariant::fromValue(widget->text());
                     }
                     break;
-                case ValueIntEdit:
+                case Datastruct::ValueIntEdit:
                     {
                         QSpinBox * widget = dynamic_cast<QSpinBox *>(field->widget);
                         if(widget)
                             fieldValue = QVariant::fromValue(widget->value());
                     }
                     break;
-                case ValueFloatEdit:
+                case Datastruct::ValueFloatEdit:
                     {
                         QDoubleSpinBox * widget = dynamic_cast<QDoubleSpinBox *>(field->widget);
                         if(widget)
                             fieldValue = QVariant::fromValue(widget->value());
                     }
                     break;
-                case DateEdit:
+                case Datastruct::DateEdit:
                     {
                         QDateEdit * widget = dynamic_cast<QDateEdit *>(field->widget);
                         if(widget)
                             fieldValue = QVariant::fromValue(widget->text());
                     }
                     break;
-                case TimeEdit:
+                case Datastruct::TimeEdit:
                     {
                         QTimeEdit * widget = dynamic_cast<QTimeEdit *>(field->widget);
                         if(widget)
@@ -312,7 +312,7 @@ void TaskDialogProxy::findFiled(TaskControlModel::Container * container)
             d->taskInfo->fields.insert(field->data.index,field->data);
         });
     }else{
-        std::for_each(container->childContainer.begin(),container->childContainer.end(),[&](Container * cont){
+        std::for_each(container->childContainer.begin(),container->childContainer.end(),[&](Datastruct::Container * cont){
             findFiled(cont);
         });
     }

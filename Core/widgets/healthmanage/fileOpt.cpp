@@ -30,7 +30,7 @@ QColor transformFrHexToRGB(QString strColor)
 }
 
 ParseXML_HealthStateLayout::ParseXML_HealthStateLayout()
-    :RXmlParseMethod()
+    :Base::RXmlParseMethod()
 {
     mHealthData = new HealthData();
 }

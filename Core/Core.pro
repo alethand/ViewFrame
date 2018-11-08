@@ -81,7 +81,9 @@ SOURCES += main.cpp \
     widgets/datadisplay/radiusSource/radiasourcemap.cpp \
     widgets/datadisplay/radiusSource/radiationsourcetable.cpp \
     widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.cpp \
-    widgets/datadisplay/filterdockpanel.cpp
+    widgets/datadisplay/filterdockpanel.cpp \
+    protocol/commonprotocolparse.cpp \
+    protocol/protocolmanager.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
@@ -135,7 +137,9 @@ HEADERS  += \
     widgets/datadisplay/radiusSource/radiasourcemap.h \
     widgets/datadisplay/radiusSource/radiationsourcetable.h \
     widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.h \
-    widgets/datadisplay/filterdockpanel.h
+    widgets/datadisplay/filterdockpanel.h \
+    protocol/commonprotocolparse.h \
+    protocol/protocolmanager.h
 
 FORMS    += mainwindow.ui \
     widgets/taskcontrol/gathercontroldialog.ui \

@@ -16,7 +16,7 @@
 
 namespace TaskControlModel{
 
-class TaskParsedMethod : public RTextParseMethod
+class TaskParsedMethod : public Base::RTextParseMethod
 {
 public:
     explicit TaskParsedMethod();
@@ -25,8 +25,8 @@ public:
     void setTaskInfo(NewTaskList list){this->taskList = list;}
     NewTaskList getTaskInfo(){return this->taskList;}
 
-    bool  startParse(RTextFile * file);
-    bool  startSave(RTextFile * file);
+    bool  startParse(Base::RTextFile * file);
+    bool  startSave(Base::RTextFile * file);
 
 private:
     NewTaskList taskList;

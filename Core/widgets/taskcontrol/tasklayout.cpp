@@ -10,45 +10,7 @@
 namespace TaskControlModel
 {
 
-struct NodeInfo{
-    NodeInfo():window("window"),name("name"),width("width"),height("height"),layout("layout")
-    ,type("type"),widget("widget"),groupBox("groupbox"),item("item"),items("items"),nodeShow("show"),nodeColumn("column"),nodeEnabled("enabled"),
-    itemName("name"),itemBytes("bytes"),itemSigned("signed"),itemBits("bits"),itemOffset("offset"),itemText("text"),
-    itemWeight("weight"),itemPrecision("precision"),itemUnit("unit"),itemType("type"),itemComboxList("comboxList"),itemRange("range"){
-
-    }
-    QString window;
-    QString name;
-    QString width;
-    QString height;
-    QString layout;
-    QString type;
-
-    QString widget;
-    QString groupBox;
-
-    QString item;
-    QString items;
-
-    QString nodeShow;
-    QString nodeColumn;
-    QString nodeEnabled;
-
-    QString itemName;
-    QString itemBytes;
-    QString itemSigned;
-    QString itemBits;
-    QString itemOffset;
-    QString itemText;
-    QString itemWeight;
-    QString itemPrecision;
-    QString itemUnit;
-    QString itemType;
-    QString itemComboxList;
-    QString itemRange;
-};
-
-TaskLayoutParse::TaskLayoutParse():RXmlParseMethod(),windowContainer(NULL),filedIndex(0)
+TaskLayoutParse::TaskLayoutParse():Base::RXmlParseMethod(),windowContainer(NULL),filedIndex(0)
 {
 
 }
@@ -64,15 +26,15 @@ TaskLayoutParse::~TaskLayoutParse()
  * @brief 递归释放容器
  * @param[in] container 待释放的容器数据信息
  */
-void TaskLayoutParse::releaseContainer(Container *container)
+void TaskLayoutParse::releaseContainer(Datastruct::Container *container)
 {
     if(container->childContainer.size() == 0){
-        std::for_each(container->fileds.begin(),container->fileds.end(),[&](Field* filed){
+        std::for_each(container->fileds.begin(),container->fileds.end(),[&](Datastruct::Field* filed){
             delete filed;
         });
         container->fileds.clear();
     }else{
-        std::for_each(container->childContainer.begin(),container->childContainer.end(),[&](Container* cter){
+        std::for_each(container->childContainer.begin(),container->childContainer.end(),[&](Datastruct::Container* cter){
             releaseContainer(cter);
         });
     }
@@ -81,13 +43,13 @@ void TaskLayoutParse::releaseContainer(Container *container)
 
 bool TaskLayoutParse::startParse(QDomNode &node)
 {
-    NodeInfo nodeInfo;
+    Datastruct::NodeInfo nodeInfo;
     QDomElement *domElem = &(node.toElement());
     if(!node.isNull() && domElem != NULL)
     {
        if(domElem->tagName().toLower() == nodeInfo.window)
        {
-           windowContainer = new Container();
+           windowContainer = new Datastruct::Container();
 
            if(domElem->hasAttribute(nodeInfo.type) && domElem->attributeNode(nodeInfo.type).value().toLower() == "dialog")
                windowContainer->continer.widget = new QDialog();
@@ -107,7 +69,7 @@ bool TaskLayoutParse::startParse(QDomNode &node)
            QDomNodeList childList = node.childNodes();
            for(int i = 0; i < childList.size();i++){
                if(childList.at(i).toElement().tagName().toLower() == nodeInfo.widget){
-                    Container * childContainer = new Container();
+                    Datastruct::Container * childContainer = new Datastruct::Container();
                     parseContainer(childList.at(i),childContainer);
                     windowContainer->childContainer.append(childContainer);
                }
@@ -124,22 +86,22 @@ bool TaskLayoutParse::startParse(QDomNode &node)
  * @param[in] node 中间容器节点
  * @param[in] element 待保存解析后的信息
  */
-void TaskLayoutParse::parseContainer(QDomNode &node, Container *element)
+void TaskLayoutParse::parseContainer(QDomNode &node, Datastruct::Container *element)
 {
     QDomNodeList childList = node.childNodes();
     if(childList.size() == 2){
-        NodeInfo nodeInfo;
+        Datastruct::NodeInfo nodeInfo;
 
         QDomElement elem = node.toElement();
         if(elem.attribute(nodeInfo.type).toLower() == nodeInfo.widget){
             element->continer.widget = new QWidget();
-            element->continer.type = Widget;
+            element->continer.type = Datastruct::Widget;
         }
         else if(elem.attribute(nodeInfo.type).toLower() == nodeInfo.groupBox){
             QGroupBox * groupbox = new QGroupBox();
             groupbox->setTitle(elem.attribute(nodeInfo.name));
             element->continer.widget = groupbox;
-            element->continer.type = Groupbox;
+            element->continer.type = Datastruct::Groupbox;
         }
 
         for(int i = 0; i < childList.size(); i++){
@@ -157,9 +119,9 @@ void TaskLayoutParse::parseContainer(QDomNode &node, Container *element)
  * @param[in] node 布局节点
  * @param[in] element 保存解析后的容器信息
  */
-void TaskLayoutParse::parseLayout(QDomNode &node,Container *element)
+void TaskLayoutParse::parseLayout(QDomNode &node,Datastruct::Container *element)
 {
-    NodeInfo nodeInfo;
+    Datastruct::NodeInfo nodeInfo;
 
     if(node.toElement().hasAttribute(nodeInfo.type))
         element->continer.data.layout = parseLayout(node.toElement().attribute(nodeInfo.type));
@@ -188,11 +150,10 @@ void TaskLayoutParse::parseLayout(QDomNode &node,Container *element)
  * @brief 解析协议-属性
  * @param[in] node 待解析的节点
  * @param[in/out] element 待保存的元素
- * @return
  */
-void TaskLayoutParse::parseItems(QDomNode &node,Container *element)
+void TaskLayoutParse::parseItems(QDomNode &node,Datastruct::Container *element)
 {
-    NodeInfo nodeInfo;
+    Datastruct::NodeInfo nodeInfo;
     QDomNode *domNode =&( node.firstChild() );
     while(!domNode->isNull() && domNode->toElement().tagName() == nodeInfo.item)
     {
@@ -205,13 +166,13 @@ void TaskLayoutParse::parseItems(QDomNode &node,Container *element)
  * @brief 解析字段中属性信息
  * @return
  */
-Field *TaskLayoutParse::parseAttributes(QDomNode &node)
+Datastruct::Field *TaskLayoutParse::parseAttributes(QDomNode &node)
 {
      QDomElement * domElem = NULL;
      bool hasAtttribut = true;
-     Field * newItem = new Field();
+     Datastruct::Field * newItem = new Datastruct::Field();
 
-     NodeInfo nodeInfo;
+     Datastruct::NodeInfo nodeInfo;
 
      while(!node.isNull() && hasAtttribut)
      {
@@ -253,7 +214,7 @@ Field *TaskLayoutParse::parseAttributes(QDomNode &node)
          else  if(nodeInfo.itemType == domElem->tagName()){
                parseType(node,newItem);
          }
-         else if(nodeInfo.itemComboxList == domElem->tagName()&&newItem->type == ControlType::ComboBox
+         else if(nodeInfo.itemComboxList == domElem->tagName()&&newItem->type == Datastruct::ControlType::ComboBox
                  &&newItem->widget != NULL)
          {
              QDomNodeList nodeList = node.childNodes();
@@ -268,10 +229,12 @@ Field *TaskLayoutParse::parseAttributes(QDomNode &node)
               QDomNodeList nodeList = node.childNodes();
               for(int i = 0;i < nodeList.count();i++)
               {   nod =& (nodeList.at(i) );
-                  if(nod->toElement().tagName() == "max")
-                      newItem->data.maxValue = nod->toElement().text().toUShort();
-                  else  if(nod->toElement().tagName() == "min")
-                      newItem->data.minValue = nod->toElement().text().toUShort();
+                  if(nod->toElement().tagName() == "max"){
+//                      newItem->data.maxValue = nod->toElement().text().toUShort();
+                  }
+                  else  if(nod->toElement().tagName() == "min"){
+//                      newItem->data.minValue = nod->toElement().text().toUShort();
+                  }
               }
          }
          else
@@ -290,65 +253,63 @@ Field *TaskLayoutParse::parseAttributes(QDomNode &node)
  * @param[in] node 待解析类型节点
  * @param[in] element 解析后的控件
  */
-void TaskLayoutParse::parseType(QDomNode &node, PubHead *element)
+void TaskLayoutParse::parseType(QDomNode &node, Datastruct::PubHead *element)
 {
     QDomElement *domElem = NULL;
     domElem = &(node.toElement());
 
-    if(domElem->text()== "combox") {
-        element->type = ControlType::ComboBox;
+    Datastruct::WidgetType wtype;
+
+    if(domElem->text()== wtype.combox) {
+        element->type = Datastruct::ControlType::ComboBox;
         QComboBox * comb = new QComboBox();
         comb->setView(new QListView());
         element->widget = comb;
     }
-    else if(domElem->text() == "checkBox") {
-        element->type = ControlType::CheckBox;
+    else if(domElem->text() == wtype.checkBox) {
+        element->type = Datastruct::ControlType::CheckBox;
         element->widget = new QCheckBox();
     }
-    else if(domElem->text() == "radioButton") {
-        element->type = ControlType::RadioButton;
+    else if(domElem->text() == wtype.radioButton) {
+        element->type = Datastruct::ControlType::RadioButton;
         element->widget = new QRadioButton();
     }
-    else if(domElem->text() == "textEdit") {
-        element->type = ControlType::TextEdit;
+    else if(domElem->text() == wtype.textEdit) {
+        element->type = Datastruct::ControlType::TextEdit;
         element->widget = new QLineEdit();
     }
-    else if(domElem->text() == "valueint") {
-        element->type = ControlType::ValueIntEdit;
+    else if(domElem->text() == wtype.valueint) {
+        element->type = Datastruct::ControlType::ValueIntEdit;
         element->widget = new QSpinBox();
     }
-    else if(domElem->text() == "valuefloat") {
-        element->type = ControlType::ValueFloatEdit;
+    else if(domElem->text() == wtype.valuefloat) {
+        element->type = Datastruct::ControlType::ValueFloatEdit;
         element->widget = new QDoubleSpinBox();
     }
-    else if(domElem->text() == "dateEdit") {
-        element->type = ControlType::DateEdit;
+    else if(domElem->text() == wtype.dateEdit) {
+        element->type = Datastruct::ControlType::DateEdit;
         element->widget = new QDateEdit();
     }
-    else if(domElem->text() == "timeEdit") {
-        element->type = ControlType::TimeEdit;
+    else if(domElem->text() == wtype.timeEdit) {
+        element->type = Datastruct::ControlType::TimeEdit;
         element->widget = new QTimeEdit();
     }
-    else if(domElem->text() == "dialog") {
-        element->type = ControlType::Dialog;
+    else if(domElem->text() == wtype.dialog) {
+        element->type = Datastruct::ControlType::Dialog;
         element->widget = new QDialog();
     }
-    else if(domElem->text() == "widget") {
-        element->type = ControlType::Widget;
+    else if(domElem->text() == wtype.widget) {
+        element->type = Datastruct::ControlType::Widget;
         element->widget = new QWidget();
     }
-    else if(domElem->text() == "table") {
-        element->type = ControlType::Table;
+    else if(domElem->text() == wtype.table) {
+        element->type = Datastruct::ControlType::Table;
         element->widget = new QTableWidget();
     }
-    else if(domElem->text() == "list") {
-        element->type = ControlType::List;
+    else if(domElem->text() == wtype.list) {
+        element->type = Datastruct::ControlType::List;
         element->widget = new QListWidget();
     }
-    else if(domElem->text() == "length")
-        element->type = ControlType::Length;
-    else if(domElem->text() == "count")
-        element->type = ControlType::Count;
 }
 
 /*!
@@ -356,9 +317,9 @@ void TaskLayoutParse::parseType(QDomNode &node, PubHead *element)
  * @param[in]  node 待解析的item节点
  * @param[in]  element 待保存解析后的容器信息
  */
-void TaskLayoutParse::parseItem(QDomNode &node, Container *element)
+void TaskLayoutParse::parseItem(QDomNode &node, Datastruct::Container *element)
 {
-    Field * newItem = parseAttributes(node);
+    Datastruct::Field * newItem = parseAttributes(node);
     if(NULL != newItem )
     {
         newItem->data.index = filedIndex++;
@@ -372,7 +333,7 @@ void TaskLayoutParse::parseItem(QDomNode &node, Container *element)
  *       2.采用递归对布局进行生成
  * @param[in] elem  容器
  */
-void TaskLayoutParse::generateWidget(Container * container)
+void TaskLayoutParse::generateWidget(Datastruct::Container * container)
 {
     QGridLayout * layout = new QGridLayout();
     container->continer.widget->setLayout(layout);
@@ -381,15 +342,15 @@ void TaskLayoutParse::generateWidget(Container * container)
         QWidget * filedContainer = NULL;
         for(int i = 0; i < container->fileds.size();i++)
         {
-            Field *temp = container->fileds.at(i);
+            Datastruct::Field *temp = container->fileds.at(i);
             switch(temp->type)
             {
-              case ComboBox:
-              case TextEdit:
-              case ValueIntEdit:
-              case ValueFloatEdit:
-              case DateEdit:
-              case TimeEdit:
+              case Datastruct::ComboBox:
+              case Datastruct::TextEdit:
+              case Datastruct::ValueIntEdit:
+              case Datastruct::ValueFloatEdit:
+              case Datastruct::DateEdit:
+              case Datastruct::TimeEdit:
                 {
                     QLabel *temp_label = new QLabel(temp->data.name);
                     QHBoxLayout * temp_layout = new QHBoxLayout();
@@ -405,13 +366,13 @@ void TaskLayoutParse::generateWidget(Container * container)
 
             if(filedContainer){
                 switch(container->continer.data.layout){
-                    case Grid:
+                    case Datastruct::Grid:
                             layout->addWidget(filedContainer,i/container->continer.data.column,i%container->continer.data.column,1,1);
                         break;
-                    case Vertical:
+                    case Datastruct::Vertical:
                             layout->addWidget(filedContainer,i,0,1,1);
                         break;
-                    case Horizonal:
+                    case Datastruct::Horizonal:
                             layout->addWidget(filedContainer,0,i,1,1);
                         break;
 
@@ -427,13 +388,13 @@ void TaskLayoutParse::generateWidget(Container * container)
 
             QWidget * child = container->childContainer.at(i)->continer.widget;
             switch(container->continer.data.layout){
-                case Grid:
+                case Datastruct::Grid:
                         layout->addWidget(child,i/container->continer.data.column,i%container->continer.data.column,1,1);
                     break;
-                case Vertical:
+                case Datastruct::Vertical:
                         layout->addWidget(child,i,0,1,1);
                     break;
-                case Horizonal:
+                case Datastruct::Horizonal:
                         layout->addWidget(child,0,i,1,1);
                     break;
 
@@ -450,15 +411,15 @@ void TaskLayoutParse::generateWidget(Container * container)
  * @param[in] layoutText 布局类型英文描述
  * @return 若存在返回对应类型的枚举值，否则返回None
  */
-Layout TaskLayoutParse::parseLayout(QString layoutText)
+Datastruct::Layout TaskLayoutParse::parseLayout(QString layoutText)
 {
     if(layoutText == "vertical")
-        return Vertical;
+        return Datastruct::Vertical;
     else if(layoutText == "horizonal")
-        return Horizonal;
+        return Datastruct::Horizonal;
     else if(layoutText == "grid")
-        return Grid;
-    return None;
+        return Datastruct::Grid;
+    return Datastruct::None;
 }
 
 }

@@ -8,6 +8,8 @@
 
 #include "rlog.h"
 
+namespace Base{
+
 RFile::RFile(const QString &fileName):QFile(fileName)
 {
 
@@ -58,9 +60,7 @@ RXmlFile::~RXmlFile()
 
 bool RXmlFile::startParse(OpenMode  openMode)
 {
-    bool result = false;
     if(parseMethod  && RFile::startParse(openMode)){
-
         QDomDocument doc;
         QString errorMsg;
         int errorRow = 0,errorCol = 0;
@@ -73,9 +73,8 @@ bool RXmlFile::startParse(OpenMode  openMode)
         QDomElement root = doc.documentElement();
         if(!root.isNull())
         {
-             result =  parseMethod->startParse(root.toElement());
-             return result;
-         }
+             return parseMethod->startParse(root.toElement());
+        }
     }
     RLOG_INFO("Not set xml parseMethod!");
     return false;
@@ -134,4 +133,6 @@ bool RTextFile::startSave(OpenMode  openMode)
     }
     RLOG_INFO("Not set text file parseMethod!");
     return false;
+}
+
 }

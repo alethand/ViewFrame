@@ -16,6 +16,7 @@
 
 #include <QSharedPointer>
 #include "head.h"
+#include "../../protocol/datastruct.h"
 #include "Base/selfwidget/dialogproxy.h"
 
 namespace TaskControlModel {
@@ -45,8 +46,8 @@ private slots:
     void respCancel();
 
 private:
-    void fillFiled(Container * container);
-    void findFiled(Container * container);
+    void fillFiled(Datastruct::Container * container);
+    void findFiled(Datastruct::Container * container);
 
 private:
     QSharedPointer<TaskDialogProxyPrivate> d_ptr;

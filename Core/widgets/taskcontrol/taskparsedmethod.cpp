@@ -9,7 +9,7 @@ TaskParsedMethod::TaskParsedMethod():magicNum("TASKCONTROL_LIST")
 
 }
 
-bool TaskParsedMethod::startParse(RTextFile *file)
+bool TaskParsedMethod::startParse(Base::RTextFile *file)
 {
     QDataStream stream(file);
     QString flag;
@@ -26,7 +26,7 @@ bool TaskParsedMethod::startParse(RTextFile *file)
     return true;
 }
 
-bool TaskParsedMethod::startSave(RTextFile *file)
+bool TaskParsedMethod::startSave(Base::RTextFile *file)
 {
     QDataStream stream(file);
     stream << magicNum;
