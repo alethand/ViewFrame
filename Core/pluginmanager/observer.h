@@ -12,12 +12,11 @@
 #define OBSERVER_H
 
 #include "subject.h"
-#include "../messagetype.h"
-#include "../base_global.h"
+#include "Base/messagetype.h"
 
-namespace Base{
+namespace Core{
 
-class BASESHARED_EXPORT Observer
+class Observer
 {
 public:
     Observer();

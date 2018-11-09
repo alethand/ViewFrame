@@ -69,7 +69,7 @@ LayoutAndDisplay::LayoutAndDisplay(QWidget *parent)
       minRowInterval(10),minColumnInterval(10),mItemsHeight(50),isHasLayout(false)
 
 {
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
 
     initView();
     wkRowCount =0,wkColcount =0;

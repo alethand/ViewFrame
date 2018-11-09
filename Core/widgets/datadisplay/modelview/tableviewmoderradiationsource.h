@@ -13,12 +13,12 @@
 
 #include <QAbstractTableModel>
 #include <QSharedPointer>
-#include "Base/pluginmanager/observer.h"
+#include "pluginmanager/observer.h"
 #include "protocol/datastruct.h"
 using namespace Datastruct;
 
 namespace DataView {
-class TableViewModelRadiationSource: public QAbstractTableModel , public Base::Observer
+class TableViewModelRadiationSource: public QAbstractTableModel , public Core::Observer
 {
     Q_OBJECT
 public:

@@ -15,14 +15,13 @@
 #include <QMap>
 #include <mutex>
 
-#include "../actionmanager/id.h"
-#include "../base_global.h"
+#include "Base/actionmanager/id.h"
 
-namespace Base{
+namespace Core{
 
 class RComponent;
 
-class BASESHARED_EXPORT PluginManager : public QObject
+class PluginManager : public QObject
 {
 public:
     explicit PluginManager(QObject * parent = 0);
@@ -31,11 +30,17 @@ public:
 
     void load();
 
-    void addPlugin(RComponent * component);
-    ComponentMap plugins();
+    void addAvailblePlugin(RComponent * component);
+    RComponent* getAvailblePlugin(QString pluginId);
+    ComponentMap getAllAvailblePlugins();
+
+    void addActivePlugin(RComponent * component);
+    RComponent * getActivePlugin(QString pluginId);
+    ComponentMap getAllActivePlugins();
 
 private:
-    ComponentMap componentMap;
+    ComponentMap availbleComponentMap;
+    ComponentMap activeComponentMap;
     std::mutex  m_mutex;
 };
 

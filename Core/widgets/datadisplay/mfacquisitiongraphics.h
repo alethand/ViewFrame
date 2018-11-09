@@ -8,13 +8,13 @@
 #ifndef MFACQUISITIONGRAPHICS_H
 #define MFACQUISITIONGRAPHICS_H
 
-#include "Base/pluginmanager/rcomponent.h"
+#include "pluginmanager/rcomponent.h"
 
 namespace DataView {
 
 class MFAcquisitionGraphicsPrivate;
 
-class MFAcquisitionGraphics : public Base::RComponent
+class MFAcquisitionGraphics : public Core::RComponent
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(MFAcquisitionGraphics)
@@ -25,7 +25,9 @@ public:
     bool initialize();
     void release();
     QString pluginName();
+    RComponent * clone();
     void onMessage(MessageType::MessType type);
+    void onNetwork(int protocolType,Datastruct::FieldValues & data);
 
 private:
     void retranslateUi();

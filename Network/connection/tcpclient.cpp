@@ -84,7 +84,6 @@ TcpClient::TcpClient()
     memset(cIp,0,32);
 
     sendPackId = qrand()%1024 + 1000;
-    onlineState = 0;
     cSocket = 0;
     cPort = 0;
     recvBytes = sendBytes = recvPacks = 0;
@@ -164,8 +163,6 @@ TcpClient *TcpClientManager::getClient(QString accountId)
     std::lock_guard<std::mutex> lg(mutex);
 
     auto findIndex = std::find_if(clientList.begin(),clientList.end(),[&accountId](TcpClient * client){
-        if(client->getAccount() == accountId)
-            return true;
         return false;
     });
 
@@ -181,8 +178,7 @@ ClientList TcpClientManager::getClients(QString accountId)
     std::lock_guard<std::mutex> lg(mutex);
     std::list<TcpClient *> clients;
     std::for_each(clientList.begin(),clientList.end(),[&](TcpClient * client){
-        if(client->getAccount() == accountId)
-            clients.push_back(client);
+
     });
 
     return clients;
@@ -215,7 +211,6 @@ TcpClientManager::ClientInfoList TcpClientManager::getAnchorPoint()
     std::for_each(clientList.begin(),clientList.end(),[&clientInfos](const TcpClient* client){
         if(client){
             SimpleClientInfo info;
-            info.accountId = client->accountId.toUShort();
             info.ip = client->ip();
             info.cPort = client->port();
             info.recvBytes = client->recvBytes;

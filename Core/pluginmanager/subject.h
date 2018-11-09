@@ -15,14 +15,13 @@
 #include <list>
 #include <mutex>
 
-#include "../messagetype.h"
-#include "../base_global.h"
+#include "Base/messagetype.h"
 
-namespace Base{
+namespace Core{
 
 class Observer;
 
-class BASESHARED_EXPORT Subject
+class Subject
 {
 public:
     Subject();

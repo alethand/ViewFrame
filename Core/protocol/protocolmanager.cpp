@@ -68,4 +68,26 @@ Datastruct::BaseProtocol ProtocolManager::getProtocol(QString protocolName, bool
     return bprotocol;
 }
 
+/*!
+ * @brief 根据协议名称获取对应的协议
+ * @param[in]  protocolType 协议类型,如0xCCDD
+ * @param[in/out]  existed true：对应的协议是否存在;false：对应的协议不存在
+ * @return 协议描述
+ */
+Datastruct::BaseProtocol ProtocolManager::getProtocol(int protocolType,bool & existed)
+{
+    Datastruct::BaseProtocol bprotocol;
+    BaseProtocolMap::iterator iter = protocols.begin();
+    while(iter != protocols.end()){
+        if(iter.value().type == protocolType){
+            existed = true;
+            bprotocol = iter.value();
+            break;
+        }
+        iter++;
+    }
+
+    return bprotocol;
+}
+
 }

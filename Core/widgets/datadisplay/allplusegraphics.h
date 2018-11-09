@@ -9,7 +9,7 @@
 #ifndef ALLPLUSEGRAPHICS_H
 #define ALLPLUSEGRAPHICS_H
 #include "protocol/datastruct.h"
-#include "Base/pluginmanager/rcomponent.h"
+#include "pluginmanager/rcomponent.h"
 #include "widgets/datadisplay/Graphics/scatterdiagram.h"
 #include "widgets/datadisplay/Graphics/histogram.h"
 #include "widgets/datadisplay/Graphics/waveform.h"
@@ -19,7 +19,7 @@ namespace DataView {
 
 class AllPluseGraphicsPrivate;
 
-class AllPluseGraphics: public Base::RComponent
+class AllPluseGraphics: public Core::RComponent
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(AllPluseGraphics)
@@ -30,7 +30,9 @@ public:
     bool initialize();
     void release();
     QString pluginName();
+    Core::RComponent * clone();
     void onMessage(MessageType::MessType type);
+    void onNetwork(int protocolType,Datastruct::FieldValues & data);
 
 private:
     void retranslateUi();
@@ -48,9 +50,6 @@ private:
     Diagram::Histogram freqHistogram;
     Diagram::WaveForm  timeAreaWaveForm;
 };
-
-
-
 
 } //namespace DataView
 

@@ -207,7 +207,7 @@ TaskControl::TaskControl(QWidget *parent) :
 {
     IsDistributing = false;
     retranslateUi();
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
 }
 
 TaskControl::~TaskControl()

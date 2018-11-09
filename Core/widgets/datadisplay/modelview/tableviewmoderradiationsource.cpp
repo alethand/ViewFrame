@@ -14,7 +14,7 @@ TableViewModelRadiationSource::TableViewModelRadiationSource(QObject *parent):
     tableTotalRows=INIT_TABLE_RADIASOURCE_ROW;
     rsDataList.clear();
     retranslateUi();
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
 }
 
 TableViewModelRadiationSource::~TableViewModelRadiationSource()

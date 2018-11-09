@@ -4,6 +4,9 @@
 #include <QString>
 #include "protocol/datastruct.h"
 
+#include <mutex>
+#include <condition_variable>
+
 using namespace Datastruct;
 class GlobalConfigFile;
 
@@ -15,6 +18,10 @@ extern QString G_FILE_UPLOAD_PATH;             /*!< 文件上传保存的路径 
 extern DBFeature G_DB_FEATURE;                 /*!< 当前数据库驱动支持的功能 */
 
 extern GlobalConfigFile * G_GlobalConfigFile;
+
+extern std::mutex G_ProtocolQueueMutex;
+extern std::condition_variable G_ProtocolQueueCondition;
+extern Datastruct::ProtocolQueue G_ProtoQueue;
 
 }
 

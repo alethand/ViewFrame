@@ -2,7 +2,7 @@
 
 #include "observer.h"
 
-namespace Base{
+namespace Core{
 
 Subject::Subject()
 {

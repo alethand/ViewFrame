@@ -135,11 +135,11 @@ void RadiationSourceTablePrivate::initTableViewMenu()
 }
 
 RadiationSourceTable::RadiationSourceTable(QWidget *parent) :
-    Base::RComponent(Constant::PLUGIN_RADIATION_SOURCE_TABLE,parent),d_ptr(new RadiationSourceTablePrivate(this))
+    Core::RComponent(Constant::PLUGIN_RADIATION_SOURCE_TABLE,parent),d_ptr(new RadiationSourceTablePrivate(this))
 {
     initRSTable();
     retranslateUi();
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
 }
 
 RadiationSourceTable::~RadiationSourceTable()
@@ -164,6 +164,11 @@ QString RadiationSourceTable::pluginName()
     return tr("DataDisplay panel");
 }
 
+Core::RComponent *RadiationSourceTable::clone()
+{
+    return new RadiationSourceTable;
+}
+
 void RadiationSourceTable::onMessage(MessageType::MessType type)
 {
     switch(type){
@@ -173,6 +178,11 @@ void RadiationSourceTable::onMessage(MessageType::MessType type)
         default:
             break;
     }
+}
+
+void RadiationSourceTable::onNetwork(int protocolType, FieldValues &data)
+{
+
 }
 
 /*!
@@ -409,12 +419,10 @@ QString RadiationSourceTable::getCurrentDate()
 
 void RadiationSourceTable::retranslateUi()
 {
-//    cout<<"the1"<<endl;
     Q_D(RadiationSourceTable);
-//    QStringList headInfo;
+    setObjectName("radiationTable");
     m_name = tr("Radiation source data");
     setWindowTitle(m_name);
-
 
     d->radioButtonCoverReno->setText(tr("Overwrite Refresh"));
     d->radioButtonScrollReno->setText(tr("Scrolling Refresh"));

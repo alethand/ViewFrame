@@ -8,12 +8,12 @@
 #ifndef RADIASOURCEMAP_H
 #define RADIASOURCEMAP_H
 
-#include "Base/pluginmanager/rcomponent.h"
+#include "pluginmanager/rcomponent.h"
 
 namespace DataView {
 class RadiaSourceMapPrivate;
 
-class RadiaSourceMap : public Base::RComponent
+class RadiaSourceMap : public Core::RComponent
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(RadiaSourceMap)
@@ -24,7 +24,10 @@ public:
     bool initialize();
     void release();
     QString pluginName();
+    Core::RComponent * clone();
     void onMessage(MessageType::MessType type);
+    void onNetwork(int protocolType,Datastruct::FieldValues & data);
+
 private:
     void retranslateUi();
 

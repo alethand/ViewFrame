@@ -12,7 +12,7 @@
 #ifndef RSOCKET_H_2018_01_09
 #define RSOCKET_H_2018_01_09
 
-#include "network_global.h"
+#include "../network_global.h"
 
 namespace Network {
 

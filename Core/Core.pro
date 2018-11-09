@@ -83,7 +83,21 @@ SOURCES += main.cpp \
     widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.cpp \
     widgets/datadisplay/filterdockpanel.cpp \
     protocol/commonprotocolparse.cpp \
-    protocol/protocolmanager.cpp
+    protocol/protocolmanager.cpp \
+    protocol/pluginxmlparse.cpp \
+    protocol/pluginloader.cpp \
+    network/networkmanager.cpp \
+    network/tcpserver.cpp \
+    network/rtask.cpp \
+    pluginmanager/observer.cpp \
+    pluginmanager/pluginmanager.cpp \
+    pluginmanager/rcomponent.cpp \
+    pluginmanager/subject.cpp \
+    widgets/pageinfo.cpp \
+    network/protocolparsethread.cpp \
+    others/googlemap.cpp \
+    others/utility.cpp \
+    widgets/mapview.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
@@ -139,7 +153,22 @@ HEADERS  += \
     widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.h \
     widgets/datadisplay/filterdockpanel.h \
     protocol/commonprotocolparse.h \
-    protocol/protocolmanager.h
+    protocol/protocolmanager.h \
+    protocol/pluginxmlparse.h \
+    protocol/pluginloader.h \
+    network/networkmanager.h \
+    network/tcpserver.h \
+    network/rtask.h \
+    pluginmanager/observer.h \
+    pluginmanager/pluginmanager.h \
+    pluginmanager/rcomponent.h \
+    pluginmanager/subject.h \
+    widgets/pageinfo.h \
+    network/protocolparsethread.h \
+    others/googlemap.h \
+    others/CommonHeader.h \
+    others/utility.h \
+    widgets/mapview.h
 
 FORMS    += mainwindow.ui \
     widgets/taskcontrol/gathercontroldialog.ui \

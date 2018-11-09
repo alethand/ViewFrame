@@ -33,10 +33,6 @@ CONFIG(debug, debug|release) {
 }
 
 HEADERS += \
-    pluginmanager/observer.h \
-    pluginmanager/pluginmanager.h \
-    pluginmanager/subject.h \
-    pluginmanager/rcomponent.h \
     actionmanager/action.h \
     actionmanager/actioncontainer.h \
     actionmanager/actionmanager.h \
@@ -62,15 +58,10 @@ HEADERS += \
     constants.h \
     common/stylemanager.h \
     common/languagemanager.h \
-    selfwidget/pageinfo.h \
     common/validator/rvalidator.h \
     common/validator/rcombinevalidator.h
 
 SOURCES += \
-    pluginmanager/observer.cpp \
-    pluginmanager/pluginmanager.cpp \
-    pluginmanager/subject.cpp \
-    pluginmanager/rcomponent.cpp \
     actionmanager/action.cpp \
     actionmanager/actioncontainer.cpp \
     actionmanager/actionmanager.cpp \
@@ -93,7 +84,6 @@ SOURCES += \
     common/sql/rpersistence.cpp \
     common/stylemanager.cpp \
     common/languagemanager.cpp \
-    selfwidget/pageinfo.cpp \
     common/validator/rvalidator.cpp \
     common/validator/rcombinevalidator.cpp
 

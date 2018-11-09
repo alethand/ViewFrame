@@ -12,12 +12,12 @@
 #include <QModelIndex>
 using namespace Datastruct;
 
-#include "Base/pluginmanager/rcomponent.h"
+#include "pluginmanager/rcomponent.h"
 
 namespace DataView {
 class RadiationSourceTablePrivate;
 
-class RadiationSourceTable : public Base::RComponent
+class RadiationSourceTable : public Core::RComponent
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(RadiationSourceTable)
@@ -28,7 +28,10 @@ public:
     bool initialize();
     void release();
     QString pluginName();
+    Core::RComponent * clone();
     void onMessage(MessageType::MessType type);
+    void onNetwork(int protocolType,Datastruct::FieldValues & data);
+
     void changeTableHeaderInfo(bool blAddColFlag);
     void recvRSPara(char *buff,int len);
 

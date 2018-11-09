@@ -8,7 +8,7 @@
 #ifndef MFACQUISTIONTABLE_H
 #define MFACQUISTIONTABLE_H
 
-#include "Base/pluginmanager/rcomponent.h"
+#include "pluginmanager/rcomponent.h"
 #include "protocol/datastruct.h"
 
 #include "modelview/tableviewdata.h"
@@ -29,7 +29,7 @@ using namespace Diagram;
 namespace DataView {
 class MFAcquistionTablePrivate;
 
-class MFAcquistionTable : public Base::RComponent
+class MFAcquistionTable : public Core::RComponent
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(MFAcquistionTable)
@@ -40,7 +40,9 @@ public:
     bool initialize();
     void release();
     QString pluginName();
+    Core::RComponent * clone();
     void onMessage(MessageType::MessType type);
+    void onNetwork(int protocolType,Datastruct::FieldValues & data);
 
 public slots:
     void recvMidFreqData(char *buff, int len);                                          /*! 接收网络数据 */

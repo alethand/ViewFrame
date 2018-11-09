@@ -7,7 +7,7 @@
 #include <QBoxLayout>
 #include <QDebug>
 
-#include "../util/rsingleton.h"
+#include "Base/util/rsingleton.h"
 
 class SwitchPagePrivate
 {
@@ -140,7 +140,7 @@ SwitchPage::SwitchPage(SwitchPage::PageNumAppearPos pos, Qt::Orientation directi
     :QWidget(parent),d_ptr(new SwitchPagePrivate(this,pos,direction,buttonNums))
 {
     setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
     retranslateUi();
 }
 

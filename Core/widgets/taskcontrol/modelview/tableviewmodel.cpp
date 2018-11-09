@@ -12,7 +12,7 @@ TableViewModel::TableViewModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
     retranslateUi();
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
 }
 
 TableViewModel::~TableViewModel()

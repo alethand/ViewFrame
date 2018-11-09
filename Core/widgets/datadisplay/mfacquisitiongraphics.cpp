@@ -46,9 +46,9 @@ void MFAcquisitionGraphicsPrivate::initView()
 }
 
 MFAcquisitionGraphics::MFAcquisitionGraphics(QWidget *parent) :
-    Base::RComponent(Constant::PLUGIN_MF_QUISITION_GRAPHICS,parent),d_ptr(new MFAcquisitionGraphicsPrivate(this))
+    Core::RComponent(Constant::PLUGIN_MF_QUISITION_GRAPHICS,parent),d_ptr(new MFAcquisitionGraphicsPrivate(this))
 {
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
     retranslateUi();
 }
 
@@ -74,6 +74,11 @@ QString MFAcquisitionGraphics::pluginName()
     return tr("DataDisplay panel");
 }
 
+Core::RComponent *MFAcquisitionGraphics::clone()
+{
+    return new MFAcquisitionGraphics;
+}
+
 void MFAcquisitionGraphics::onMessage(MessageType::MessType type)
 {
     switch(type){
@@ -83,6 +88,11 @@ void MFAcquisitionGraphics::onMessage(MessageType::MessType type)
         default:
             break;
     }
+}
+
+void MFAcquisitionGraphics::onNetwork(int protocolType, Datastruct::FieldValues &data)
+{
+
 }
 
 /*!
@@ -126,6 +136,7 @@ void MFAcquisitionGraphicsPrivate::initTimeFiledGraphis()
 void MFAcquisitionGraphics::retranslateUi()
 {
     m_name = tr("Intermediate Frequency Data Graphics");
+    setObjectName("mfGraphics");
     setWindowTitle(m_name);
 }
 

@@ -11,7 +11,7 @@
 #ifndef HEALTHINFOPANNEL_H
 #define HEALTHINFOPANNEL_H
 
-#include "Base/pluginmanager/rcomponent.h"
+#include "pluginmanager/rcomponent.h"
 #include "healthstate_display.h"
 
 #include <QTcpSocket>
@@ -68,7 +68,7 @@ private:
 
 
 
-class  HealthInfoDockPanel : public Base::RComponent
+class  HealthInfoDockPanel : public Core::RComponent
 {
   Q_OBJECT
 public:
@@ -79,8 +79,10 @@ public:
      void release(){}
      QString pluginName();
      QString MachineName();
-     void onMessage(MessageType::MessType type);
+     Core::RComponent * clone();
      QSize sizeHint()const;
+     void onMessage(MessageType::MessType type);
+     void onNetwork(int protocolType,Datastruct::FieldValues & data);
 
 private slots:
      void retranslateUi();

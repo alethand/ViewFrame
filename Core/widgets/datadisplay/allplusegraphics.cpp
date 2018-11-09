@@ -88,9 +88,9 @@ void AllPluseGraphicsPrivate::initView()
 
 AllPluseGraphics::AllPluseGraphics(QWidget *parent) :timeScatter(QStringLiteral("时间特性图")),freqHistogram(QStringLiteral("频度直方图")),
     timeAreaWaveForm(QStringLiteral("时域波形图")),
-    Base::RComponent(Constant::PLUGIN_ALL_PLUS_GRAPHICS,parent),d_ptr(new AllPluseGraphicsPrivate(this))
+    Core::RComponent(Constant::PLUGIN_ALL_PLUS_GRAPHICS,parent),d_ptr(new AllPluseGraphicsPrivate(this))
 {
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
     retranslateUi();
 
 //    timeScatter.setXAxis(DataType::DateTime,QStringLiteral("到达时间"));
@@ -153,6 +153,11 @@ QString AllPluseGraphics::pluginName()
     return tr("DataDisplay panel");
 }
 
+Core::RComponent *AllPluseGraphics::clone()
+{
+    return new AllPluseGraphics;
+}
+
 void AllPluseGraphics::onMessage(MessageType::MessType type)
 {
     switch(type){
@@ -162,6 +167,11 @@ void AllPluseGraphics::onMessage(MessageType::MessType type)
         default:
             break;
     }
+}
+
+void AllPluseGraphics::onNetwork(int protocolType, FieldValues &data)
+{
+
 }
 
 /*!
@@ -329,6 +339,7 @@ void AllPluseGraphicsPrivate::initBarGraphis()
 void AllPluseGraphics::retranslateUi()
 {
     m_name = tr("DataDisplay panel");
+    setObjectName("allPluseGraphics");
     setWindowTitle(m_name);
 }
 

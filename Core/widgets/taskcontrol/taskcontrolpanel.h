@@ -11,15 +11,13 @@
 #ifndef TASKCONTROLPANEL_H
 #define TASKCONTROLPANEL_H
 
-#include "Base/pluginmanager/rcomponent.h"
-
-using namespace Base;
+#include "pluginmanager/rcomponent.h"
 
 namespace TaskControlModel {
 
 class TaskControl;
 
-class TaskControlPanel : public RComponent
+class TaskControlPanel : public Core::RComponent
 {
     Q_OBJECT
 public:
@@ -29,8 +27,10 @@ public:
     bool initialize();
     void release();
     QString pluginName();
+    Core::RComponent * clone();
 
     void onMessage(MessageType::MessType type);
+    void onNetwork(int protocolType,Datastruct::FieldValues & data);
 
     QSize sizeHint()const;
 

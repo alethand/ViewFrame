@@ -16,7 +16,7 @@
 #include <QWidget>
 
 #include "head.h"
-#include "Base/pluginmanager/observer.h"
+#include "pluginmanager/observer.h"
 
 class QTimerEvent;
 
@@ -24,7 +24,7 @@ namespace TaskControlModel {
 
 class TaskControlPrivate;
 
-class TaskControl : public QWidget , public Base::Observer
+class TaskControl : public QWidget , public Core::Observer
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(TaskControl)

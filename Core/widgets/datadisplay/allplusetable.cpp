@@ -25,9 +25,9 @@ const int MIN_PACKAGE_LEN=36;       //数据包最小长度
 
 
 AllPluseDock::AllPluseDock(QWidget *parent) :
-    Base::RComponent(Constant::PLUGIN_ALL_PLUS_TABLE,parent)
+    Core::RComponent(Constant::PLUGIN_ALL_PLUS_TABLE,parent)
 {
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
 
     ininData();
     initView();
@@ -66,6 +66,11 @@ QString AllPluseDock::pluginName()
     return tr("DataDisplay panel");
 }
 
+Core::RComponent *AllPluseDock::clone()
+{
+    return new AllPluseDock();
+}
+
 void AllPluseDock::onMessage(MessageType::MessType type)
 {
     switch(type){
@@ -75,6 +80,11 @@ void AllPluseDock::onMessage(MessageType::MessType type)
         default:
             break;
     }
+}
+
+void AllPluseDock::onNetwork(int protocolType, FieldValues &data)
+{
+
 }
 
 
@@ -194,6 +204,7 @@ void AllPluseDock::ininData()
 
 void AllPluseDock::retranslateUi()
 {
+    setObjectName("allPluseTable");
 //    QStringList headInfo;
 ////    headInfo<<QObject::tr("Serial number")
 //    initTable();

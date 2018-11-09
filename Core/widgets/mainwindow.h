@@ -15,7 +15,9 @@
 #include <QList>
 class QAction;
 
-#include "Base/pluginmanager/observer.h"
+class MapView;
+
+#include "pluginmanager/observer.h"
 
 namespace Ui {
 class MainWindow;
@@ -24,7 +26,7 @@ class MainWindow;
 class ActionContainer;
 class BaseInfoDockPanel;
 
-class MainWindow : public QMainWindow , public Base::Observer
+class MainWindow : public QMainWindow , public Core::Observer
 {
     Q_OBJECT
 
@@ -34,6 +36,8 @@ public:
     ~MainWindow();
 
     void onMessage(MessageType::MessType type);
+
+    void displayResize();
 
 private:
     void initMenu();
@@ -62,6 +66,7 @@ private slots:
     void exportView();
 
 private:
+    void loadCmponent();
     void initComponent();
     void updateStyle(int index);
     void updateLanguage(QString lanFileName);
@@ -93,8 +98,7 @@ private:
     QAction * supportAction;
     QAction * aboutPorgramAction;
 
-public:
-    void displayResize();/*!健康管理表格重新布局*/
+    MapView * mapView;
 
 };
 

@@ -19,6 +19,7 @@
 #include <QSet>
 #include <QDebug>
 #include <QDataStream>
+#include <QQueue>
 
 #include "calculater/commonalgorithms.h"
 using namespace Calculator;
@@ -521,7 +522,12 @@ struct MidFreqInfo
 
 /*****************新框架*********************/
 
+struct ProtocolArray{
+    int protocolType;
+    QByteArray data;
+};
 
+typedef QQueue<ProtocolArray> ProtocolQueue;
 
 /*!
  *  @brief 控件类型
@@ -610,6 +616,18 @@ struct Field : public PubHead{
 
     FieldData data;        /*!< 字段属性 */
 };
+
+/*!
+ *  @brief 字段值
+ *  @details
+ */
+struct FieldValue{
+    int index;
+    QVariant value;
+};
+
+typedef QList<FieldValue> FieldValues;
+
 
 struct NodeInfo{
     NodeInfo():window("window"),name("name"),width("width"),height("height"),layout("layout")
@@ -750,8 +768,13 @@ struct BaseProtocol{
 };
 /**************************健康管理/数据显示模块************************************/
 
-struct ProtocolInfo{
-    QString id;             /*!< 协议ID */
+/*!
+ *  @brief 插件描述信息
+ *  @details
+ */
+struct PluginInfo{
+    QString id;         /*!< 插件标识 */
+    QString name;       /*!< 名称 */
 };
 
 enum NetworkType{
@@ -784,8 +807,15 @@ struct NetworkBase{
  */
 struct NetworkInfo{
     QString id;             /*!< 网络Id */
-    NetworkType type;       /*!< 类型 */
+    NetworkType protocol;   /*!< 传输类型 */
     NetworkBase baseInfo;   /*!< 基础信息 */
+};
+
+enum WindowLayout{
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT
 };
 
 /*!
@@ -794,12 +824,15 @@ struct NetworkInfo{
  */
 struct ModuleInfo{
     QString id;             /*!< 模块ID */
-    QString pluginId;       /*!< 内部插件ID */
+    WindowLayout layout;    /*!< 在mainwindow中的位置方向 */
+    bool closeable;         /*!< 是否可关闭 */
+    bool visible;           /*!< 是否可见 */
+    bool floatable;         /*!< 是否可移动 */
     QString name;           /*!< 模块名称 */
-    QString networkId;      /*!< 网络模块id， @see NetworkInfo */
     QStringList protocols;  /*!< 协议id， @see  ProtocolInfo */
+    QString pluginId;       /*!< 内部插件ID @see PluginInfo */
+    QString networkId;      /*!< 网络模块id， @see BaseProtocol */
 };
-
 
 } //namespace Datastruct
 

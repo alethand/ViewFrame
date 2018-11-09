@@ -26,11 +26,14 @@ public:
     bool parseLocalProtocol(QString fullFilePath);
 
     Datastruct::BaseProtocol getProtocol(QString protocolName,bool & existed);
+    Datastruct::BaseProtocol getProtocol(int protocolType,bool & existed);
 
     int size(){return protocols.size();}
 
 private:
-    QMap<QString,Datastruct::BaseProtocol> protocols;
+    typedef QMap<QString,Datastruct::BaseProtocol> BaseProtocolMap;
+
+    BaseProtocolMap protocols;
 };
 
 }

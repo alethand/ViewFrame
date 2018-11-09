@@ -303,7 +303,6 @@ struct NETWORKSHARED_EXPORT SimpleClientInfo
     }
     QString ip;
     ushort cPort;
-    ushort accountId;
     qint64 recvBytes;
     qint64 sendBytes;
     qint64 recvPacks;
@@ -324,15 +323,6 @@ public:
 
     QHash<int,PacketBuff*> & getPacketBuffs(){return packetBuffs;}
     QByteArray & getHalfPacketBuff(){return halfPackBufff;}
-
-    void setOnLineState(int val){onlineState = val;}
-    int getOnLineState(){return onlineState;}
-
-    void setAccount(QString id){accountId = id;}
-    QString getAccount(){return accountId;}
-
-    void setNickName(QString name){nickName = name;}
-    QString getNickName(){return nickName;}
 
     std::mutex & BuffMutex(){return packBuffMutex;}
 
@@ -364,10 +354,6 @@ private:
     std::mutex packBuffMutex;
     std::mutex packIdMutex;
     int sendPackId;                                 /*!< 每次响应结果ID，可能被拆分成多个包，但每个子包的ID是一致的。 */
-
-    int onlineState;                                /*!< 在线状态(与OnlineStatus保持一致) */
-    QString accountId;                              /*!< 用户ID */
-    QString nickName;                               /*!< 用户昵称 */
 
     QHash<QString,FileRecvDesc*> fileRecvList;      /*!< 文件接收缓冲列表 */
     std::mutex fileMutex;

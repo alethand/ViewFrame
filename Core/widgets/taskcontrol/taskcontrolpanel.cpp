@@ -12,7 +12,7 @@ TaskControlPanel::TaskControlPanel(QWidget *parent):
     RComponent(Constant::PLUGIN_TASK_CONTROL,parent),controlWidget(nullptr)
 {
     retranslateUi();
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
 }
 
 TaskControlPanel::~TaskControlPanel()
@@ -38,6 +38,11 @@ QString TaskControlPanel::pluginName()
     return tr("TaskControl panel");
 }
 
+Core::RComponent * TaskControlPanel::clone()
+{
+    return new TaskControlPanel;
+}
+
 void TaskControlPanel::onMessage(MessageType::MessType type)
 {
     switch(type){
@@ -49,6 +54,11 @@ void TaskControlPanel::onMessage(MessageType::MessType type)
     }
 }
 
+void TaskControlPanel::onNetwork(int protocolType, Datastruct::FieldValues &data)
+{
+
+}
+
 QSize TaskControlPanel::sizeHint() const
 {
     return QSize(350,200);
@@ -56,6 +66,8 @@ QSize TaskControlPanel::sizeHint() const
 
 void TaskControlPanel::retranslateUi()
 {
+    setObjectName("taskControl");
     m_name = tr("TaskControl panel");
+    pluginId = "0x0002";
     setWindowTitle(m_name);
 }

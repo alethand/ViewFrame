@@ -14,7 +14,7 @@
 #define SHORTCUTSETTINGS_H
 
 #include "Base/selfwidget/dialogproxy.h"
-#include "Base/pluginmanager/observer.h"
+#include "pluginmanager/observer.h"
 
 #include "Base/util/fileutils.h"
 
@@ -47,7 +47,7 @@ private:
 class QTreeWidgetItem;
 class ShortcutSettingsPrivate;
 
-class ShortcutSettings : public DialogProxy,public Base::Observer
+class ShortcutSettings : public DialogProxy,public Core::Observer
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(ShortcutSettings)

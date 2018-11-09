@@ -29,9 +29,9 @@ void RadiaSourceMapPrivate::initView()
 }
 
 RadiaSourceMap::RadiaSourceMap(QWidget *parent) :
-    Base::RComponent(Constant::PLUGIN_RADIA_SOURCE_MAP,parent),d_ptr(new RadiaSourceMapPrivate(this))
+    Core::RComponent(Constant::PLUGIN_RADIA_SOURCE_MAP,parent),d_ptr(new RadiaSourceMapPrivate(this))
 {
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
     retranslateUi();
 }
 
@@ -56,6 +56,11 @@ QString RadiaSourceMap::pluginName()
     return tr("DataDisplay panel");
 }
 
+Core::RComponent *RadiaSourceMap::clone()
+{
+    return new RadiaSourceMap;
+}
+
 void RadiaSourceMap::onMessage(MessageType::MessType type)
 {
     switch(type){
@@ -67,9 +72,15 @@ void RadiaSourceMap::onMessage(MessageType::MessType type)
     }
 }
 
+void RadiaSourceMap::onNetwork(int protocolType, Datastruct::FieldValues &data)
+{
+
+}
+
 void RadiaSourceMap::retranslateUi()
 {
     m_name = tr("Data source Map");
+    setObjectName("radiaSourceMap");
     setWindowTitle(m_name);
 }
 

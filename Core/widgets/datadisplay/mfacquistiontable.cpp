@@ -64,9 +64,9 @@ void MFAcquistionTablePrivate::initData()
 //}
 
 MFAcquistionTable::MFAcquistionTable(QWidget *parent) :
-    Base::RComponent(Constant::PLUGIN_MF_ACQUISTION_TABLE,parent),d_ptr(new MFAcquistionTablePrivate(this))
+    Core::RComponent(Constant::PLUGIN_MF_ACQUISTION_TABLE,parent),d_ptr(new MFAcquistionTablePrivate(this))
 {
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
     retranslateUi();
 }
 
@@ -122,6 +122,11 @@ QString MFAcquistionTable::pluginName()
     return  tr("DataDisplay panel");
 }
 
+Core::RComponent *MFAcquistionTable::clone()
+{
+    return new MFAcquistionTable();
+}
+
 void MFAcquistionTable::onMessage(MessageType::MessType type)
 {
     switch(type){
@@ -133,11 +138,17 @@ void MFAcquistionTable::onMessage(MessageType::MessType type)
     }
 }
 
+void MFAcquistionTable::onNetwork(int protocolType, FieldValues &data)
+{
+
+}
+
 
 
 void MFAcquistionTable::retranslateUi()
 {
     QStringList headInfo;
+    setObjectName("acquistionTable");
 
     headInfo<<QObject::tr("serial number")<<QObject::tr("acquisition time")<<QObject::tr("acquisition mode")<<QObject::tr("collection pulse number")
                     <<QObject::tr("collection points");

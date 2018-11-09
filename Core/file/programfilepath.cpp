@@ -15,4 +15,5 @@ ProgramFilePath::ProgramFilePath()
     dataViewPath = configPath + QDir::separator() + QString("protocol/dataview/");
 
     configFile = configPath + QDir::separator() + QString("config.ini");
+    pluginFile = configPath + QDir::separator() + QString("plugins.xml");
 }

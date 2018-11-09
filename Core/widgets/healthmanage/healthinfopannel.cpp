@@ -83,7 +83,6 @@ void ProtocolParseThread::run()
             G_NetMutex.lock();
             G_NetCondtion.wait(&G_NetMutex);
         }
-        qDebug()<<"+======111======";
 
         G_NetMutex.lock();
         qDebug()<<"+====222==";
@@ -99,10 +98,10 @@ void ProtocolParseThread::parseNetData(NetOrginData &data)
 }
 
 HealthInfoDockPanel::HealthInfoDockPanel(QWidget *parent)
-    :Base::RComponent(Constant::PLUGIN_HEALTH_MANAGER,parent)
+    :Core::RComponent(Constant::PLUGIN_HEALTH_MANAGER,parent)
 {
     retranslateUi();
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
 }
 
 bool HealthInfoDockPanel::initialize()
@@ -117,11 +116,8 @@ bool HealthInfoDockPanel::initialize()
     if(existed){
         Datastruct::SignalProtocol sprotocol = bprotocol.protocol;
         std::for_each(sprotocol.fields.begin(),sprotocol.fields.end(),[&](Datastruct::FieldData fdata){
-            qDebug()<<fdata.name;
         });
     }
-
-
 
 //    //TODO 【20181108将网络数据解析】
 //    TcpConnection * connection = new TcpConnection;
@@ -170,14 +166,17 @@ bool HealthInfoDockPanel::initialize()
 
 QString HealthInfoDockPanel::pluginName()
 {
-//    cout<<"1"<<endl;
     return tr("HealthInfo panel");
 }
 
 QString HealthInfoDockPanel::MachineName()
 {
-//    cout<<"2"<<endl;
     return tr("Machine");
+}
+
+Core::RComponent *HealthInfoDockPanel::clone()
+{
+    return new HealthInfoDockPanel;
 }
 
 void HealthInfoDockPanel::onMessage(MessageType::MessType type)
@@ -191,6 +190,11 @@ void HealthInfoDockPanel::onMessage(MessageType::MessType type)
     }
 }
 
+void HealthInfoDockPanel::onNetwork(int protocolType, Datastruct::FieldValues &data)
+{
+
+}
+
 QSize HealthInfoDockPanel::sizeHint() const
 {
     return QSize(300,200);
@@ -198,8 +202,9 @@ QSize HealthInfoDockPanel::sizeHint() const
 
 void HealthInfoDockPanel::retranslateUi()
 {
-//    cout<<"3"<<endl;
+    setObjectName("healthControl");
     m_name = tr("HealthInfo panel");
+    pluginId = "0x0001";
     setWindowTitle(m_name);
 }
 

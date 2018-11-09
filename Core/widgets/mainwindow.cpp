@@ -12,12 +12,12 @@
 #include "Base/actionmanager/actioncontainer.h"
 #include "Base/actionmanager/actionmanager.h"
 #include "Base/actionmanager/action.h"
-#include "Base/pluginmanager/pluginmanager.h"
+#include "pluginmanager/pluginmanager.h"
 #include "Base/constants.h"
 #include "Base/util/rsingleton.h"
 #include "Base/common/stylemanager.h"
 #include "Base/common/languagemanager.h"
-#include "Base/pluginmanager/subject.h"
+#include "pluginmanager/subject.h"
 #include "Base/util/rlog.h"
 #include "Base/util/fileutils.h"
 #include "healthmanage/healthinfopannel.h"
@@ -29,23 +29,24 @@
 #include "datadisplay/allplusegraphics.h"
 #include "datadisplay/mfacquisitiongraphics.h"
 
+#include "network/protocolparsethread.h"
+
 #include "global.h"
 #include "file/globalconfigfile.h"
 #include "file/programfilepath.h"
 #include "widgets/taskcontrol/taskcontrolpanel.h"
 #include "shortcutsettings.h"
 
+#include "mapview.h"
+
 #include <QDateTime>
 #include <QScreen>
 #include <QFileDialog>
 #include <QTimer>
 
-#include <iostream>
-using namespace std;
+#include "protocol/pluginloader.h"
 
 using namespace Base;
-
-
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -60,15 +61,10 @@ MainWindow::MainWindow(QWidget *parent) :
     RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Dark style"),":/resource/style/Black.qss",false));
     RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Light style"),":/resource/style/White.qss",false));
     RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Technology(Big) style"),":/resource/style/TechnologyBig.qss",false));
-//    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Technology(Small) style"),":/resource/style/TechnologySmall.qss",true));
     RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Dark(Big) style"),":/resource/style/BlackBig.qss",false));
-//    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Dark(Small) style"),":/resource/style/BlackSmall.qss",false));
-
     RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Light(Big) style"),":/resource/style/WhiteBig.qss",false));
-//    RSingleton<StyleManager>::instance()->addStyle(new CustomStyle(tr("Light(Small) style"),":/resource/style/WhiteSmall.qss",false));
 
-
-    RSingleton<Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
 
     initMenu();
     initComponent();
@@ -82,6 +78,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    RSingleton<Core::ProtocolParseThread>::instance()->stopMe();
+
+
     delete ui;
 }
 
@@ -335,7 +334,7 @@ void MainWindow::switchLanguage()
 void MainWindow::updateLanguage(QString lanFileName)
 {
     if(RSingleton<LanguageManager>::instance()->switchLanguage(lanFileName)){
-        RSingleton<Subject>::instance()->notify(MessageType::MESS_LAN_CHANGED);
+        RSingleton<Core::Subject>::instance()->notify(MessageType::MESS_LAN_CHANGED);
     }
 }
 
@@ -405,54 +404,34 @@ void MainWindow::loadUserSetting()
 
 void MainWindow::retranslateUi()
 {
-//    QFont font;
-//    font.setPointSize(20);
-//    QFont font( “Microsoft YaHei”, 10, 75);
     serverMenu->menu()->setTitle(tr("Program(&P)"));
     exitAction->setText(tr("Exit(&X)"));
-//    serverMenu->menu()->setFont(font);
-//    exitAction->setFont(font);
 
     viewMenu->menu()->setTitle(tr("View(&V)"));
     viewManagerMenu->menu()->setTitle(tr("View manager"));
     importViewAction->setText(tr("Import view"));
     exportViewAction->setText(tr("Export view"));
-//    viewMenu->menu()->setFont(font);
-//    viewManagerMenu->menu()->setFont(font);
-//    importViewAction->setFont(font);
-//    exportViewAction->setFont(font);
 
     settingsMenu->menu()->setTitle(tr("Settings(&S)"));
     topHintAction->setText(tr("Top hint"));
     fullScreenAction->setText(tr("Full screen"));
-//    settingsMenu->menu()->setFont(font);
-//    topHintAction->setFont(font);
-//    fullScreenAction->setFont(font);
 
     styleMenu->menu()->setTitle(tr("Styles(&Y)"));
     lanMenu->menu()->setTitle(tr("Language(&L)"));
     shortcutAction->setText(tr("Shortcut settings(&T)"));
     screenshotAction->setText(tr("Screenshot(&S)"));
-//    styleMenu->menu()->setFont(font);
-//    lanMenu->menu()->setFont(font);
-//    shortcutAction->setFont(font);
-//    screenshotAction->setFont(font);
 
     helpMenu->menu()->setTitle(tr("Help(&H)"));
     supportAction->setText(tr("Technical support(&T)"));
     aboutPorgramAction->setText(tr("About program(&A)"));
-//    helpMenu->menu()->setFont(font);
-//    supportAction->setFont(font);
-//    aboutPorgramAction->setFont(font);
 
-    PluginManager::ComponentMap maps = RSingleton<PluginManager>::instance()->plugins();
-    PluginManager::ComponentMap::iterator iter = maps.begin();
+    Core::PluginManager::ComponentMap maps = RSingleton<Core::PluginManager>::instance()->getAllActivePlugins();
+    Core::PluginManager::ComponentMap::iterator iter = maps.begin();
     while(iter != maps.end()){
         Id id = iter.value()->id();
         Action * act = ActionManager::instance()->action(id);
         if(act){
             act->action()->setText(iter.value()->name());
-//            act->action()->setFont(font);
         }
 
         QStringList slist = id.toString().split(".");
@@ -462,7 +441,6 @@ void MainWindow::retranslateUi()
         Action * module = ActionManager::instance()->action(mid);
         if(module){
             module->action()->setText(iter.value()->pluginName());
-//            module->action()->setFont(font);
         }
         iter++;
     }
@@ -495,15 +473,12 @@ void MainWindow::screenshotSettings()
 {
     QString saveName = QFileDialog::getSaveFileName(this,tr("save screenshot"),QDir::homePath(),QString("*.jpg"));
     if(!saveName.isEmpty()){
-        cout<<saveName.toStdString()<<endl;
         QEventLoop eventloop;
         QTimer::singleShot(50, &eventloop, SLOT(quit()));
         eventloop.exec();
 
         QScreen *screen = QGuiApplication::primaryScreen();
         QString filePathName = saveName;
-//        filePathName += QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss-zzz");
-//        filePathName += ".jpg";
 
         if(!screen->grabWindow(0).save(filePathName, "jpg"))
         {
@@ -511,16 +486,6 @@ void MainWindow::screenshotSettings()
         }else{
             QMessageBox::information(this,tr("information"),tr("save screenshot successfully!"));
         }
-
-//        RTextFile file(saveName);
-//        TaskParsedMethod * method = new TaskParsedMethod;
-//        method->setTaskInfo(d->taskInfoList);
-//        file.setParseMethod(method);
-//        if(file.startSave(QFile::WriteOnly | QFile::Truncate)){
-//            QMessageBox::information(this,tr("information"),tr("save successfully!"));
-//        }else{
-//            QMessageBox::warning(this,tr("warning"),tr("save failed!"));
-//        }
     }
 
 }
@@ -552,75 +517,115 @@ void MainWindow::exportView()
 }
 
 /*!
- * @brief   初始化各个组件
+ * @brief 加载可用的所有模块
  */
-void MainWindow::initComponent()
+void MainWindow::loadCmponent()
 {
-    setDockNestingEnabled(true);
-    QWidget * centeral = takeCentralWidget();
-    if (centeral)
-        delete centeral;
-
     //TODO 20180824 待从各个dll中读取
     TaskControlModel::TaskControlPanel * taskControl = new TaskControlModel::TaskControlPanel;
     HealthInfoDockPanel *healthControl = new HealthInfoDockPanel;
 
-    //数据显示模块，每个页面都是dock
     DataView::RadiationSourceTable * radiationTable = new DataView::RadiationSourceTable;
     DataView::AllPluseDock * allPluseTable = new DataView::AllPluseDock;
     DataView::MFAcquistionTable * acquistionTable = new DataView::MFAcquistionTable;
     DataView::RadiaSourceMap * radiaSourceMap = new DataView::RadiaSourceMap;
     DataView::AllPluseGraphics * allPluseGraphics = new DataView::AllPluseGraphics;
     DataView::MFAcquisitionGraphics * mfGraphics = new DataView::MFAcquisitionGraphics;
-   // DataView::SpectrumGraphics * spectrumGraphics = new DataView::SpectrumGraphics;
-
-    taskControl->setObjectName("taskControl");
-//    taskControl->setStyleSheet("QDockWidget::title{font: 75 21pt;}");
-//            MyDock->setStyleSheet("QDockWidget::title { font: 75 11pt"Ubuntu";}");
-//    label->setStyleSheet("color: orange; font-size: 14pt; font-weight: bold;");
-//    taskControl->setWidget(bodyWidget);
-//    taskControl->setTitleBarWidget(label);
-    healthControl->setObjectName("healthControl");
-    radiationTable->setObjectName("radiationTable");
-    allPluseTable->setObjectName("allPluseTable");
-    acquistionTable->setObjectName("acquistionTable");
-    radiaSourceMap->setObjectName("radiaSourceMap");
-    allPluseGraphics->setObjectName("allPluseGraphics");
-    mfGraphics->setObjectName("mfGraphics");
-   // spectrumGraphics->setObjectName("spectrumGraphics");
-
-    addDockWidget(Qt::LeftDockWidgetArea,taskControl);
-    splitDockWidget(taskControl,healthControl,Qt::Vertical);
-
-    addDockWidget(Qt::RightDockWidgetArea,radiationTable);
-    tabifyDockWidget(radiationTable,allPluseTable);
-    tabifyDockWidget(allPluseTable,acquistionTable);
-    tabifyDockWidget(acquistionTable,radiaSourceMap);
-//    tabifyDockWidget(radiaSourceMap,allPluseGraphics);
-//    tabifyDockWidget(allPluseGraphics,mfGraphics);
-//    tabifyDockWidget(mfGraphics,spectrumGraphics);
 
     radiationTable->raise();
 
-    RSingleton<PluginManager>::instance()->addPlugin(taskControl);
-    RSingleton<PluginManager>::instance()->addPlugin(healthControl);
+    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(taskControl);
+    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(healthControl);
 
-    RSingleton<PluginManager>::instance()->addPlugin(radiationTable);
-    RSingleton<PluginManager>::instance()->addPlugin(allPluseTable);
-    RSingleton<PluginManager>::instance()->addPlugin(acquistionTable);
-    RSingleton<PluginManager>::instance()->addPlugin(radiaSourceMap);
+    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(radiationTable);
+    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(allPluseTable);
+    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(acquistionTable);
+    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(radiaSourceMap);
 
-//    RSingleton<PluginManager>::instance()->addPlugin(allPluseGraphics);
-//    RSingleton<PluginManager>::instance()->addPlugin(mfGraphics);
-//    RSingleton<PluginManager>::instance()->addPlugin(spectrumGraphics);
+    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(allPluseGraphics);
+    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(mfGraphics);
+}
 
+/*!
+ * @brief   初始化各个组件
+ */
+void MainWindow::initComponent()
+{
+    setDockNestingEnabled(true);
 
-    RSingleton<PluginManager>::instance()->load();
-    PluginManager::ComponentMap maps = RSingleton<PluginManager>::instance()->plugins();
+    mapView = new MapView(centralWidget());
+    QHBoxLayout * mainLayout = new QHBoxLayout;
+    mainLayout->setContentsMargins(0,0,0,0);
+    mainLayout->addWidget(mapView);
+    centralWidget()->setLayout(mainLayout);
 
-    PluginManager::ComponentMap::iterator iter = maps.begin();
+    loadCmponent();
+
+    //加载配置
+    RSingleton<Core::PluginLoader>::instance()->initConfigFile();
+
+    //【1】实例化网络
+    Core::NetworkMap * networkMap = RSingleton<Core::PluginLoader>::instance()->getNetworks();
+    Core::NetworkMap::iterator niter = networkMap->begin();
+    while(niter != networkMap->end()){
+        Datastruct::NetworkInfo ninfo = niter.value();
+
+        niter++;
+    }
+
+    //【1.1】网络解析
+    RSingleton<Core::ProtocolParseThread>::instance();
+
+    //【2】实例化模块
+    Core::ModuleMap * moduleMap = RSingleton<Core::PluginLoader>::instance()->getModules();
+    Core::ModuleMap::iterator miter = moduleMap->begin();
+    QMap<int,Core::RComponent *> rcmaps;
+    while(miter != moduleMap->end()){
+        Datastruct::ModuleInfo mm = miter.value();
+
+        Core::RComponent * plugin = RSingleton<Core::PluginManager>::instance()->getAvailblePlugin(mm.pluginId);
+        if(plugin){
+
+            //向网络解析模块注册感兴趣的协议
+            RSingleton<Core::ProtocolParseThread>::instance()->registNetworkObserver(mm.pluginId,mm.protocols,Datastruct::N_TCP);
+
+            plugin = plugin->clone();
+            Core::RComponent * beforePlugin = rcmaps.value(static_cast<int>(mm.layout));
+            if(beforePlugin){
+                tabifyDockWidget(beforePlugin,plugin);
+            }else{
+                switch(mm.layout){
+                    case Datastruct::LEFT:
+                            addDockWidget(Qt::LeftDockWidgetArea,plugin);
+                        break;
+                    case Datastruct::TOP:
+                            addDockWidget(Qt::TopDockWidgetArea,plugin);
+                        break;
+                    case Datastruct::RIGHT:
+                            addDockWidget(Qt::RightDockWidgetArea,plugin);
+                        break;
+                    case Datastruct::BOTTOM:
+                            addDockWidget(Qt::BottomDockWidgetArea,plugin);
+                        break;
+                    default:
+                        break;
+                }
+                rcmaps.insert(static_cast<int>(mm.layout),plugin);
+            }
+
+            RSingleton<Core::PluginManager>::instance()->addActivePlugin(plugin);
+        }
+        miter++;
+    }
+
+    RSingleton<Core::ProtocolParseThread>::instance()->startMe();
+
+    RSingleton<Core::PluginManager>::instance()->load();
+    Core::PluginManager::ComponentMap maps = RSingleton<Core::PluginManager>::instance()->getAllActivePlugins();
+
+    Core::PluginManager::ComponentMap::iterator iter = maps.begin();
     while(iter != maps.end()){
-        RComponent * comp = iter.value();
+        Core::RComponent * comp = iter.value();
         comp->setFeatures(QDockWidget::AllDockWidgetFeatures);
 //        comp->setFloating(true);
         comp->initialize();
@@ -652,7 +657,7 @@ void MainWindow::initComponent()
 
         iter++;
     }
-    connect(this,SIGNAL(sendForHealthPanelResize()),healthControl,SLOT(recForHealthPanelResize()));
+//    connect(this,SIGNAL(sendForHealthPanelResize()),healthControl,SLOT(recForHealthPanelResize()));
 }
 
 /*!

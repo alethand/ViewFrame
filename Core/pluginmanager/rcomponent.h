@@ -13,13 +13,14 @@
 
 #include <QDockWidget>
 
-#include "../actionmanager/id.h"
-#include "../pluginmanager/observer.h"
-#include "../messagetype.h"
+#include "Base/actionmanager/id.h"
+#include "Base/messagetype.h"
+#include "pluginmanager/observer.h"
+#include "protocol/datastruct.h"
 
-namespace Base{
+namespace Core{
 
-class BASESHARED_EXPORT RComponent : public QDockWidget,public Observer
+class RComponent : public QDockWidget,public Core::Observer
 {
     Q_OBJECT
 public:
@@ -27,17 +28,22 @@ public:
     virtual ~RComponent();
 
     Id id();
+    QString getPluginId();
     QString name();
 
     virtual bool initialize() = 0;
     virtual void release() = 0;
     virtual QString pluginName() = 0;
+    virtual RComponent * clone() = 0;
 
     virtual void onMessage(MessageType::MessType type) = 0;
+    virtual void onNetwork(int protocolType,Datastruct::FieldValues & data) = 0;
 
 protected:
     Id m_id;
+    QString pluginId;
     QString m_name;               /*!< dockwidget titlebar */
+    static int compIndex;         /*!< 组件索引 */
 };
 
 } //namespace Base

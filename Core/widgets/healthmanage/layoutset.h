@@ -28,8 +28,8 @@ class QLineEdit;
 #include "healthstate_display.h"
 #include "fileOpt.h"
 #include "head.h"
-#include "Base/pluginmanager/observer.h"
-#include "Base/selfwidget/pageinfo.h"
+#include "pluginmanager/observer.h"
+#include "widgets/pageinfo.h"
 #include "Base/util/fileutils.h"
 
 //update
@@ -69,7 +69,7 @@ public:
     static QColor othersColor;
 };
 
-class LayoutAndDisplay:public QWidget,public PageInfo,public Base::Observer
+class LayoutAndDisplay:public QWidget,public PageInfo,public Core::Observer
 {
     Q_OBJECT
 public:

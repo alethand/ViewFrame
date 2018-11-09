@@ -20,7 +20,7 @@
 #include <QStackedWidget>
 
 #include <QModelIndex>
-#include "Base/pluginmanager/rcomponent.h"
+#include "pluginmanager/rcomponent.h"
 #include "protocol/datastruct.h"
 #include "modelview/tableviewdata.h"
 #include "Graphics/energybar.h"
@@ -33,7 +33,7 @@ namespace DataView {
 
 class AllPluseTablePrivate;
 
-class AllPluseDock : public Base::RComponent
+class AllPluseDock : public Core::RComponent
 {
     Q_OBJECT
 public:
@@ -50,7 +50,9 @@ public:
     void initView();
     void ininData();
     QString pluginName();
+    Core::RComponent * clone();
     void onMessage(MessageType::MessType type);
+    void onNetwork(int protocolType,Datastruct::FieldValues & data);
 
 public slots:
     void recvAllPlusePara(char *buff, int len);

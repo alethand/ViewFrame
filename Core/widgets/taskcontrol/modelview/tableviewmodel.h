@@ -14,12 +14,12 @@
 #include <QAbstractTableModel>
 #include <QSharedPointer>
 
-#include "Base/pluginmanager/observer.h"
+#include "pluginmanager/observer.h"
 #include "../head.h"
 
 namespace TaskControlModel {
 
-class TableViewModel : public QAbstractTableModel , public Base::Observer
+class TableViewModel : public QAbstractTableModel , public Core::Observer
 {
     Q_OBJECT
 public:

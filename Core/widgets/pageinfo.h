@@ -14,13 +14,12 @@
 class QPushButton;
 class QSpinBox;
 
-#include "../base_global.h"
 #include "../pluginmanager/observer.h"
 
 /*!
  * \brief 想要拥有换页按钮的类必须继承这个类并实现upDateInterface方法
  */
-class BASESHARED_EXPORT PageInfo
+class PageInfo
 {
 public:
     PageInfo(){}
@@ -38,7 +37,7 @@ public:
  */
 class SwitchPagePrivate;
 
-class BASESHARED_EXPORT SwitchPage : public QWidget,public Base::Observer
+class  SwitchPage : public QWidget,public Core::Observer
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(SwitchPage)
