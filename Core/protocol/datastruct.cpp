@@ -178,9 +178,43 @@ QVariant Datastruct::MidFreqInfo::Core::getData(int index)
 
 namespace Datastruct{
 
+//TODO 20181109保存时只需要保存字段的name、index以及索引就好，基本信息从协议中获取
+QDataStream & operator<< (QDataStream &stream, const BitData &data)
+{
+    stream<<data.name<<data.index<<data.enable<<data.visible<<data.weight<<data.precision<<data.unit<<data.displayText;
+    return stream;
+}
+
+QDataStream & operator>> (QDataStream &stream, BitData &data)
+{
+
+    return stream;
+}
+
+QDataStream & operator<< (QDataStream &stream, const BitField &field)
+{
+    stream<<field.bitList.size();
+    std::for_each(field.bitList.begin(),field.bitList.end(),[&](const BitData data){
+        stream<<data;
+    });
+    return stream;
+}
+
+QDataStream & operator>> (QDataStream &stream, BitField &field)
+{
+    int size = 0;
+    stream >> size;
+    for(int i = 0;i < size;i++){
+        BitData data;
+        stream>>data;
+        field.bitList.append(data);
+    }
+    return stream;
+}
+
 QDataStream & operator<<(QDataStream & stream,const FieldData & data)
 {
-    stream<<data.name<<data.index<<data.bytes<<data.isSigned<<data.bits<<data.offset
+    stream<<data.name<<data.index<<data.bytes<<data.isSigned<<data.bits
          <<data.weight<<data.precision<<data.unit<<data.displayText;
 
     stream<<static_cast<int>(data.type);
@@ -217,7 +251,7 @@ QDataStream & operator<<(QDataStream & stream,const FieldData & data)
 
 QDataStream & operator>>(QDataStream & stream,FieldData & data)
 {
-    stream>>data.name>>data.index>>data.bytes>>data.isSigned>>data.bits>>data.offset
+    stream>>data.name>>data.index>>data.bytes>>data.isSigned>>data.bits
          >>data.weight>>data.precision>>data.unit>>data.displayText;
 
     int type = 0;

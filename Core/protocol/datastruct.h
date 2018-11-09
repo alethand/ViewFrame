@@ -564,22 +564,62 @@ struct PubHead{
  * @details 根据Field的type来转换为对应的值，可转换的包括int、double、date等
  */
 struct DataRange{
-    QVariant minValue;
-    QVariant maxValue;
+    QString minValue;
+    QString maxValue;
+};
+
+/*!
+ *  @brief 位数据信息描述
+ *  @details
+ */
+struct BitData{
+
+    friend QDataStream & operator<< (QDataStream & stream,const BitData & field);
+    friend QDataStream & operator>> (QDataStream & stream,BitData & field);
+
+    QString  name;        /*!< 控件显示信息 */
+    ControlType  type;    /*!< 字段类型 */
+    int index;            /*!< 字段唯一标识符，初始为0。新添加字段后，此值+1 */
+
+    int startPos;         /*!< 起始位 */
+    int last;             /*!< 持续位数 */
+    bool enable;          /*!< 控件是否可用 */
+    bool visible;         /*!< 是否可见 */
+    float weight;         /*!< 权值 */
+    float precision;      /*!< 精度 */
+    QString unit;         /*!< 单位 */
+    QString displayText;  /*!< 显示文本 */
+    QVariant defaultValue;/*!< 默认值 */
+    QVariant value;       /*!< 控件中显示值 */
+    QStringList list;     /*!< type为ComboBox时，保存下拉框中子项名称 */
+};
+typedef QList<BitData> BitList;
+
+/*!
+ *  @brief 位字段
+ *  @details
+ */
+struct BitField{
+
+    friend QDataStream & operator<< (QDataStream & stream,const BitField & field);
+    friend QDataStream & operator>> (QDataStream & stream,BitField & field);
+
+    BitList bitList;        /*!< 位字段集合 */
 };
 
 /*!
  *  @brief 单个字段内容数据
- *  @warning (字节数-符号位) 与 (比特数-偏移量) 这两对值不能同时使用，属于互斥关系
+ *  @warning (字节数-符号位) 与 (位操作集合) 这两对值不能同时使用，属于互斥关系
  */
 struct FieldData{
 public:
     FieldData(){
         bytes =0;isSigned = false;
-        bits = 0; offset = 0;
         weight = 1;
         precision = 1;
         enable = true;
+        visible = true;
+        bitOperator = false;
     }
 
     friend QDataStream & operator<<(QDataStream & stream,const FieldData & data);
@@ -587,21 +627,24 @@ public:
 
     QString  name;        /*!< 控件显示信息 */
     ControlType  type;    /*!< 字段类型 */
-    int index;            /*!< 字段唯一标识符，初始为0。新添加字段后，此值+1 */
+
+    int index;            /*!< 字段唯一标识符，初始为0。无需从xml中解析，新添加字段后，此值+1 */
+    bool bitOperator;     /*!< 位操作字段，当bits中不为0，此值为true */
 
     ushort bytes;         /*!< 字节数 */
     bool   isSigned;      /*!< 有无符号位 */
 
-    ushort bits;          /*!< 比特位数 */
-    ushort offset;        /*!< 偏移量 */
+    BitField bits;        /*!< 位操作集合 */
 
     bool enable;          /*!< 控件是否可用 */
+    bool visible;         /*!< 是否可见，可控制此字段是否显示在表格等控件上 */
     float weight;         /*!< 权值 */
     float precision;      /*!< 精度 */
+    int repeat;           /*!< 重复的次数，此字段之后连续出现的次数 */
     QString unit;         /*!< 单位 */
     DataRange range;      /*!< 数值范围 */
     QString displayText;  /*!< 显示文本 */
-    QVariant defaultValue; /*!< 默认值 */
+    QString defaultValue; /*!< 默认值 */
     QVariant value;       /*!< 控件中显示值 */
     QStringList list;     /*!< type为ComboBox时，保存下拉框中子项名称 */
 };
@@ -617,6 +660,7 @@ struct Field : public PubHead{
     FieldData data;        /*!< 字段属性 */
 };
 
+//TODO 20181109 待支持对bit的值
 /*!
  *  @brief 字段值
  *  @details
@@ -632,8 +676,9 @@ typedef QList<FieldValue> FieldValues;
 struct NodeInfo{
     NodeInfo():window("window"),name("name"),width("width"),height("height"),layout("layout")
     ,type("type"),widget("widget"),groupBox("groupbox"),item("item"),items("items"),nodeShow("show"),nodeColumn("column"),nodeEnabled("enabled"),
-    itemName("name"),itemBytes("bytes"),itemSigned("signed"),itemBits("bits"),itemOffset("offset"),itemText("text"),
-    itemWeight("weight"),itemPrecision("precision"),itemUnit("unit"),itemType("type"),itemComboxList("list"),itemRange("range"){
+    itemName("name"),itemBytes("bytes"),itemSigned("signed"),itemBits("bits"),itemText("text"),
+    itemWeight("weight"),itemPrecision("precision"),itemUnit("unit"),itemType("type"),itemComboxList("list"),itemRange("range"),itemEnable("enable"),
+    itemVisible("visible"),itemDefaultValue("default"),bitStart("start"),bitLast("last"),itemMax("max"),itemMin("min"),itemRepeat("repeat"){
 
     }
     QString window;
@@ -656,15 +701,23 @@ struct NodeInfo{
     QString itemName;
     QString itemBytes;
     QString itemSigned;
+    QString itemEnable;
+    QString itemVisible;
     QString itemBits;
-    QString itemOffset;
-    QString itemText;
     QString itemWeight;
+    QString itemText;
     QString itemPrecision;
     QString itemUnit;
+    QString itemRange;
     QString itemType;
     QString itemComboxList;
-    QString itemRange;
+    QString itemDefaultValue;
+    QString itemMax;
+    QString itemMin;
+    QString itemRepeat;
+
+    QString bitStart;
+    QString bitLast;
 };
 
 /*!
@@ -751,6 +804,8 @@ struct Container{
  *  @brief 单个协议描述
  */
 struct SignalProtocol{
+    int count;                   /*!< 当前协议数量：>0：表示固定的数量，-1：表示数量不定 */
+    int memoryBytes;            /*!< 当count字段为变长时，count字段占用几字节空间,用于解析协议数量 */
     int length;                 /*!< 协议长度 */
     QList<FieldData> fields;    /*!< 协议字段集合 */
 };
@@ -763,7 +818,7 @@ struct BaseProtocol{
     int startCode;      /*!< 开始标志码 */
     int type;           /*!< 协议类型 */
     int length;         /*!< 整包数据长度 */
-    SignalProtocol protocol;    /*!< 协议 */
+    QList<SignalProtocol> protocols;    /*!< 协议族 */
     int endCode;        /*!< 结束标志码 */
 };
 /**************************健康管理/数据显示模块************************************/

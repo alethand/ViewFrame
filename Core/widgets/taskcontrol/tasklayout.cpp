@@ -7,6 +7,8 @@
 #include <QVBoxLayout>
 #include <QGridLayout>
 
+#include "protocol/commonprotocolparse.h"
+
 namespace TaskControlModel
 {
 
@@ -75,10 +77,10 @@ bool TaskLayoutParse::startParse(QDomNode &node)
                }
            }
            generateWidget(windowContainer);
+           return true;
        }
     }
-
-    return true;
+    return false;
 }
 
 /*!
@@ -185,34 +187,44 @@ Datastruct::Field *TaskLayoutParse::parseAttributes(QDomNode &node)
             newItem->data.bytes = domElem->text().toUShort();
          else if(nodeInfo.itemSigned == domElem->tagName() )
          {
-             if(newItem->data.bytes !=0)
-                 newItem->data.isSigned = (bool)domElem->text().toUShort();
-             else
-                 qDebug()<<"error1";
+            newItem->data.isSigned = (bool)domElem->text().toUShort();
          }
          else if(nodeInfo.itemBits == domElem->tagName() )
-             newItem->data.bytes = domElem->text().toUShort();
-         else if(nodeInfo.itemOffset == domElem->tagName())
          {
-             if(newItem->data.bits !=0)
-                newItem->data.offset = domElem->text().toUShort();
-             else
-                 qDebug()<<"error2";
+             newItem->data.bitOperator = true;
+             Core::CommonProtocolParse::parseBits(node,newItem->data);
          }
          else if(nodeInfo.itemText == domElem->tagName())
          {
              newItem->data.displayText = domElem->text();
+         }
+         else if(nodeInfo.itemEnable == domElem->tagName())
+         {
+             newItem->data.enable = domElem->text().toInt();
+         }
+         else if(nodeInfo.itemVisible == domElem->tagName())
+         {
+             newItem->data.visible = domElem->text().toInt();
          }
          else if(nodeInfo.itemWeight == domElem->tagName())
          {
              newItem->data.weight = domElem->text().toFloat();
          }
          else if(nodeInfo.itemPrecision == domElem->tagName())
+         {
              newItem->data.precision = domElem->text().toFloat();
+         }
          else if(nodeInfo.itemUnit == domElem->tagName())
+         {
              newItem->data.unit = domElem->text();
-         else  if(nodeInfo.itemType == domElem->tagName()){
+         }
+         else  if(nodeInfo.itemType == domElem->tagName())
+         {
                parseType(node,newItem);
+         }
+         else if(nodeInfo.itemDefaultValue == domElem->tagName())
+         {
+             newItem->data.defaultValue = domElem->text();
          }
          else if(nodeInfo.itemComboxList == domElem->tagName()&&newItem->type == Datastruct::ControlType::ComboBox
                  &&newItem->widget != NULL)
@@ -229,11 +241,11 @@ Datastruct::Field *TaskLayoutParse::parseAttributes(QDomNode &node)
               QDomNodeList nodeList = node.childNodes();
               for(int i = 0;i < nodeList.count();i++)
               {   nod =& (nodeList.at(i) );
-                  if(nod->toElement().tagName() == "max"){
-//                      newItem->data.maxValue = nod->toElement().text().toUShort();
+                  if(nod->toElement().tagName() == nodeInfo.itemMax){
+                       newItem->data.range.maxValue = nod->toElement().text();
                   }
-                  else  if(nod->toElement().tagName() == "min"){
-//                      newItem->data.minValue = nod->toElement().text().toUShort();
+                  else  if(nod->toElement().tagName() == nodeInfo.itemMin){
+                       newItem->data.range.minValue = nod->toElement().text();
                   }
               }
          }

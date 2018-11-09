@@ -6,11 +6,16 @@ namespace Core{
 
 class ProtocolStruct{
 public:
-    ProtocolStruct():name("name"),type("type"),startCode("start"),endCode("end"){}
+    ProtocolStruct():name("name"),type("type"),startCode("start"),endCode("end"),itemsCount("count"),
+                itemsMemoryByte("memoryByte"),itemsLen("length"){}
     QString name;
     QString type;
     QString startCode;
     QString endCode;
+
+    QString itemsCount;
+    QString itemsMemoryByte;
+    QString itemsLen;
 };
 
 CommonProtocolParse::CommonProtocolParse()
@@ -22,7 +27,6 @@ bool CommonProtocolParse::startParse(QDomNode &rootNode)
 {
     ProtocolStruct pstruct;
     QDomElement rootElement = rootNode.toElement();
-
 
     //解析协议信息
     if(rootElement.hasAttribute(pstruct.name))
@@ -37,11 +41,18 @@ bool CommonProtocolParse::startParse(QDomNode &rootNode)
     if(rootElement.hasAttribute(pstruct.endCode))
         parsedProtocol.endCode = rootElement.attribute(pstruct.endCode).toInt();
 
-    //解析字段信息
-    if(rootElement.childNodes().size() != 1 )
+    //解析Items信息
+    if(rootElement.childNodes().size() < 1 )
         return false;
 
-    return parseItems(rootElement.childNodes().at(0));
+    bool result = false;
+    for(int i = 0;i< rootElement.childNodes().size();i++){
+        result = parseItems(rootElement.childNodes().at(i));
+        if(!result)
+           break;
+    }
+
+    return result;
 }
 
 /*!
@@ -50,21 +61,43 @@ bool CommonProtocolParse::startParse(QDomNode &rootNode)
  */
 bool CommonProtocolParse::parseItems(QDomNode & itemsNode)
 {
+    ProtocolStruct pstruct;
+    Datastruct::SignalProtocol protocol;
+
+    QDomElement itemsElement = itemsNode.toElement();
+    if(itemsElement.hasAttribute(pstruct.itemsCount))
+        protocol.count = itemsElement.attribute(pstruct.itemsCount).toInt();
+
+    if(itemsElement.hasAttribute(pstruct.itemsMemoryByte))
+        protocol.memoryBytes = itemsElement.attribute(pstruct.itemsMemoryByte).toInt();
+
+    if(itemsElement.hasAttribute(pstruct.itemsLen))
+        protocol.length = itemsElement.attribute(pstruct.itemsLen).toInt();
+
     QDomNodeList items = itemsNode.childNodes();
-    for(int i = 0; i < items.size(); i++){
+
+    for(int i = 0; i < items.size(); i++)
+    {
+        Datastruct::FieldData fieldData;
+        fieldData.index = i;
+
         QDomNode itemNode = items.at(i);
-        parseItem(itemNode.firstChild());
+        parseItem(itemNode.firstChild(),fieldData);
+
+        protocol.fields.append(fieldData);
     }
+
+    parsedProtocol.protocols.append(protocol);
     return true;
 }
 
 /*!
  * @brief 解析item节点中子节点信息
+ * @details  1.若item中有位操作，需要单独解析bits节点。
  * @param[in] itemNode 待解析的item节点
  */
-void CommonProtocolParse::parseItem(QDomNode &node)
+void CommonProtocolParse::parseItem(QDomNode &node,Datastruct::FieldData & fieldData)
 {
-    Datastruct::FieldData fieldData;
     bool hasAtttribut = true;
     QDomElement * domElem = NULL;
     Datastruct::NodeInfo nodeInfo;
@@ -82,25 +115,24 @@ void CommonProtocolParse::parseItem(QDomNode &node)
         }
         else if(nodeInfo.itemSigned == domElem->tagName() )
         {
-            if(fieldData.bytes !=0)
-                fieldData.isSigned = (bool)domElem->text().toUShort();
-            else
-                qDebug()<<"error1";
+            fieldData.isSigned = (bool)domElem->text().toUShort();
         }
         else if(nodeInfo.itemBits == domElem->tagName())
         {
-            fieldData.bytes = domElem->text().toUShort();
-        }
-        else if(nodeInfo.itemOffset == domElem->tagName()){
-
-            if(fieldData.bits !=0)
-               fieldData.offset = domElem->text().toUShort();
-            else
-                qDebug()<<"error2";
+            fieldData.bitOperator = true;
+            parseBits(node,fieldData);
         }
         else if(nodeInfo.itemText == domElem->tagName())
         {
             fieldData.displayText = domElem->text();
+        }
+        else if(nodeInfo.itemEnable == domElem->tagName())
+        {
+            fieldData.enable = domElem->text().toInt();
+        }
+        else if(nodeInfo.itemVisible == domElem->tagName())
+        {
+            fieldData.visible = domElem->text().toInt();
         }
         else if(nodeInfo.itemWeight == domElem->tagName())
         {
@@ -110,13 +142,21 @@ void CommonProtocolParse::parseItem(QDomNode &node)
         {
             fieldData.precision = domElem->text().toFloat();
         }
+        else if(nodeInfo.itemRepeat == domElem->tagName())
+        {
+            fieldData.repeat = domElem->text().toInt();
+        }
         else if(nodeInfo.itemUnit == domElem->tagName())
         {
             fieldData.unit = domElem->text();
         }
         else  if(nodeInfo.itemType == domElem->tagName())
         {
-              parseType(node,fieldData);
+              parseFieldType(node,fieldData);
+        }
+        else if(nodeInfo.itemDefaultValue == domElem->tagName())
+        {
+            fieldData.defaultValue = domElem->text();
         }
         else if(nodeInfo.itemComboxList == domElem->tagName())
         {
@@ -129,12 +169,13 @@ void CommonProtocolParse::parseItem(QDomNode &node)
              QDomNode *nod = NULL;
              QDomNodeList nodeList = node.childNodes();
              for(int i = 0;i < nodeList.count();i++)
-             {   nod =& (nodeList.at(i) );
-                 if(nod->toElement().tagName() == "max"){
-//                      fieldData.maxValue = nod->toElement().text().toUShort();
+             {
+                 nod = &(nodeList.at(i));
+                 if(nod->toElement().tagName() == nodeInfo.itemMax){
+                      fieldData.range.maxValue = nod->toElement().text();
                  }
-                 else  if(nod->toElement().tagName() == "min"){
-//                      fieldData.minValue = nod->toElement().text().toUShort();
+                 else  if(nod->toElement().tagName() == nodeInfo.itemMin){
+                      fieldData.range.minValue = nod->toElement().text();
                  }
              }
         }
@@ -145,8 +186,6 @@ void CommonProtocolParse::parseItem(QDomNode &node)
         }
         node = node.nextSibling();
     }
-
-    parsedProtocol.protocol.fields.append(fieldData);
 }
 
 /*!
@@ -154,7 +193,7 @@ void CommonProtocolParse::parseItem(QDomNode &node)
  * @param[in] node 待解析类型节点
  * @param[in] data 保存解析后的协议信息
  */
-void CommonProtocolParse::parseType(QDomNode &node, Datastruct::FieldData &data)
+void CommonProtocolParse::parseFieldType(QDomNode &node, Datastruct::FieldData &data)
 {
     Datastruct::WidgetType wtype;
     QDomElement *domElem = NULL;
@@ -207,6 +246,119 @@ void CommonProtocolParse::parseType(QDomNode &node, Datastruct::FieldData &data)
     else if(domElem->text() == wtype.list)
     {
         data.type = Datastruct::ControlType::List;
+    }
+}
+
+/*!
+ * @brief 解析位字段描述信息
+ * @param[in] node 待解析类型节点
+ * @param[in] data 保存解析后的协议信息
+ */
+void CommonProtocolParse::parseBits(QDomNode &node, Datastruct::FieldData &data)
+{
+    QDomNodeList bits = node.childNodes();
+    for(int i = 0; i < bits.size();i++)
+    {
+        QDomNode bitNode = bits.at(i);
+
+        bool hasAtttribut = true;
+        Datastruct::NodeInfo nodeInfo;
+
+        Datastruct::BitData bitData;
+        bitData.index = i;
+
+        QDomNode childNode = bitNode.firstChild();
+        while(!childNode.isNull() && hasAtttribut)
+        {
+            QDomElement childElement = childNode.toElement();
+
+            if(nodeInfo.itemName == childElement.tagName())
+            {
+                bitData.name = childElement.text();
+            }
+            else if(nodeInfo.bitStart == childElement.tagName())
+            {
+                bitData.startPos = childElement.text().toInt();
+            }
+            else if(nodeInfo.bitLast == childElement.tagName() )
+            {
+                bitData.last = childElement.text().toInt();
+            }
+            else if(nodeInfo.itemText == childElement.tagName())
+            {
+                bitData.displayText = childElement.text();
+            }
+            else if(nodeInfo.itemEnable == childElement.tagName())
+            {
+                bitData.enable = childElement.text().toInt();
+            }
+            else if(nodeInfo.itemVisible == childElement.tagName())
+            {
+                bitData.visible = childElement.text().toInt();
+            }
+            else if(nodeInfo.itemWeight == childElement.tagName())
+            {
+                bitData.weight = childElement.text().toFloat();
+            }
+            else if(nodeInfo.itemPrecision == childElement.tagName())
+            {
+                bitData.precision = childElement.text().toFloat();
+            }
+            else if(nodeInfo.itemUnit == childElement.tagName())
+            {
+                bitData.unit = childElement.text();
+            }
+            else if(nodeInfo.itemType == childElement.tagName())
+            {
+                  parseBitType(node,bitData);
+            }
+            else if(nodeInfo.itemDefaultValue == childElement.tagName())
+            {
+                bitData.defaultValue = childElement.text();
+            }
+            else if(nodeInfo.itemComboxList == childElement.tagName())
+            {
+                QDomNodeList nodeList = node.childNodes();
+                for(int i = 0;i < nodeList.count();i++)
+                    bitData.list<<nodeList.at(i).toElement().text();
+            }
+            else
+            {
+               hasAtttribut = false;
+               continue;
+            }
+            childNode = childNode.nextSibling();
+        }
+
+        data.bits.bitList.append(bitData);
+    }
+}
+
+/*!
+ * @brief 解析bit位所显示的控件类型
+ * @details 因bit位特殊，一般不作为浮点、日期等的显示，常用于整形数据显示。因此其解析的字段类型比FieldData较少。
+ */
+void CommonProtocolParse::parseBitType(QDomNode &node, Datastruct::BitData &data)
+{
+    Datastruct::WidgetType wtype;
+    QDomElement *domElem = NULL;
+    domElem = &(node.toElement());
+
+    if(domElem->text()== wtype.combox)
+    {
+        data.type = Datastruct::ControlType::ComboBox;
+    }
+    else if(domElem->text() == wtype.checkBox)
+    {
+        data.type = Datastruct::ControlType::CheckBox;
+    }
+    else if(domElem->text() == wtype.radioButton)
+    {
+        data.type = Datastruct::ControlType::RadioButton;
+    }
+    else if(domElem->text() == wtype.valueint)
+    {
+        data.type = Datastruct::ControlType::ValueIntEdit;
     }
 }
 

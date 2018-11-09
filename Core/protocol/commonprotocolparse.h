@@ -9,6 +9,38 @@
  *  @warning
  *  @copyright NanJing RenGu.
  *  @note
+ *      20181109:wey:调整协议格式字段，支持对多协议的支持；调整对位操作的解析；
+ *
+ *
+ <protocol  name = "健康管理" type="0xCCDD" start="0x1ACF" end="0x0000FC1D" >
+    <items count="1" memoryByte="0" length="50">
+        <item>
+            <name>回放数据类型</name>
+            <bytes>4</bytes>
+            <bits>
+                <bit>
+                    <name>回放速度</name>
+                    <start>0</start>
+                    <last>1</last>
+                    <unit>度</unit>
+                    <weight>1.0</weight>
+                    <precision>1.0</precision>
+                    <list>
+                        <string>辐射源</string>
+                        <string>全脉冲</string>
+                        <string>中频采集</string>
+                        <string>频谱</string>
+                        <string>设备状态</string>
+                    </list>
+                </bit>
+            </bits>
+        </item>
+    </items>
+
+    <items count="-1" memoryByte="4" length="50">
+        <item />
+    </items>
+</protocol>
  */
 #ifndef COMMONPROTOCOLPARSE_H
 #define COMMONPROTOCOLPARSE_H
@@ -26,10 +58,15 @@ public:
     bool  startParse(QDomNode & rootNode);
     Datastruct::BaseProtocol getProtocol(){return parsedProtocol;}
 
+    static void parseBits(QDomNode &node, Datastruct::FieldData &data);
+
 private:
     bool parseItems(QDomNode & itemsNode);
-    void parseItem(QDomNode &node);
-    void parseType(QDomNode &node, Datastruct::FieldData &data);
+
+    void parseItem(QDomNode &node, Datastruct::FieldData &fieldData);
+    void parseFieldType(QDomNode &node, Datastruct::FieldData &data);
+
+    static void parseBitType(QDomNode &node, Datastruct::BitData &data);
 
 private:
     Datastruct::BaseProtocol parsedProtocol;

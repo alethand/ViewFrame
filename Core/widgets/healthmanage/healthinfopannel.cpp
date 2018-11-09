@@ -108,16 +108,16 @@ bool HealthInfoDockPanel::initialize()
 {
     //TODO 【20181108将字段设置至表格上】
     ProgramFilePath filePath;
-    RSingleton<Core::ProtocolManager>::instance()->parseLocalDir(filePath.healthManagePath);
+    RSingleton<Core::ProtocolManager>::instance()->parseLocalDir(filePath.taskControlPath);
 
     bool existed = false;
     Datastruct::BaseProtocol bprotocol = RSingleton<Core::ProtocolManager>::instance()->getProtocol(QStringLiteral("健康管理"),existed);
 
-    if(existed){
-        Datastruct::SignalProtocol sprotocol = bprotocol.protocol;
-        std::for_each(sprotocol.fields.begin(),sprotocol.fields.end(),[&](Datastruct::FieldData fdata){
-        });
-    }
+//    if(existed){
+//        Datastruct::SignalProtocol sprotocol = bprotocol.protocols.at(0);
+//        std::for_each(sprotocol.fields.begin(),sprotocol.fields.end(),[&](Datastruct::FieldData fdata){
+//        });
+//    }
 
 //    //TODO 【20181108将网络数据解析】
 //    TcpConnection * connection = new TcpConnection;
