@@ -14,6 +14,7 @@
 
 #include "rtask.h"
 
+#include "protocol/datastruct.h"
 #include "global.h"
 using namespace RGlobal;
 
@@ -38,13 +39,23 @@ public:
         QString moduleId;           /*!< 模块Id */
     };
 
+    struct ProtocolHead{
+        int count;
+        int memoryBytes;
+    };
+
     typedef QList<ModuleProtocol> MProtocolList;
 
 protected:
     void run();
 
 private:
-    bool parsedProtocol(Datastruct::ProtocolArray & array);
+    bool beforeParsing(Datastruct::ProtocolArray & array);
+    bool parsedProtocol(ProtocolArray &array, ParsedResult &values);
+    bool parsedSignalProtocol(const ProtocolArray &array, int & posPointer, Datastruct::SignalProtocol & protocol, Datastruct::ParsedResult *result);
+    int getProtocolRepeatTime(const ProtocolArray &array,int memoryBytes,int count,int &pos);
+    QVariant getBytesData(const ProtocolArray &array,Datastruct::ControlType type,int & pos,int bytes,bool & error);
+    FieldValues getBitsData(const ProtocolArray &array,Datastruct::ControlType type,int & pos,int bytes,bool & error);
 
 private:
     std::mutex pmutex;

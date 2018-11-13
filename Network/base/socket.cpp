@@ -31,6 +31,17 @@ RSocket::RSocket():socktype(R_NONE)
     memset(socketIp,0,sizeof(socketIp));
 }
 
+RSocket::RSocket(const RSocket &rsock)
+{
+    this->sockFd = rsock.sockFd;
+    this->socketPort = rsock.socketPort;
+    this->errorCode = rsock.errorCode;
+    this->socketValid = rsock.socketValid;
+    this->blockAble = rsock.blockAble;
+    memset(socketIp,0,sizeof(socketIp));
+    memcpy(this->socketIp,rsock.socketIp,sizeof(socketIp));
+}
+
 bool RSocket::createSocket(SocketType socktype)
 {
 #ifdef Q_OS_WIN

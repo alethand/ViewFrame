@@ -108,7 +108,7 @@ bool HealthInfoDockPanel::initialize()
 {
     //TODO 【20181108将字段设置至表格上】
     ProgramFilePath filePath;
-    RSingleton<Core::ProtocolManager>::instance()->parseLocalDir(filePath.taskControlPath);
+    RSingleton<Core::ProtocolManager>::instance()->parseLocalDir(filePath.healthManagePath);
 
     bool existed = false;
     Datastruct::BaseProtocol bprotocol = RSingleton<Core::ProtocolManager>::instance()->getProtocol(QStringLiteral("健康管理"),existed);

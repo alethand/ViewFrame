@@ -6,11 +6,16 @@ namespace Core{
 
 class ProtocolStruct{
 public:
-    ProtocolStruct():name("name"),type("type"),startCode("start"),endCode("end"),itemsCount("count"),
+    ProtocolStruct():name("name"),type("type"),startCode("start"),endCode("end"),startLen("startLen"),count("count")
+      ,memoryBytes("memoryBytes"),endLen("endLen"),itemsCount("count"),
                 itemsMemoryByte("memoryByte"),itemsLen("length"){}
     QString name;
     QString type;
     QString startCode;
+    QString startLen;
+    QString count;
+    QString memoryBytes;
+    QString endLen;
     QString endCode;
 
     QString itemsCount;
@@ -37,6 +42,18 @@ bool CommonProtocolParse::startParse(QDomNode &rootNode)
 
     if(rootElement.hasAttribute(pstruct.startCode))
         parsedProtocol.startCode = rootElement.attribute(pstruct.startCode).toInt();
+
+    if(rootElement.hasAttribute(pstruct.startLen))
+        parsedProtocol.startLen = rootElement.attribute(pstruct.startLen).toInt();
+
+    if(rootElement.hasAttribute(pstruct.count))
+        parsedProtocol.count = rootElement.attribute(pstruct.count).toInt();
+
+    if(rootElement.hasAttribute(pstruct.memoryBytes))
+        parsedProtocol.memoryBytes = rootElement.attribute(pstruct.memoryBytes).toInt();
+
+    if(rootElement.hasAttribute(pstruct.endLen))
+        parsedProtocol.endLen = rootElement.attribute(pstruct.endLen).toInt();
 
     if(rootElement.hasAttribute(pstruct.endCode))
         parsedProtocol.endCode = rootElement.attribute(pstruct.endCode).toInt();

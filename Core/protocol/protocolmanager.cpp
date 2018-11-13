@@ -53,6 +53,25 @@ bool ProtocolManager::parseLocalProtocol(QString fullFilePath)
 }
 
 /*!
+ * @brief 判断协议类型是否存在
+ * @param[in] protocolType 协议类型
+ * @return true 存在；false 不存在
+ */
+bool ProtocolManager::existed(int protocolType)
+{
+    BaseProtocolMap::iterator iter = protocols.begin();
+    while(iter != protocols.end()){
+        if(iter.value().type == protocolType){
+            return true;
+            break;
+        }
+        iter++;
+    }
+
+    return false;
+}
+
+/*!
  * @brief 根据协议名称获取对应的协议
  * @param[in]  protocolName 协议名
  * @param[in/out]  existed true：对应的协议是否存在;false：对应的协议不存在

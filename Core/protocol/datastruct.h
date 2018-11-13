@@ -660,18 +660,28 @@ struct Field : public PubHead{
     FieldData data;        /*!< 字段属性 */
 };
 
-//TODO 20181109 待支持对bit的值
-/*!
- *  @brief 字段值
- *  @details
- */
-struct FieldValue{
-    int index;
+struct ByteValue{
     QVariant value;
+};
+typedef QList<ByteValue> ByteValues;
+
+struct FieldValue{
+    FieldValue():index(0),protocolIndex(0),valList(NULL){}
+    int protocolIndex;          /*!< 所属协议在所有协议中索引 */
+    int index;                  /*!< 同一协议中字段索引 */
+    ByteValue signalValue;      /*!< 适用于单个字段值 */
+    ByteValues * valList;       /*!< 适用于同一个字段被重复多次;字段属于bit位操作 */
 };
 
 typedef QList<FieldValue> FieldValues;
 
+/*!
+ *  @brief  保存解析后的结果值
+ */
+struct ParsedResult{
+    FieldValues fieldResults;
+    QList<ParsedResult * > results;
+};
 
 struct NodeInfo{
     NodeInfo():window("window"),name("name"),width("width"),height("height"),layout("layout")
@@ -804,7 +814,7 @@ struct Container{
  *  @brief 单个协议描述
  */
 struct SignalProtocol{
-    int count;                   /*!< 当前协议数量：>0：表示固定的数量，-1：表示数量不定 */
+    int count;                   /*!< 当前协议数量：>0：表示固定的数量，-1：表示数量不定，需结合memoryBytes */
     int memoryBytes;            /*!< 当count字段为变长时，count字段占用几字节空间,用于解析协议数量 */
     int length;                 /*!< 协议长度 */
     QList<FieldData> fields;    /*!< 协议字段集合 */
@@ -818,7 +828,11 @@ struct BaseProtocol{
     int startCode;      /*!< 开始标志码 */
     int type;           /*!< 协议类型 */
     int length;         /*!< 整包数据长度 */
+    int startLen;       /*!< 数据头部固定长度 */
+    int count;          /*!< 最小协议包数据量，>0:表示固定数量，-1:表示数量不定，需结合memoryBytes */
+    int memoryBytes;    /*!< 当count字段为变长时，count字段占用几字节空间,用于解析协议数量 */
     QList<SignalProtocol> protocols;    /*!< 协议族 */
+    int endLen;         /*!< 数据尾部固定长度 */
     int endCode;        /*!< 结束标志码 */
 };
 /**************************健康管理/数据显示模块************************************/

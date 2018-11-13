@@ -20,6 +20,7 @@ class NETWORKSHARED_EXPORT  RSocket
 {
 public:
     RSocket();
+    RSocket(const RSocket & rsock);
 
     enum SocketType{
         R_NONE = 0,

@@ -36,6 +36,8 @@
 #include "file/programfilepath.h"
 #include "widgets/taskcontrol/taskcontrolpanel.h"
 #include "shortcutsettings.h"
+#include "network/tcpserver.h"
+#include "network/taskmanager.h"
 
 #include "mapview.h"
 
@@ -518,6 +520,7 @@ void MainWindow::exportView()
 
 /*!
  * @brief 加载可用的所有模块
+ * @warning 每个子插件需要在类中定义pluginId,确保每个插件的id不一样.
  */
 void MainWindow::loadCmponent()
 {
@@ -569,7 +572,12 @@ void MainWindow::initComponent()
     Core::NetworkMap::iterator niter = networkMap->begin();
     while(niter != networkMap->end()){
         Datastruct::NetworkInfo ninfo = niter.value();
-
+        if(ninfo.protocol == Datastruct::N_TCP && ninfo.baseInfo.connectionType == Datastruct::N_Server){
+            std::shared_ptr<Core::TcpServer> server(new Core::TcpServer());
+            server->init(ninfo);
+            server->startMe();
+            RSingleton<Core::TaskManager>::instance()->addTask(ninfo.id,server);
+        }
         niter++;
     }
 
@@ -585,9 +593,16 @@ void MainWindow::initComponent()
 
         Core::RComponent * plugin = RSingleton<Core::PluginManager>::instance()->getAvailblePlugin(mm.pluginId);
         if(plugin){
-
-            //向网络解析模块注册感兴趣的协议
-            RSingleton<Core::ProtocolParseThread>::instance()->registNetworkObserver(mm.pluginId,mm.protocols,Datastruct::N_TCP);
+            //2.1 向网络接收模块注册需要数据信息
+            Core::TaskPtr tptr = RSingleton<Core::TaskManager>::instance()->getTask(mm.networkId);
+            if(tptr){
+                std::shared_ptr<Core::TcpServer> tcpPtr = std::dynamic_pointer_cast<Core::TcpServer>(tptr);
+                if(tcpPtr){
+                    tcpPtr->registNetworkObserver(mm.pluginId,mm.protocols);
+                    //2.2 向网络解析模块注册需要解析的协议
+                    RSingleton<Core::ProtocolParseThread>::instance()->registNetworkObserver(mm.pluginId,mm.protocols,Datastruct::N_TCP);
+                }
+            }
 
             plugin = plugin->clone();
             Core::RComponent * beforePlugin = rcmaps.value(static_cast<int>(mm.layout));

@@ -97,7 +97,8 @@ SOURCES += main.cpp \
     network/protocolparsethread.cpp \
     others/googlemap.cpp \
     others/utility.cpp \
-    widgets/mapview.cpp
+    widgets/mapview.cpp \
+    network/taskmanager.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
@@ -168,7 +169,8 @@ HEADERS  += \
     others/googlemap.h \
     others/CommonHeader.h \
     others/utility.h \
-    widgets/mapview.h
+    widgets/mapview.h \
+    network/taskmanager.h
 
 FORMS    += mainwindow.ui \
     widgets/taskcontrol/gathercontroldialog.ui \

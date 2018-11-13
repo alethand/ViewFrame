@@ -25,6 +25,8 @@ public:
     bool parseLocalDir(QString dirname);
     bool parseLocalProtocol(QString fullFilePath);
 
+    bool existed(int protocolType);
+
     Datastruct::BaseProtocol getProtocol(QString protocolName,bool & existed);
     Datastruct::BaseProtocol getProtocol(int protocolType,bool & existed);
 
