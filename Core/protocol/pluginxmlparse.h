@@ -29,6 +29,13 @@ public:
 
     bool  startParse(QDomNode & rootNode);
 
+    enum RectPos{
+        R_X,
+        R_Y,
+        R_W,
+        R_H
+    };
+
     ModuleMap * getModules(){return this->modules;}
     NetworkMap * getNetworks(){return this->networks;}
     PluginMap * getPlugins(){return this->plugins;}
@@ -37,6 +44,8 @@ private:
     void parsePlugin(QDomNode & pluginsNode);
     void parseNetwork(QDomNode & networkNode);
     void parseModule(QDomNode & moduleNode);
+
+    int getRectSize(RectPos, QString content);
 
 private:
     ModuleMap * modules;

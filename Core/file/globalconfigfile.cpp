@@ -31,6 +31,8 @@ bool GlobalConfigFile::parseFile()
     systemConfigInfo.userKeySchemesName = RUtil::getGlobalValue(Constant::SYSTEM_SETTING,Constant::SYSTEM_USER_SCHEMES_NAME,systemConfigInfo.userKeySchemesName).toString();
     systemConfigInfo.locale = RUtil::getGlobalValue(Constant::SYSTEM_SETTING,Constant::SYSTEM_LOCALE,systemConfigInfo.locale).toString();
     systemConfigInfo.style = RUtil::getGlobalValue(Constant::SYSTEM_SETTING,Constant::SYSTEM_STYLE,systemConfigInfo.style).toString();
+    systemConfigInfo.fullscreen = RUtil::getGlobalValue(Constant::SYSTEM_SETTING,Constant::SYSTEM_FULLSCREEN,systemConfigInfo.fullscreen).toBool();
+    systemConfigInfo.topHint = RUtil::getGlobalValue(Constant::SYSTEM_SETTING,Constant::SYSTEM_TOPHINT,systemConfigInfo.topHint).toBool();
 
     return true;
 }
@@ -58,16 +60,7 @@ void GlobalConfigFile::saveFile()
     settings->setValue(Constant::SYSTEM_USER_SCHEMES_NAME,systemConfigInfo.userKeySchemesName);
     settings->setValue(Constant::SYSTEM_LOCALE,systemConfigInfo.locale);
     settings->setValue(Constant::SYSTEM_STYLE,systemConfigInfo.style);
+    settings->setValue(Constant::SYSTEM_FULLSCREEN,systemConfigInfo.fullscreen);
+    settings->setValue(Constant::SYSTEM_TOPHINT,systemConfigInfo.topHint);
     settings->endGroup();
-
-//    settings->beginGroup(Constant::LAY_SETTING);
-//    settings->setValue(Constant::LAY_GEOMETRY,saveGeometry());
-//    settings->setValue(Constant::LAY_WINDOWSTATE,this->saveState());
-//    settings->setValue(Constant::SYSTEM_LOCALE,systemConfigInfo.locale);
-//    settings->setValue(Constant::SYSTEM_STYLE,systemConfigInfo.style);
-
-//    QSettings settings("MyCompany", "MyApp");
-//    settings.setValue("geometry", saveGeometry());
-//    settings.setValue("windowState", saveState());
-//    settings->endGroup();
 }

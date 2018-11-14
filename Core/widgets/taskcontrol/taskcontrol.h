@@ -55,6 +55,9 @@ private slots:
 
     void tableContextPoint(QPoint point);
 
+protected:
+    void mousePressEvent(QMouseEvent * event);
+
 private:
     QModelIndex currentIndex(bool &validIndex);
     void showEditWindow(QModelIndex index);

@@ -172,7 +172,6 @@ void TableViewModel::resetData()
 
 void TableViewModel::retranslateUi()
 {
-//    cout<<"the2"<<endl;
     headInfo.clear();
     headInfo<<QObject::tr("Index")<<QObject::tr("Type")<<QObject::tr("Parameter")
                   <<QObject::tr("Dispatch Time")<<QObject::tr("Execute Time")<<QObject::tr("Issued status");

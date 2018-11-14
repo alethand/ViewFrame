@@ -37,7 +37,7 @@ public:
     explicit MFAcquistionTable(QWidget *parent = 0);
     ~MFAcquistionTable();
 
-    bool initialize();
+    QWidget * initialize(QWidget * parent);
     void release();
     QString pluginName();
     Core::RComponent * clone();
@@ -66,8 +66,6 @@ private:
 public slots:
     void filter(QModelIndex index);
     void recFilterMessage(QList<double> filterMessage);
-
-
 };
 
 } //namespace DataView

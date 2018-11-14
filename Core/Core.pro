@@ -41,13 +41,6 @@ SOURCES += main.cpp \
     widgets/taskcontrol/modelview/tableviewmodel.cpp \
     widgets/taskcontrol/taskcontrol.cpp \
     widgets/taskcontrol/taskcontrolpanel.cpp \
-    widgets/taskcontrol/bandcontroldialog.cpp \
-    widgets/taskcontrol/turntablecontroldialog.cpp \
-    widgets/taskcontrol/statecontroldialog.cpp \
-    widgets/taskcontrol/playbackcontroldialog.cpp \
-    widgets/taskcontrol/selfcheckcontroldialog.cpp \
-    widgets/taskcontrol/instrumentcontroldialog.cpp \
-    widgets/taskcontrol/gathercontroldialog.cpp \
     widgets/healthmanage/fileOpt.cpp \
     widgets/healthmanage/healthinfopannel.cpp \
     widgets/healthmanage/healthstate_display.cpp \
@@ -98,7 +91,10 @@ SOURCES += main.cpp \
     others/googlemap.cpp \
     others/utility.cpp \
     widgets/mapview.cpp \
-    network/taskmanager.cpp
+    network/taskmanager.cpp \
+    selfwidget/mydockwidgettitlebutton.cpp \
+    selfwidget/mydockwidget.cpp \
+    selfwidget/widget.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
@@ -111,13 +107,6 @@ HEADERS  += \
     widgets/taskcontrol/taskcontrol.h \
     widgets/taskcontrol/utils.h \
     widgets/taskcontrol/taskcontrolpanel.h \
-    widgets/taskcontrol/bandcontroldialog.h \
-    widgets/taskcontrol/turntablecontroldialog.h \
-    widgets/taskcontrol/statecontroldialog.h \
-    widgets/taskcontrol/playbackcontroldialog.h \
-    widgets/taskcontrol/selfcheckcontroldialog.h \
-    widgets/taskcontrol/instrumentcontroldialog.h \
-    widgets/taskcontrol/gathercontroldialog.h \
     widgets/taskcontrol/head.h \
     widgets/healthmanage/fileOpt.h \
     widgets/healthmanage/healthinfopannel.h \
@@ -170,10 +159,12 @@ HEADERS  += \
     others/CommonHeader.h \
     others/utility.h \
     widgets/mapview.h \
-    network/taskmanager.h
+    network/taskmanager.h \
+    selfwidget/mydockwidgettitlebutton.h \
+    selfwidget/mydockwidget.h \
+    selfwidget/widget.h
 
 FORMS    += mainwindow.ui \
-    widgets/taskcontrol/gathercontroldialog.ui \
     widgets/datadisplay/mfacquisitiongraphics.ui \
     widgets/datadisplay/radiusSource/radiasourcemap.ui \
     widgets/datadisplay/radiusSource/radiationsourcetable.ui \

@@ -24,7 +24,7 @@ public:
     explicit TaskControlPanel(QWidget * parent = 0);
     ~TaskControlPanel();
 
-    bool initialize();
+    QWidget *initialize(QWidget * parent);
     void release();
     QString pluginName();
     Core::RComponent * clone();

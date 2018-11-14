@@ -22,7 +22,7 @@ public:
     explicit MFAcquisitionGraphics(QWidget *parent = 0);
     ~MFAcquisitionGraphics();
 
-    bool initialize();
+    QWidget * initialize(QWidget * parent);
     void release();
     QString pluginName();
     RComponent * clone();

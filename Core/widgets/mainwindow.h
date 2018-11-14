@@ -51,7 +51,7 @@ private slots:
     void programExit();
 
     void windowTopHint(bool flag);
-    void windowFullScreen(bool);
+    void windowFullScreen(bool flag);
 
     void switchStyle();
     void switchLanguage();

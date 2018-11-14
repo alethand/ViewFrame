@@ -32,7 +32,7 @@ AllPluseDock::AllPluseDock(QWidget *parent) :
     ininData();
     initView();
     switchModeTo(RealTime);
-    this->setWindowTitle(QStringLiteral("全脉冲数据"));
+//    this->setWindowTitle(QStringLiteral("全脉冲数据"));
     retranslateUi();
 
     QObject::connect(btn_load,SIGNAL(clicked()),this,SLOT(on_btn_load_clicked()));
@@ -49,11 +49,11 @@ AllPluseDock::~AllPluseDock()
 {
 }
 
-bool AllPluseDock::initialize()
+QWidget *AllPluseDock::initialize(QWidget * parent)
 {
 //    Q_D(AllPluseDock);
 //    setWidget(d->mainWidget);
-    return true;
+    return NULL;
 }
 
 void AllPluseDock::release()
@@ -163,7 +163,7 @@ void AllPluseDock::initView()
     vlayout->addWidget(mWidget);
     widget->setLayout(vlayout);
 
-    this->setWidget(widget);
+//    this->setWidget(widget);
 
 }
 
@@ -377,7 +377,7 @@ void AllPluseDock::on_btn_load_clicked()
 {
   //  Q_D(AllPluseDock);
     // 指定存储的位置
-    QString filepath = QFileDialog::getSaveFileName(this, tr("Save as..."),
+    QString filepath = QFileDialog::getSaveFileName(nullptr, tr("Save as..."),
                                                     QString(), tr("EXCEL files (*.xls *.xlsx);;HTML-Files (*.htm *.html);;"));
     if(filepath.isEmpty())
         return;

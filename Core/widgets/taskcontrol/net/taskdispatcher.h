@@ -26,9 +26,6 @@ class TaskDispatcher : public QObject
 public:
     explicit TaskDispatcher();
     ~TaskDispatcher();
-
-    bool initTask(TaskConfigInfo & info);
-
     void bindTaskList(NewTaskList list);
 
     void startDispatch();

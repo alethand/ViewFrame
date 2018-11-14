@@ -11,7 +11,7 @@ QWidget{
     selection-color: #eff0f1;
     background-clip: border;
     border: 0px transparent black;
-    background-color:#0d1a2a;
+    /*background-color:rgba(13,26,42,100);*/
     font-size: 9pt;
 }
 
@@ -22,7 +22,7 @@ QWidget#Container
 
 QDockWidget {
     color:white;
-    background: #027eba;
+   /* background-color:rgba(255,0,0,100);*/
     border: 1px solid red;
     titlebar-close-icon: url(:/tech/resource/technology/close.png);
     titlebar-normal-icon: url(:/tech/resource/technology/undock.png);
@@ -43,7 +43,7 @@ QDockWidget::close-button,
 QDockWidget::float-button {
     border: 1px solid transparent;
     border-radius: 2px;
-    background: transparent;
+    background: red;
 }
 
 QDockWidget::close-button:hover,
@@ -51,10 +51,21 @@ QDockWidget::float-button:hover {
     background: rgba(255, 255, 255, 10);
 }
 
+QAbstractButton#dockwidget_floatbutton,QAbstractButton#dockwidget_closebutton{
+    background-color:rgba(17,227,246,120);
+}
+
 QDockWidget::close-button:pressed,
 QDockWidget::float-button:pressed {
     padding: 1px -1px -1px 1px;
     background: rgba(255, 255, 255, 10);
+}
+
+QLabel#dockwidget_titlelabel{
+    background-color:rgba(17,227,246,120);
+    padding-left:2px;
+    font-size:14px;
+    font-weight:500;
 }
 
 QHeaderView {
@@ -67,7 +78,7 @@ QHeaderView {
 }
 
 QHeaderView::section {
-    background-color: #004c78;
+    background-color: rgba(0,0,255,50);
     color: #eff0f1;
     padding: 7px;
     border: 1px solid #76797C;
@@ -102,10 +113,10 @@ QTableWidget,
 QTableView {
     color: white;
     gridline-color: black;
-    background-color: #0d1a2a;
-    alternate-background-color:#093266;
+    background-color: rgba(13,26,42,150);
+    alternate-background-color:rgba(42,110,150,100);
     selection-color: white;
-    selection-background-color: #2a6e96;
+    selection-background-color: rgba(42,110,150,100);
     border-radius: 2px;
     padding: 2px 4px;
 }

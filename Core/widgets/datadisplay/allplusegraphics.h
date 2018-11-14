@@ -27,7 +27,7 @@ public:
     explicit AllPluseGraphics(QWidget *parent = 0);
     ~AllPluseGraphics();
 
-    bool initialize();
+    QWidget * initialize(QWidget * parent);
     void release();
     QString pluginName();
     Core::RComponent * clone();

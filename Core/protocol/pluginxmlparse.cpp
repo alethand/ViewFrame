@@ -2,6 +2,8 @@
 
 #include <QDebug>
 
+#include "Base/util/rutil.h"
+
 namespace Core{
 
 struct PluginNode{
@@ -27,7 +29,7 @@ struct NetworkNode{
 
 struct MoudleNode{
     MoudleNode():node("module"),id("id"),closeable("closeable"),visible("visible"),floatable("floatable"),name("name"),protocols("protocols"),
-            pluginId("plugin"),networkId("network"),layout("layout"){}
+            pluginId("plugin"),networkId("network"),layout("layout"),geometry("geometry"),x("x"),y("y"),w("w"),h("h"){}
 
     QString node;
     QString id;
@@ -39,6 +41,11 @@ struct MoudleNode{
     QString pluginId;
     QString networkId;
     QString layout;
+    QString geometry;
+    QString x;
+    QString y;
+    QString w;
+    QString h;
 };
 
 PluginXmlParse::PluginXmlParse()
@@ -190,9 +197,61 @@ void PluginXmlParse::parseModule(QDomNode &moduleNode)
                     minfo.layout = Datastruct::BOTTOM;
                 }
             }
+            else if(tagname == pnode.geometry)
+            {
+                QDomNode geometryChild = child.firstChild();
+                while(!geometryChild.isNull()){
+                    QDomElement geometryElement = geometryChild.toElement();
+                    QString gname = geometryElement.tagName();
+                    if(gname == pnode.x)
+                    {
+                        minfo.geometry.setX(getRectSize(R_X,geometryElement.text()));
+                    }
+                    else if(gname == pnode.y)
+                    {
+                        minfo.geometry.setY(getRectSize(R_Y,geometryElement.text()));
+                    }
+                    else if(gname == pnode.w)
+                    {
+                        minfo.geometry.setWidth(getRectSize(R_W,geometryElement.text()));
+                    }
+                    else if(gname == pnode.h)
+                    {
+                        minfo.geometry.setHeight(getRectSize(R_H,geometryElement.text()));
+                    }
+                    geometryChild = geometryChild.nextSibling();
+                }
+            }
             child = child.nextSibling();
         }
         modules->insert(minfo.id,minfo);
+    }
+}
+
+int PluginXmlParse::getRectSize(RectPos pos,QString content)
+{
+    if(content.indexOf("%") >= 0){
+        int percentInt = content.left(content.indexOf("%")).toInt();
+        if(percentInt < 0 || percentInt >100)
+            percentInt = 0;
+
+        double percent = (double)percentInt/100;
+        switch(pos){
+            case R_X:
+            case R_W:
+                    return RUtil::screenGeometry().width() * percent;
+                break;
+
+            case R_Y:
+            case R_H:
+                    return RUtil::screenGeometry().height() * percent;
+                break;
+
+            default:
+                break;
+        }
+    }else{
+        return content.toInt();
     }
 }
 

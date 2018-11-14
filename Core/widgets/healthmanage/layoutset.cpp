@@ -200,19 +200,18 @@ void LayoutAndDisplay::generateWSLayout(unsigned int start)
     }
     standItemModel->setHorizontalHeaderLabels(headInfo);
 
-//    tableView->horizontalHeader()->setDefaultSectionSize(1.1*(wkItemWidth+minColumnInterval));
+    tableView->horizontalHeader()->setStyleSheet("background-color:rgba(0,255,0,50)");
     tableView->verticalHeader()->setDefaultSectionSize(0.9*(mItemsHeight+minRowInterval));
 
-//    tableView->horizontalHeader()->hide();
     tableView->verticalHeader()->hide();
 
     tableView->setAlternatingRowColors(true);//设置变色
     tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);//设置不可编辑
 
-
     //1
     int wkPerPageItemsNum = wkRowCount*wkColcount;
     QGridLayout *layout = dynamic_cast<QGridLayout*>(mWorkStateWidget->layout());
+    layout->setContentsMargins(1,1,1,1);
     int index = 0;
     for(int i=0;i < wkRowCount;i++)
     {

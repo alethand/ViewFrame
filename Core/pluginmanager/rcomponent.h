@@ -7,31 +7,35 @@
  *  @warning
  *  @copyright NanJing RenGu.
  *  @note
+ *      20181113:wey:将父类从QDockWidget改为QObject，将继承关系改为依赖
  */
 #ifndef RCOMPONENT_H
 #define RCOMPONENT_H
-
-#include <QDockWidget>
 
 #include "Base/actionmanager/id.h"
 #include "Base/messagetype.h"
 #include "pluginmanager/observer.h"
 #include "protocol/datastruct.h"
+#include "selfwidget/mydockwidget.h"
 
 namespace Core{
 
-class RComponent : public QDockWidget,public Core::Observer
+class MyDockWidget;
+
+class RComponent : public QObject,public Core::Observer
 {
     Q_OBJECT
 public:
-    RComponent(const char * id,QWidget * parent  = 0);
+    RComponent(const char * id,QObject * parent  = 0);
     virtual ~RComponent();
 
     Id id();
     QString getPluginId();
     QString name();
+    void setDockContainer(MyDockWidget * container){this->dockContainer = container;}
+    MyDockWidget * getDockContainer(){return this->dockContainer;}
 
-    virtual bool initialize() = 0;
+    virtual QWidget * initialize(QWidget * parent) = 0;
     virtual void release() = 0;
     virtual QString pluginName() = 0;
     virtual RComponent * clone() = 0;
@@ -44,6 +48,7 @@ protected:
     QString pluginId;
     QString m_name;               /*!< dockwidget titlebar */
     static int compIndex;         /*!< 组件索引 */
+    MyDockWidget * dockContainer;    /*!<  插件绑定的容器 */
 };
 
 } //namespace Base

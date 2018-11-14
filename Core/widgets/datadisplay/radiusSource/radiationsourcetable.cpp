@@ -94,7 +94,7 @@ void RadiationSourceTablePrivate::initView()
     QVBoxLayout * vlayout = new QVBoxLayout;
     vlayout->addWidget(radioWidget);
 
-    dataView = new TableView(q_ptr);
+    dataView = new TableView();
     dataView->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 //    m_tableView->resizeColumnsToContents();
 
@@ -147,11 +147,11 @@ RadiationSourceTable::~RadiationSourceTable()
 
 }
 
-bool RadiationSourceTable::initialize()
+QWidget *RadiationSourceTable::initialize(QWidget *parent)
 {
     Q_D(RadiationSourceTable);
-    setWidget(d->mainWidget);
-    return true;
+//    setWidget(d->mainWidget);
+    return NULL;
 }
 
 void RadiationSourceTable::release()
@@ -422,7 +422,7 @@ void RadiationSourceTable::retranslateUi()
     Q_D(RadiationSourceTable);
     setObjectName("radiationTable");
     m_name = tr("Radiation source data");
-    setWindowTitle(m_name);
+//    setWindowTitle(m_name);
 
     d->radioButtonCoverReno->setText(tr("Overwrite Refresh"));
     d->radioButtonScrollReno->setText(tr("Scrolling Refresh"));
@@ -451,8 +451,8 @@ void RadiationSourceTable::showRSDialog(QModelIndex index)
 {
     if(d_ptr->enRSReKind==COVER_RENOVATE)
     {
-        RadiationSourceTableRenovateDialog dialog(this);
-        dialog.resize(800,600);
+        RadiationSourceTableRenovateDialog dialog();
+//        dialog.resize(800,600);
         d_ptr->blDoubleClickedFlag=true;
         unsigned short usSourceNo=0;
         int row=index.row();
@@ -468,10 +468,10 @@ void RadiationSourceTable::showRSDialog(QModelIndex index)
             }
         }
 
-        QObject::connect(this,SIGNAL(sendRSDataList(RSDataList*)),&dialog,SLOT(recvRSDataList(RSDataList*)));
-        dialog.setRadiationSourceList(usSourceNo,d_ptr->rsDataList);
-        dialog.exec();
-        d_ptr->blDoubleClickedFlag=false;
+//        QObject::connect(this,SIGNAL(sendRSDataList(RSDataList*)),&dialog,SLOT(recvRSDataList(RSDataList*)));
+//        dialog.setRadiationSourceList(usSourceNo,d_ptr->rsDataList);
+//        dialog.exec();
+//        d_ptr->blDoubleClickedFlag=false;
     }
 }
 
@@ -479,7 +479,7 @@ void RadiationSourceTable::on_btn_load_clicked()
 {
     Q_D(RadiationSourceTable);
     // 指定存储的位置
-    QString filepath = QFileDialog::getSaveFileName(this, tr("Save as..."),
+    QString filepath = QFileDialog::getSaveFileName(nullptr, tr("Save as..."),
                                                     QString(), tr("EXCEL files (*.xls *.xlsx);;HTML-Files (*.htm *.html);;"));
     if(filepath.isEmpty())
         return;

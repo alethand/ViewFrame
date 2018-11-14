@@ -39,11 +39,11 @@ RadiaSourceMap::~RadiaSourceMap()
 {
 }
 
-bool RadiaSourceMap::initialize()
+QWidget *RadiaSourceMap::initialize(QWidget *parent)
 {
     Q_D(RadiaSourceMap);
-    setWidget(d->mainWidget);
-    return true;
+//    setWidget(d->mainWidget);
+    return d->mainWidget;
 }
 
 void RadiaSourceMap::release()
@@ -81,7 +81,7 @@ void RadiaSourceMap::retranslateUi()
 {
     m_name = tr("Data source Map");
     setObjectName("radiaSourceMap");
-    setWindowTitle(m_name);
+//    setWindowTitle(m_name);
 }
 
 } //namespace DataView

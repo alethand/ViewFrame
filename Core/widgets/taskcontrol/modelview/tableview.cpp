@@ -31,6 +31,7 @@ TableView::TableView(QWidget *parent) : QTableView(parent),
     horizontalHeader()->setStretchLastSection(true);
     verticalHeader()->setVisible(false);
     horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    horizontalHeader()->setStyleSheet("background-color:rgba(0,255,0,50)");
     horizontalHeader()->setHighlightSections(false);
     setAlternatingRowColors(true);
 

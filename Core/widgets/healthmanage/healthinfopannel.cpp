@@ -12,91 +12,6 @@ using namespace std;
 #include "file/programfilepath.h"
 #include "protocol/protocolmanager.h"
 
-#include <QHostAddress>
-#include <QTimer>
-
-
-OriginDataStack G_RecvDataStack;    /*!< 接收未解析的数据信息 */
-
-QWaitCondition G_NetCondtion;
-QMutex G_NetMutex;
-
-TcpConnection::TcpConnection(QObject *parent):QThread(parent),tcpSocket(NULL){
-
-}
-
-bool TcpConnection::init()
-{
-
-    return true;
-}
-
-bool TcpConnection::connectToServer()
-{
-    tcpSocket->connectToHost(QHostAddress("127.0.0.1"),8023);
-    if(tcpSocket->waitForConnected(3000))
-        return true;
-
-    return false;
-}
-
-void TcpConnection::run()
-{
-    tcpSocket = new QTcpSocket();
-    connect(tcpSocket,SIGNAL(readyRead()),this,SLOT(processData()),Qt::DirectConnection);
-    tcpSocket->connectToHost(QHostAddress("127.0.0.1"),8023);
-
-    exec();
-}
-
-void TcpConnection::processData()
-{
-    QByteArray buff /*= tcpSocket->readAll()*/;
-    //将ProtocolManager中的已存在的协议注册到网络接收中，通过帧有效标记、数据类型以及包尾来判断截取数据
-    //TODO 【20181108将数据按照一定长度压入待解析栈内】
-    qDebug()<<buff;
-
-    NetOrginData tmpData;
-    tmpData.startCode = 1;
-
-    tmpData.data = buff;
-
-    G_NetMutex.lock();
-    G_RecvDataStack.push(tmpData);
-    G_NetMutex.unlock();
-
-    qDebug()<<"NetWork:::"<<G_RecvDataStack.size();
-
-    G_NetCondtion.wakeOne();
-}
-
-ProtocolParseThread::ProtocolParseThread(QObject *parent):QThread(parent)
-{
-
-}
-
-void ProtocolParseThread::run()
-{
-    while(true){
-        qDebug()<<G_RecvDataStack.size()<<"++++++";
-        while(G_RecvDataStack.size() == 0){
-            G_NetMutex.lock();
-            G_NetCondtion.wait(&G_NetMutex);
-        }
-
-        G_NetMutex.lock();
-        qDebug()<<"+====222==";
-        NetOrginData data = G_RecvDataStack.pop();
-        G_NetMutex.unlock();
-        parseNetData(data);
-    }
-}
-
-void ProtocolParseThread::parseNetData(NetOrginData &data)
-{
-    qDebug()<<data.startCode<<"__"<<data.data;
-}
-
 HealthInfoDockPanel::HealthInfoDockPanel(QWidget *parent)
     :Core::RComponent(Constant::PLUGIN_HEALTH_MANAGER,parent)
 {
@@ -104,7 +19,7 @@ HealthInfoDockPanel::HealthInfoDockPanel(QWidget *parent)
     RSingleton<Core::Subject>::instance()->attach(this);
 }
 
-bool HealthInfoDockPanel::initialize()
+QWidget *HealthInfoDockPanel::initialize(QWidget *parent)
 {
     //TODO 【20181108将字段设置至表格上】
     ProgramFilePath filePath;
@@ -113,23 +28,7 @@ bool HealthInfoDockPanel::initialize()
     bool existed = false;
     Datastruct::BaseProtocol bprotocol = RSingleton<Core::ProtocolManager>::instance()->getProtocol(QStringLiteral("健康管理"),existed);
 
-//    if(existed){
-//        Datastruct::SignalProtocol sprotocol = bprotocol.protocols.at(0);
-//        std::for_each(sprotocol.fields.begin(),sprotocol.fields.end(),[&](Datastruct::FieldData fdata){
-//        });
-//    }
-
-//    //TODO 【20181108将网络数据解析】
-//    TcpConnection * connection = new TcpConnection;
-//    connection->init();
-//    connection->start();
-
-//    ProtocolParseThread * thread = new ProtocolParseThread;
-//    thread->start();
-
-
-    infoWidget = new HealthState_Display();
-    setWidget(infoWidget);
+    infoWidget = new HealthState_Display(parent);
 
     //todo 以下需要删除
     infoWidget->openDynamicLayout(true);
@@ -161,7 +60,7 @@ bool HealthInfoDockPanel::initialize()
 
     connect(this,SIGNAL(sendForHealthPanelResize()),infoWidget,SLOT(recForHealthPanelResize()));
 
-    return true;
+    return infoWidget;
 }
 
 QString HealthInfoDockPanel::pluginName()
@@ -176,7 +75,7 @@ QString HealthInfoDockPanel::MachineName()
 
 Core::RComponent *HealthInfoDockPanel::clone()
 {
-    return new HealthInfoDockPanel;
+    return new HealthInfoDockPanel();
 }
 
 void HealthInfoDockPanel::onMessage(MessageType::MessType type)
@@ -205,7 +104,7 @@ void HealthInfoDockPanel::retranslateUi()
     setObjectName("healthControl");
     m_name = tr("HealthInfo panel");
     pluginId = "0x0001";
-    setWindowTitle(m_name);
+//    setWindowTitle(m_name);
 }
 
 /**

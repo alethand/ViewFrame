@@ -45,7 +45,7 @@ public:
         Historical       /*!< 历史显示模式 */
     };
 
-    bool initialize();
+    QWidget * initialize(QWidget * parent);
     void release();
     void initView();
     void ininData();
@@ -81,8 +81,6 @@ private:
     QPushButton *btn_load;
 
     QStackedWidget *mWidget;
-
-
 
     HugeData_Gram *originData;        //原始数据
     HugeData_Gram *staticsData;       //统计数据

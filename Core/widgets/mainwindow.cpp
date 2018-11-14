@@ -39,6 +39,9 @@
 #include "network/tcpserver.h"
 #include "network/taskmanager.h"
 
+#include "selfwidget/mydockwidget.h"
+#include "taskcontrol/taskcontrol.h"
+
 #include "mapview.h"
 
 #include <QDateTime>
@@ -74,8 +77,8 @@ MainWindow::MainWindow(QWidget *parent) :
     updateLanguage(curLanguageName);
 
     loadUserSetting();
-    showMaximized();
-    QWidget::setWindowFlags(Qt::WindowMaximizeButtonHint|Qt::WindowCloseButtonHint|Qt::WindowMinimizeButtonHint);
+    if(!RGlobal::G_GlobalConfigFile->systemConfigInfo.fullscreen)
+        showMaximized();
 }
 
 MainWindow::~MainWindow()
@@ -284,19 +287,27 @@ void MainWindow::windowTopHint(bool flag)
 
     setWindowFlags(flags);
     show();
+    RGlobal::G_GlobalConfigFile->systemConfigInfo.topHint = flag;
+    RGlobal::G_GlobalConfigFile->saveFile();
 }
 
-void MainWindow::windowFullScreen(bool)
+void MainWindow::windowFullScreen(bool flag)
 {
     Qt::WindowStates state = windowState();
-    if(!isFullScreen())
+    if(flag)
+    {
         state |= Qt::WindowFullScreen;
-    else{
+    }
+    else
+    {
         state = state & ~Qt::WindowFullScreen;
         showMaximized();
     }
 
     setWindowState(state);
+
+    RGlobal::G_GlobalConfigFile->systemConfigInfo.fullscreen = flag;
+    RGlobal::G_GlobalConfigFile->saveFile();
 }
 
 /*!
@@ -345,7 +356,8 @@ void MainWindow::updateLanguage(QString lanFileName)
  * @details 1.语言设置； @n
  *          2.样式表设置； @n
  *          3.从config/config.ini文件中查找是否有快捷键设置，若存在快捷键设置则使用 @n
- *          4.布局设置(待添加) @n
+ *          4.窗口设置(20181113) @n
+ *          5.布局设置(待添加) @n
  */
 void MainWindow::loadUserSetting()
 {
@@ -402,6 +414,15 @@ void MainWindow::loadUserSetting()
             QMessageBox::warning(this,tr("warning"),tr("User defined shortcut keys not available!"),QMessageBox::Yes);
         }
     }
+
+    //[4]窗口设置
+    windowTopHint(RGlobal::G_GlobalConfigFile->systemConfigInfo.topHint);
+    ActionManager::instance()->action(Constant::TOP_HINT)->action()->setChecked(RGlobal::G_GlobalConfigFile->systemConfigInfo.topHint);
+
+    windowFullScreen(RGlobal::G_GlobalConfigFile->systemConfigInfo.fullscreen);
+    ActionManager::instance()->action(Constant::FULL_SCREEN)->action()->setChecked(RGlobal::G_GlobalConfigFile->systemConfigInfo.fullscreen);
+
+    //[5]布局
 }
 
 void MainWindow::retranslateUi()
@@ -530,19 +551,17 @@ void MainWindow::loadCmponent()
 
     DataView::RadiationSourceTable * radiationTable = new DataView::RadiationSourceTable;
     DataView::AllPluseDock * allPluseTable = new DataView::AllPluseDock;
-    DataView::MFAcquistionTable * acquistionTable = new DataView::MFAcquistionTable;
+//    DataView::MFAcquistionTable * acquistionTable = new DataView::MFAcquistionTable;
     DataView::RadiaSourceMap * radiaSourceMap = new DataView::RadiaSourceMap;
     DataView::AllPluseGraphics * allPluseGraphics = new DataView::AllPluseGraphics;
     DataView::MFAcquisitionGraphics * mfGraphics = new DataView::MFAcquisitionGraphics;
-
-    radiationTable->raise();
 
     RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(taskControl);
     RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(healthControl);
 
     RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(radiationTable);
     RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(allPluseTable);
-    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(acquistionTable);
+//    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(acquistionTable);
     RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(radiaSourceMap);
 
     RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(allPluseGraphics);
@@ -587,7 +606,6 @@ void MainWindow::initComponent()
     //【2】实例化模块
     Core::ModuleMap * moduleMap = RSingleton<Core::PluginLoader>::instance()->getModules();
     Core::ModuleMap::iterator miter = moduleMap->begin();
-    QMap<int,Core::RComponent *> rcmaps;
     while(miter != moduleMap->end()){
         Datastruct::ModuleInfo mm = miter.value();
 
@@ -605,28 +623,9 @@ void MainWindow::initComponent()
             }
 
             plugin = plugin->clone();
-            Core::RComponent * beforePlugin = rcmaps.value(static_cast<int>(mm.layout));
-            if(beforePlugin){
-                tabifyDockWidget(beforePlugin,plugin);
-            }else{
-                switch(mm.layout){
-                    case Datastruct::LEFT:
-                            addDockWidget(Qt::LeftDockWidgetArea,plugin);
-                        break;
-                    case Datastruct::TOP:
-                            addDockWidget(Qt::TopDockWidgetArea,plugin);
-                        break;
-                    case Datastruct::RIGHT:
-                            addDockWidget(Qt::RightDockWidgetArea,plugin);
-                        break;
-                    case Datastruct::BOTTOM:
-                            addDockWidget(Qt::BottomDockWidgetArea,plugin);
-                        break;
-                    default:
-                        break;
-                }
-                rcmaps.insert(static_cast<int>(mm.layout),plugin);
-            }
+            Core::MyDockWidget * dockContainer = new Core::MyDockWidget(this);
+            dockContainer->setGeometry(mm.geometry);
+            plugin->setDockContainer(dockContainer);
 
             RSingleton<Core::PluginManager>::instance()->addActivePlugin(plugin);
         }
@@ -641,11 +640,17 @@ void MainWindow::initComponent()
     Core::PluginManager::ComponentMap::iterator iter = maps.begin();
     while(iter != maps.end()){
         Core::RComponent * comp = iter.value();
-        comp->setFeatures(QDockWidget::AllDockWidgetFeatures);
-//        comp->setFloating(true);
-        comp->initialize();
+        Core::MyDockWidget * dockContainer = comp->getDockContainer();
+        dockContainer->setFeatures(Core::MyDockWidget::AllDockWidgetFeatures);
+        dockContainer->setFloating(true);
+        QWidget * widget = comp->initialize(dockContainer);
+        if(widget){
+            dockContainer->setWidget(widget);
+            dockContainer->setTitle(comp->pluginName());
+        }
 
-        if(comp->toggleViewAction()){
+        //将dock中控制显隐的action添加至菜单栏
+        if(dockContainer->toggleViewAction()){
             QStringList slist = comp->id().toString().split(".");
             QString menuId = slist.at(0)+"."+slist.at(1);
             ActionContainer * container = ActionManager::instance()->actionContainer(Constant::MENU_VIEW);
@@ -665,19 +670,14 @@ void MainWindow::initComponent()
 
                     moduleAction->setMenu(moduleMenu->menu());
                 }
-                Action * toggleAction = ActionManager::instance()->registAction(comp->id(),comp->toggleViewAction());
+                Action * toggleAction = ActionManager::instance()->registAction(comp->id(),dockContainer->toggleViewAction());
                 moduleMenu->addAction(toggleAction,mid);
             }
         }
-
         iter++;
     }
 //    connect(this,SIGNAL(sendForHealthPanelResize()),healthControl,SLOT(recForHealthPanelResize()));
 }
-
-/*!
- * \brief 布局导入
- */
 
 void MainWindow::displayResize(){
     importView();

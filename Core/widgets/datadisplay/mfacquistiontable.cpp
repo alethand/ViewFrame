@@ -41,16 +41,16 @@ public:
 
 void MFAcquistionTablePrivate::initData()
 {
-    viewList=new TableView(q_ptr);
-    viewList->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-    model_MidFreq=new HugeData_Model(&midFreqData);
-    midFreqData.coreData.append(new MidFreqInfo::Core());
-    viewList->setModel(model_MidFreq);
+//    viewList=new TableView(q_ptr);
+//    viewList->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+//    model_MidFreq=new HugeData_Model(&midFreqData);
+//    midFreqData.coreData.append(new MidFreqInfo::Core());
+//    viewList->setModel(model_MidFreq);
 
-    viewList->setSortingEnabled(true);
-    QSortFilterProxyModel *dataViewProxy = new QSortFilterProxyModel();
-    dataViewProxy->setSourceModel(model_MidFreq);
-    viewList->setModel(dataViewProxy);
+//    viewList->setSortingEnabled(true);
+//    QSortFilterProxyModel *dataViewProxy = new QSortFilterProxyModel();
+//    dataViewProxy->setSourceModel(model_MidFreq);
+//    viewList->setModel(dataViewProxy);
 }
 
 //void MFAcquistionTablePrivate::initTableViewMenu()
@@ -75,41 +75,41 @@ MFAcquistionTable::~MFAcquistionTable()
 
 }
 
-bool MFAcquistionTable::initialize()
+QWidget *MFAcquistionTable::initialize(QWidget *parent)
 {
     mainWidget = new QWidget();
 
-    QWidget * radioWidget = new QWidget();
-    btn_load = new QPushButton(radioWidget);
-    btn_load->setText(QObject::tr("Output"));
-    QObject::connect(btn_load,SIGNAL(clicked()),this,SLOT(on_btn_load_clicked()));
+//    QWidget * radioWidget = new QWidget();
+//    btn_load = new QPushButton(radioWidget);
+//    btn_load->setText(QObject::tr("Output"));
+//    QObject::connect(btn_load,SIGNAL(clicked()),this,SLOT(on_btn_load_clicked()));
 
-    QHBoxLayout * layout = new QHBoxLayout;
-    layout->addWidget(btn_load);
-    layout->addStretch(1);
-    layout->setContentsMargins(1,1,1,1);
+//    QHBoxLayout * layout = new QHBoxLayout;
+//    layout->addWidget(btn_load);
+//    layout->addStretch(1);
+//    layout->setContentsMargins(1,1,1,1);
 
-    QVBoxLayout * vlayout = new QVBoxLayout;
-    vlayout->addWidget(radioWidget);
-    radioWidget->setLayout(layout);
-    vlayout->addWidget(d_ptr->viewList);
-    mainWidget->setLayout(vlayout);
-    setWidget(mainWidget);
+//    QVBoxLayout * vlayout = new QVBoxLayout;
+//    vlayout->addWidget(radioWidget);
+//    radioWidget->setLayout(layout);
+//    vlayout->addWidget(d_ptr->viewList);
+//    mainWidget->setLayout(vlayout);
+////    setWidget(mainWidget);
 
-    QAction *clearAction = new QAction();
-    d_ptr->viewList->addAction(clearAction);
-    QObject::connect(clearAction, SIGNAL(triggered(bool)), this, SLOT(clearTable()));
-    clearAction->setText(QObject::tr("Clear Table"));
-    QAction *timeAreawave = new QAction();
-    d_ptr->viewList->addAction(timeAreawave);
-    timeAreawave->setText(QStringLiteral("时域频谱图"));
-    connect(timeAreawave,SIGNAL(triggered(bool)),this,SLOT(showTimeAreaFreq()));
-    QAction *fftDigram = new QAction();
-    fftDigram->setText(QStringLiteral("FFT"));
-     d_ptr->viewList->addAction(fftDigram);
-    connect(fftDigram,SIGNAL(triggered(bool)),this,SLOT(showFFT()));
+//    QAction *clearAction = new QAction();
+//    d_ptr->viewList->addAction(clearAction);
+//    QObject::connect(clearAction, SIGNAL(triggered(bool)), this, SLOT(clearTable()));
+//    clearAction->setText(QObject::tr("Clear Table"));
+//    QAction *timeAreawave = new QAction();
+//    d_ptr->viewList->addAction(timeAreawave);
+//    timeAreawave->setText(QStringLiteral("时域频谱图"));
+//    connect(timeAreawave,SIGNAL(triggered(bool)),this,SLOT(showTimeAreaFreq()));
+//    QAction *fftDigram = new QAction();
+//    fftDigram->setText(QStringLiteral("FFT"));
+//     d_ptr->viewList->addAction(fftDigram);
+//    connect(fftDigram,SIGNAL(triggered(bool)),this,SLOT(showFFT()));
 
-    return true;
+    return mainWidget;
 }
 
 void MFAcquistionTable::release()
@@ -155,7 +155,6 @@ void MFAcquistionTable::retranslateUi()
     //d_ptr->model_MidFreq->resetHeadInfo(headInfo);
 
     m_name = tr("Intermediate Frequency Data List");
-    setWindowTitle(m_name);
     d_ptr->viewList->resizeColumnsToContents();
     d_ptr->viewList->horizontalHeader();
     for(int i=0;i< d_ptr->viewList->horizontalHeader()->count();i++)
@@ -219,7 +218,7 @@ void MFAcquistionTable::on_btn_load_clicked()
 {
     Q_D(MFAcquistionTable);
     // 指定存储的位置
-    QString filepath = QFileDialog::getSaveFileName(this, tr("Save as..."),
+    QString filepath = QFileDialog::getSaveFileName(nullptr, tr("Save as..."),
                                                     QString(), tr("EXCEL files (*.xls *.xlsx);;HTML-Files (*.htm *.html);;"));
     if(filepath.isEmpty())
         return;

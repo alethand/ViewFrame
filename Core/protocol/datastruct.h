@@ -20,6 +20,7 @@
 #include <QDebug>
 #include <QDataStream>
 #include <QQueue>
+#include <QRect>
 
 #include "calculater/commonalgorithms.h"
 using namespace Calculator;
@@ -201,9 +202,11 @@ struct DatabaseConfigInfo
  */
 struct SystemConfigInfo
 {
-    SystemConfigInfo():defaultKeySchemes(true){
+    SystemConfigInfo():defaultKeySchemes(true),fullscreen(true),topHint(false){
     }
     bool defaultKeySchemes;             /*!< 是否采用默认的快捷键设置，默认为true */
+    bool fullscreen;                    /*!< 是否采用全屏显示 */
+    bool topHint;                       /*!< 是否置顶显示 */
     QString userKeySchemesName;         /*!< 自定义快捷键设置名称 @see defaultKeySchemes 为false时有效 */
     QString locale;                     /*!< 显示的语言 */
     QString style;                      /*!< 默认样式 */
@@ -894,6 +897,7 @@ enum WindowLayout{
 struct ModuleInfo{
     QString id;             /*!< 模块ID */
     WindowLayout layout;    /*!< 在mainwindow中的位置方向 */
+    QRect geometry;         /*!< 尺寸信息 */
     bool closeable;         /*!< 是否可关闭 */
     bool visible;           /*!< 是否可见 */
     bool floatable;         /*!< 是否可移动 */

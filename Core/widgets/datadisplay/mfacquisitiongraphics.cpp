@@ -57,11 +57,11 @@ MFAcquisitionGraphics::~MFAcquisitionGraphics()
 
 }
 
-bool MFAcquisitionGraphics::initialize()
+QWidget *MFAcquisitionGraphics::initialize(QWidget *parent)
 {
     Q_D(MFAcquisitionGraphics);
-    setWidget(d->mainWidget);
-    return true;
+//    setWidget(d->mainWidget);
+    return d->mainWidget;
 }
 
 void MFAcquisitionGraphics::release()
@@ -137,7 +137,7 @@ void MFAcquisitionGraphics::retranslateUi()
 {
     m_name = tr("Intermediate Frequency Data Graphics");
     setObjectName("mfGraphics");
-    setWindowTitle(m_name);
+//    setWindowTitle(m_name);
 }
 
 } //namespace DataView

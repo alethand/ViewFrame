@@ -25,7 +25,7 @@ public:
     explicit RadiationSourceTable(QWidget *parent = 0);
     ~RadiationSourceTable();
 
-    bool initialize();
+    QWidget * initialize(QWidget * parent);
     void release();
     QString pluginName();
     Core::RComponent * clone();

@@ -21,7 +21,7 @@ public:
     explicit RadiaSourceMap(QWidget *parent = 0);
     ~RadiaSourceMap();
 
-    bool initialize();
+    QWidget * initialize(QWidget * parent);
     void release();
     QString pluginName();
     Core::RComponent * clone();

@@ -13,6 +13,7 @@
 #include <QFileDialog>
 #include <QDataStream>
 #include <QDir>
+#include <QMouseEvent>
 
 #include "Base/util/rsingleton.h"
 #include "modelview/tableview.h"
@@ -20,13 +21,6 @@
 #include "modelview/tableviewdelegate.h"
 #include "utils.h"
 
-#include "bandcontroldialog.h"
-#include "turntablecontroldialog.h"
-#include "statecontroldialog.h"
-#include "playbackcontroldialog.h"
-#include "selfcheckcontroldialog.h"
-#include "instrumentcontroldialog.h"
-#include "gathercontroldialog.h"
 #include "net/taskdispatcher.h"
 #include "Base/util/fileutils.h"
 #include "Core/file/programfilepath.h"
@@ -350,6 +344,11 @@ void TaskControl::tableContextPoint(QPoint point)
     d->contextPoint = point;
 }
 
+void TaskControl::mousePressEvent(QMouseEvent *event)
+{
+    QWidget::mousePressEvent(event);
+}
+
 /*!
  * @brief 获取右键菜单下的单元行
  * @param[in/out] valideIndex 当前行是否有效
@@ -410,25 +409,6 @@ void TaskControl::mouseHoverItem(QModelIndex index)
 {
     Q_D(TaskControl);
     if(index.row() > 0 && index.row() < d->taskInfoList.size()){
-//        Type type = d->taskInfoList.at(index.row())->taskType;
-//        switch(type){
-//            case Band:
-//                break;
-//            case State:
-//                break;
-//            case Gather:
-//                break;
-//            case SelfCheck:
-//                break;
-//            case Instrument:
-//                break;
-//            case Turntable:
-//                break;
-//            case PlayBack:
-//                break;
-//            default:
-//                break;
-//        }
     }
 }
 

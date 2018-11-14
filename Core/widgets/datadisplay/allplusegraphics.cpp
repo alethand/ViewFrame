@@ -136,11 +136,11 @@ AllPluseGraphics::~AllPluseGraphics()
 
 }
 
-bool AllPluseGraphics::initialize()
+QWidget *AllPluseGraphics::initialize(QWidget *parent)
 {
     Q_D(AllPluseGraphics);
-    setWidget(d->mainWidget);
-    return true;
+//    setWidget(d->mainWidget);
+    return d->mainWidget;
 }
 
 void AllPluseGraphics::release()
@@ -340,7 +340,7 @@ void AllPluseGraphics::retranslateUi()
 {
     m_name = tr("DataDisplay panel");
     setObjectName("allPluseGraphics");
-    setWindowTitle(m_name);
+//    setWindowTitle(m_name);
 }
 
 /*!

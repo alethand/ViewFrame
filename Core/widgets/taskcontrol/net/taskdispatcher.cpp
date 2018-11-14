@@ -21,12 +21,6 @@ TaskDispatcher::~TaskDispatcher()
     }
 }
 
-bool TaskDispatcher::initTask(TaskConfigInfo &info)
-{
-    udpSocket = new QUdpSocket();
-    return true;
-}
-
 void TaskDispatcher::bindTaskList(NewTaskList list)
 {
     this->taskInfoList = list;

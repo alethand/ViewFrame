@@ -20,12 +20,10 @@ TaskControlPanel::~TaskControlPanel()
 
 }
 
-bool TaskControlPanel::initialize()
+QWidget * TaskControlPanel::initialize(QWidget *parent)
 {
-    controlWidget = new TaskControl(this);
-    setWidget(controlWidget);
-
-    return true;
+    controlWidget = new TaskControl(parent);
+    return controlWidget;
 }
 
 void TaskControlPanel::release()
@@ -40,7 +38,7 @@ QString TaskControlPanel::pluginName()
 
 Core::RComponent * TaskControlPanel::clone()
 {
-    return new TaskControlPanel;
+    return new TaskControlPanel();
 }
 
 void TaskControlPanel::onMessage(MessageType::MessType type)
@@ -69,5 +67,4 @@ void TaskControlPanel::retranslateUi()
     setObjectName("taskControl");
     m_name = tr("TaskControl panel");
     pluginId = "0x0002";
-    setWindowTitle(m_name);
 }
