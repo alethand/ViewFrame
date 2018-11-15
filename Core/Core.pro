@@ -94,7 +94,9 @@ SOURCES += main.cpp \
     network/taskmanager.cpp \
     selfwidget/mydockwidgettitlebutton.cpp \
     selfwidget/mydockwidget.cpp \
-    selfwidget/widget.cpp
+    selfwidget/widget.cpp \
+    selfwidget/modulesetting.cpp \
+    selfwidget/titlebar.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
@@ -162,7 +164,9 @@ HEADERS  += \
     network/taskmanager.h \
     selfwidget/mydockwidgettitlebutton.h \
     selfwidget/mydockwidget.h \
-    selfwidget/widget.h
+    selfwidget/widget.h \
+    selfwidget/modulesetting.h \
+    selfwidget/titlebar.h
 
 FORMS    += mainwindow.ui \
     widgets/datadisplay/mfacquisitiongraphics.ui \

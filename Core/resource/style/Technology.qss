@@ -1,9 +1,8 @@
-﻿QWidget#mainContainer{
+﻿QWidget#mainWidget{
     color: white;
-    selection-color: #eff0f1;
     background-clip: border;
     border: 0px transparent black;
-    border-image: url(:/tech/resource/technology/background.png);
+    background-color: rgba(13,26,42,150);
 }
 
 QWidget{
@@ -109,11 +108,12 @@ QHeaderView::section:checked {
     background-color: #334e5e;
 }
 
+QTreeView,
 QTableWidget,
 QTableView {
     color: white;
     gridline-color: black;
-    background-color: rgba(13,26,42,150);
+    background-color: rgba(13,26,42,20);
     alternate-background-color:rgba(42,110,150,100);
     selection-color: white;
     selection-background-color: rgba(42,110,150,100);
@@ -264,8 +264,7 @@ QPushButton:hover,
 QAbstractSpinBox:hover,
 QTextEdit:hover,
 QPlainTextEdit:hover,
-QAbstractView:hover,
-QTreeView:hover {
+QAbstractView:hover{
     border: 1px solid #00ccff;
     color: #eff0f1;
 }
@@ -737,40 +736,35 @@ QTabBar QToolButton::left-arrow:disabled {
     image: url(:/tech/resource/technology/left_arrow_disabled.png);
 }
 
+QTreeView::item,
 QListView::item{
-    height:30px;
+    height:25px;
 }
 
-QListView::item::selected{
-    background-color: #2a6e96;
+QTreeView::item::hover,
+QListView::item::hover{
+    background-color:rgba(17,227,246,120);
 }
 
-QListView::item:!selected:hover,
-QTreeView::item:!selected:hover {
-    background: #18465d;
-    outline: 0;
-    color: #eff0f1
-}
-
-QListView::item:selected:hover,
-QTreeView::item:selected:hover {
-    background: #287399;
+QListView::item:selected,
+QTreeView::item:selected {
+    background-color:rgba(31,141,177,120);
     color: #eff0f1;
 }
 
 QTreeView::indicator:checked,
 QListView::indicator:checked {
-    image: url(:/tech/resource/technology/checkbox_checked.png);
+    border:1px solid red;
 }
 
 QTreeView::indicator:unchecked,
 QListView::indicator:unchecked {
-    image: url(:/tech/resource/technology/checkbox_unchecked.png);
+    border:1px solid green;
 }
 
 QTreeView::indicator:indeterminate,
 QListView::indicator:indeterminate {
-    image: url(:/tech/resource/technology/checkbox_indeterminate.png);
+    image: url(:/tech/resource/technology/checkbox_unchecked.png);
 }
 
 QTreeView::indicator:checked:hover,

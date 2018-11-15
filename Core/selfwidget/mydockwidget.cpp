@@ -15,13 +15,11 @@
 
 namespace Core{
 
-#define MOUSE_TRIGGER_SPACE 1        //窗口各边对鼠标事件触发间距
-
 class MyDockWidgetPrivate
 {
     Q_DECLARE_PUBLIC(MyDockWidget)
 public:
-    MyDockWidgetPrivate(MyDockWidget * q):q_ptr(q),contentExpanded(true),mousePressArea(0),leftButtonPressed(false),
+    MyDockWidgetPrivate(MyDockWidget * q):q_ptr(q),contentExpanded(true),
         features(MyDockWidget::DockWidgetClosable| MyDockWidget::DockWidgetMovable| MyDockWidget::DockWidgetFloatable),content(NULL){
         dockLayout = new DockLayout(q);
         dockLayout->setContentsMargins(1,1,1,1);
@@ -35,11 +33,6 @@ public:
     bool mouseRelease(QMouseEvent * event);
     bool mouseDoubleClickEvent(QMouseEvent * event);
 
-    //边框四周拖拽计算
-    int countMouseArea(QPoint p, int row);
-    int countHorizonalArea(QPoint p);
-    void setCursorType(int areaCode);
-
     QString fixedWindowTitle;
     QPoint mouseStartPoint;     /*!< 鼠标按下位置 */
     QWidget * titleBar;         /*!< 标题栏,可只显示图标 */
@@ -48,10 +41,6 @@ public:
     bool contentExpanded;       /*!< 内容面板是否折叠 */
 
     QAction *toggleViewAction;
-
-    bool leftButtonPressed;
-    QPoint globalMouseStartPoint;
-    int mousePressArea;
 
     MyDockWidget * q_ptr;
     DockLayout * dockLayout;
@@ -473,9 +462,6 @@ bool MyDockWidgetPrivate::mousePress(QMouseEvent *event)
         }else{
             mouseMoveable = false;
         }
-        globalMouseStartPoint = event->globalPos();
-        leftButtonPressed = true;
-        mousePressArea = countMouseArea(event->pos(), countHorizonalArea(event->pos()));
     }
     q_ptr->raise();
     return true;
@@ -490,91 +476,14 @@ bool MyDockWidgetPrivate::mouseMove(QMouseEvent *event)
         return true;
     }
 
-    int poss = countMouseArea(event->pos(), countHorizonalArea(event->pos()));
-//    setCursorType(poss);
-
-    if(leftButtonPressed)
-    {
-        QPoint ptemp = event->globalPos() - globalMouseStartPoint;
-
-        if (mousePressArea != 22)
-        {
-            QRect wid = q_ptr->geometry();
-            switch (mousePressArea)
-            {
-                case 11:wid.setTopLeft(wid.topLeft() + ptemp); break;
-                case 12:wid.setTop(wid.top() + ptemp.y()); break;
-                case 13:wid.setTopRight(wid.topRight() + ptemp); break;
-
-                case 21:wid.setLeft(wid.left() + ptemp.x()); break;
-                case 23:wid.setRight(wid.right() + ptemp.x()); break;
-
-                case 32:wid.setBottom(wid.bottom() + ptemp.y()); break;
-                case 33:wid.setBottomRight(wid.bottomRight() + ptemp); break;
-                case 31:wid.setBottomLeft(wid.bottomLeft() + ptemp); break;
-            }
-            q_ptr->setGeometry(wid);
-        }
-         globalMouseStartPoint = event->globalPos();
-    }
-
     return true;
 }
 
-int MyDockWidgetPrivate::countMouseArea(QPoint p, int row)
-{
-  if (p.y() < MOUSE_TRIGGER_SPACE)
-      return 10 + row;
-  else if (p.y()>q_ptr->height() - MOUSE_TRIGGER_SPACE)
-      return 30 + row;
-  else
-      return 20 + row;
-}
 
-/*!
- * @brief 根据鼠标所属的区域设置鼠标样式
- * @param[in] areaCode 区域代码
- */
-void MyDockWidgetPrivate::setCursorType(int areaCode)
-{
-    Qt::CursorShape cursor;
-    switch (areaCode)
-    {
-        case 11:
-        case 33:
-            cursor = Qt::SizeFDiagCursor; break;
-        case 13:
-        case 31:
-            cursor = Qt::SizeBDiagCursor; break;
-        case 21:
-        case 23:
-            cursor = Qt::SizeHorCursor; break;
-        case 12:
-        case 32:
-            cursor = Qt::SizeVerCursor; break;
-        case 22:
-            cursor = Qt::ArrowCursor; break;
-        default:
-            cursor = Qt::ArrowCursor; break;
-            break;
-    }
-    q_ptr->setCursor(cursor);
-}
-
-/*!
- * @brief 计算鼠标水平方向所处位置
- * @param[in]  p 鼠标当前的位置
- * @return 区域代码
- */
-int MyDockWidgetPrivate::countHorizonalArea(QPoint p)
-{
-    return (p.x() < MOUSE_TRIGGER_SPACE) ? 1 : ((q_ptr->width() - p.x() < MOUSE_TRIGGER_SPACE) ? 3 : 2);
-}
 
 bool MyDockWidgetPrivate::mouseRelease(QMouseEvent *event)
 {
     mouseMoveable = false;
-    leftButtonPressed = false;
     q_ptr->setCursor(Qt::ArrowCursor);
     return true;
 }
@@ -591,10 +500,9 @@ bool MyDockWidgetPrivate::mouseDoubleClickEvent(QMouseEvent *event)
     return true;
 }
 
-MyDockWidget::MyDockWidget(QWidget * parent):QWidget(parent),d_ptr(new MyDockWidgetPrivate(this))
+MyDockWidget::MyDockWidget(QWidget * parent):Widget(parent),d_ptr(new MyDockWidgetPrivate(this))
 {
     d_ptr->init();
-    setMouseTracking(true);
     setFocusPolicy(Qt::ClickFocus);
 }
 
@@ -654,16 +562,13 @@ bool MyDockWidget::event(QEvent *event)
     Q_D(MyDockWidget);
     switch(event->type()){
         case event->MouseButtonPress:
-            if(d->mousePress(dynamic_cast<QMouseEvent *>(event)))
-                return true;
+                d->mousePress(dynamic_cast<QMouseEvent *>(event));
             break;
         case event->MouseMove:
-            if(d->mouseMove(dynamic_cast<QMouseEvent *>(event)))
-                return true;
+                d->mouseMove(dynamic_cast<QMouseEvent *>(event));
             break;
         case event->MouseButtonRelease:
-            if(d->mouseRelease(dynamic_cast<QMouseEvent *>(event)))
-                return true;
+                d->mouseRelease(dynamic_cast<QMouseEvent *>(event));
             break;
         case event->MouseButtonDblClick:
             if(d->mouseDoubleClickEvent(dynamic_cast<QMouseEvent *>(event)))
@@ -681,7 +586,7 @@ bool MyDockWidget::event(QEvent *event)
         default:
             break;
     }
-    return QWidget::event(event);
+    return Widget::event(event);
 }
 
 void MyDockWidget::initStyleOption(QStyleOptionDockWidget *option) const

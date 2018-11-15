@@ -78,7 +78,7 @@ public:
 void TaskControlPrivate::initView()
 {
     mainWidget = new QWidget(q_ptr);
-    mainWidget->setObjectName("Container");
+    mainWidget->setObjectName("mainWidget");
 
     const int buttWidth = 120;
     const int buttHeight = 26;

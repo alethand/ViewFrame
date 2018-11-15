@@ -16,6 +16,7 @@ HealthInfoDockPanel::HealthInfoDockPanel(QWidget *parent)
     :Core::RComponent(Constant::PLUGIN_HEALTH_MANAGER,parent)
 {
     retranslateUi();
+    pluginId = "0x0001";
     RSingleton<Core::Subject>::instance()->attach(this);
 }
 
@@ -65,7 +66,7 @@ QWidget *HealthInfoDockPanel::initialize(QWidget *parent)
 
 QString HealthInfoDockPanel::pluginName()
 {
-    return tr("HealthInfo panel");
+    return QObject::tr("HealthInfo panel");
 }
 
 QString HealthInfoDockPanel::MachineName()
@@ -101,10 +102,7 @@ QSize HealthInfoDockPanel::sizeHint() const
 
 void HealthInfoDockPanel::retranslateUi()
 {
-    setObjectName("healthControl");
-    m_name = tr("HealthInfo panel");
-    pluginId = "0x0001";
-//    setWindowTitle(m_name);
+
 }
 
 /**

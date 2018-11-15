@@ -31,7 +31,10 @@ public:
 
     Id id();
     QString getPluginId();
+
     QString name();
+    void setName(QString newName){m_name = newName;}
+
     void setDockContainer(MyDockWidget * container){this->dockContainer = container;}
     MyDockWidget * getDockContainer(){return this->dockContainer;}
 

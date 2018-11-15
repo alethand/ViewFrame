@@ -12,6 +12,8 @@ TaskControlPanel::TaskControlPanel(QWidget *parent):
     RComponent(Constant::PLUGIN_TASK_CONTROL,parent),controlWidget(nullptr)
 {
     retranslateUi();
+    pluginId = "0x0002";
+    m_name = tr("TaskControl panel");
     RSingleton<Core::Subject>::instance()->attach(this);
 }
 
@@ -33,7 +35,7 @@ void TaskControlPanel::release()
 
 QString TaskControlPanel::pluginName()
 {
-    return tr("TaskControl panel");
+    return QObject::tr("TaskControl panel");
 }
 
 Core::RComponent * TaskControlPanel::clone()
@@ -64,7 +66,5 @@ QSize TaskControlPanel::sizeHint() const
 
 void TaskControlPanel::retranslateUi()
 {
-    setObjectName("taskControl");
-    m_name = tr("TaskControl panel");
-    pluginId = "0x0002";
+
 }

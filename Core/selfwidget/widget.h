@@ -18,11 +18,6 @@
 
 #include <QWidget>
 
-#define WINDOW_MARGIN_SIZE 5             //边距宽度
-#define WINDOW_MARGIN_WIDTH 10           //渐变背景宽度
-#define WINDOW_CURSOR_DETECT_SIZE  5     //鼠标移动在边框移动时检测的范围,最好WINDOW_MARGIN_SIZE与此值一致
-#define ABSTRACT_TOOL_BAR_HEGIHT 30      //工具栏固定高度
-
 namespace Core{
 
 class WidgetPrivate;
@@ -35,25 +30,21 @@ public:
     explicit Widget(QWidget * parent);
     ~Widget();
 
-    void setShadowWindow(bool flag = true);
-    void setWindowsMoveable(bool flag = true);
-
 protected:
-    void setContentWidget(QWidget * child);
-
-    virtual void paintEvent(QPaintEvent * event);
-    virtual bool nativeEvent(const QByteArray& eventType, void* message, long* result) override;
-
-    void repolish(QWidget * widget);
-    virtual int shadowWidth();
-
-signals:
-    void minimumWindow();
-    void maxWindow(bool);
-    void closeWindow();
+    void mousePressEvent(QMouseEvent * event);
+    void mouseMoveEvent(QMouseEvent * event);
+    void mouseReleaseEvent(QMouseEvent * event);
 
 private:
-    WidgetPrivate * d_ptr;
+    int countMouseArea(QPoint p, int row);
+    int countHorizonalArea(QPoint p);
+    void setCursorType(int areaCode);
+
+private:
+    bool leftButtonPressed;
+    int mousePressArea;
+    QPoint globalMouseStartPoint;
+
 };
 
 }

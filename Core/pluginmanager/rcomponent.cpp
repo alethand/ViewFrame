@@ -15,6 +15,7 @@ int RComponent::compIndex = 0;
 RComponent::RComponent(const char *id, QObject *parent):
     QObject(parent),m_id(QString("%1_%2").arg(id).arg(compIndex++).toLocal8Bit().data()),dockContainer(NULL)
 {
+    setObjectName(m_id.toString());
 }
 
 RComponent::~RComponent()

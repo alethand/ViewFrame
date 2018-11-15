@@ -1,65 +1,16 @@
 ﻿#include "widget.h"
 
-#include <QPaintEvent>
-#include <QHBoxLayout>
-#include <QPainter>
-#include <qmath.h>
-#include <QMessageBox>
-#include <QApplication>
-#include <QDesktopWidget>
-#include <QStyle>
-#include <QTimer>
-
-#ifdef Q_OS_WIN
-#include <Windows.h>
-#include <windowsx.h>
-#ifdef Q_CC_MSVC
-#pragma comment  (lib,"User32.lib")
-#pragma comment  (lib,"Gdi32.lib")
-#endif
-#endif //Q_OS_WIN
-
-#include "../protocol/datastruct.h"
+#include <QMouseEvent>
+#include <QDebug>
 
 namespace Core{
 
-class WidgetPrivate
-{
-    Q_DECLARE_PUBLIC(Widget)
-
-protected:
-    WidgetPrivate(Widget * q):q_ptr(q),isMousePressed(false),stickTopHint(false),
-        isShadowVisible(true),windowMoveable(true),toolbarMoveable(false)
-    {
-//        contentWidget = new QWidget(q);
-//        contentWidget->setObjectName("AbstractWidget_ContentWidget");
-
-//        QHBoxLayout * layout = new QHBoxLayout();
-//        layout->setContentsMargins(WINDOW_MARGIN_SIZE,WINDOW_MARGIN_SIZE,WINDOW_MARGIN_SIZE,WINDOW_MARGIN_SIZE);
-//        layout->setSpacing(0);
-//        layout->addWidget(contentWidget);
-
-//        q_ptr->setLayout(layout);
-    }
-
-    Widget * q_ptr;
-
-    QWidget * contentWidget;
-
-    QPoint mousePressPoint;
-    bool isMousePressed;
-    bool stickTopHint;
-    bool isShadowVisible;               //边框阴影是否可见
-    bool windowMoveable;                //窗口整体是否可移动(默认为true)
-    bool toolbarMoveable;               //工具栏是否可移动(默认为false，设置为true时，windowMoveable无效，此设置优先级较高)
-};
+#define MOUSE_TRIGGER_SPACE 5        //窗口各边对鼠标事件触发间距
 
 Widget::Widget(QWidget *parent):
-    d_ptr(new WidgetPrivate(this)),
     QWidget(parent)
 {
-    setWindowFlags(Qt::FramelessWindowHint |Qt::Tool);
-    setAttribute(Qt::WA_TranslucentBackground);
+    setMouseTracking(true);
 }
 
 Widget::~Widget()
@@ -67,236 +18,99 @@ Widget::~Widget()
 
 }
 
-/*!
- * @brief 设置是否开启窗口阴影
- * @param[in] flag 开启标识
- * @return 无
- */
-void Widget::setShadowWindow(bool flag)
+void Widget::mousePressEvent(QMouseEvent *event)
 {
-    Q_D(Widget);
-    d->isShadowVisible = flag;
-    if(flag)
-    {
-        QTimer::singleShot(25,this,SLOT(setLayoutMargin()));
-    }
-    else
-    {
-        dynamic_cast<QHBoxLayout *>(layout())->setContentsMargins(0,0,0,0);
-        update();
+    if(event->button() == Qt::LeftButton){
+        globalMouseStartPoint = event->globalPos();
+        leftButtonPressed = true;
+        mousePressArea = countMouseArea(event->pos(), countHorizonalArea(event->pos()));
     }
 }
 
-/*!
- * @brief 设置窗口是否可移动
- * @details 默认为true可移动，整个窗口都可以响应移动事件。
- * @param[in] flag 状态
- * @return 无
- */
-void Widget::setWindowsMoveable(bool flag)
+void Widget::mouseMoveEvent(QMouseEvent *event)
 {
-    Q_D(Widget);
-    d->windowMoveable = flag;
-}
+    int poss = countMouseArea(event->pos(), countHorizonalArea(event->pos()));
 
-/*!
- * @brief 将窗口加入至主窗口区域
- * @param[in] child 待加入的窗口
- * @return 无
- */
-void Widget::setContentWidget(QWidget *child)
-{
-    Q_D(Widget);
-//    if(!d->contentWidget->layout())
-//    {
-//        QVBoxLayout * layout = new QVBoxLayout;
-//        layout->setContentsMargins(0,0,0,0);
-//        layout->setSpacing(0);
-//        d->contentWidget->setLayout(layout);
-//    }
-
-//    QVBoxLayout * layout = dynamic_cast<QVBoxLayout *>(d->contentWidget->layout());
-//    if(layout)
-//        layout->addWidget(child);
-}
-
-#define ABSTRACT_TOOL_BAR_HEGIHT 30
-
-/*!
- * @brief 绘图事件
- * @details 绘制窗口四周边框阴影，绘制时采用渐变的方式逐级向外降低透明度。每边绘制的宽度使用WINDOW_MARGIN_WIDTH变量的定义。
- * @see WINDOW_MARGIN_WIDTH
- * @param[in] event 事件句柄
- * @return 无
- */
-void Widget::paintEvent(QPaintEvent *)
-{
-    Q_D(Widget);
-    if(d->isShadowVisible)
+    if(leftButtonPressed)
     {
-        QPainterPath path;
-        path.setFillRule(Qt::WindingFill);
-        path.addRect(WINDOW_MARGIN_WIDTH, WINDOW_MARGIN_WIDTH, this->width()-WINDOW_MARGIN_WIDTH * 2, this->height()- WINDOW_MARGIN_WIDTH * 2);
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing, true);
-        painter.fillPath(path, QBrush(Qt::white));
-
-        QColor color(0, 0, 0, 50);
-        for(int i = 0; i< WINDOW_MARGIN_WIDTH; i++)
+        QPoint ptemp = event->globalPos() - globalMouseStartPoint;
+        setCursorType(poss);
+        if (mousePressArea != 22)
         {
-            QPainterPath path;
-            path.setFillRule(Qt::WindingFill);
-            path.addRect(WINDOW_MARGIN_WIDTH-i, WINDOW_MARGIN_WIDTH-i, this->width()-(WINDOW_MARGIN_WIDTH-i)*2, this->height()-(WINDOW_MARGIN_WIDTH-i)*2);
-            color.setAlpha(150 - qSqrt(i)*50);
-            painter.setPen(color);
-            painter.drawPath(path);
+            QRect wid = geometry();
+            switch (mousePressArea)
+            {
+                case 11:wid.setTopLeft(wid.topLeft() + ptemp); break;
+                case 12:wid.setTop(wid.top() + ptemp.y()); break;
+                case 13:wid.setTopRight(wid.topRight() + ptemp); break;
+
+                case 21:wid.setLeft(wid.left() + ptemp.x()); break;
+                case 23:wid.setRight(wid.right() + ptemp.x()); break;
+
+                case 32:wid.setBottom(wid.bottom() + ptemp.y()); break;
+                case 33:wid.setBottomRight(wid.bottomRight() + ptemp); break;
+                case 31:wid.setBottomLeft(wid.bottomLeft() + ptemp); break;
+            }
+            setGeometry(wid);
         }
+         globalMouseStartPoint = event->globalPos();
     }
 }
 
-/*!
- * @brief 操作系统原生事件
- * @details 调用Windows原生的事件，用于处理无边框窗口中鼠标移动至各个边框后调整至对应样式以及处理窗口缩放
- * @param[in] eventType 事件类型
- * @param[in] message 消息类型
- * @param[in] result 操作结果
- * @return 是否处理
- */
-bool Widget::nativeEvent(const QByteArray &/*eventType*/, void *message, long *result)
+void Widget::mouseReleaseEvent(QMouseEvent *event)
 {
-    Q_D(Widget);
+    leftButtonPressed = false;
+    setCursor(Qt::ArrowCursor);
+}
 
-#ifdef Q_OS_WIN
-    if(d->isShadowVisible)
-    {
-        //Yang 解决无边框下窗口的拖拽以及鼠标状态显示
-        MSG* msg = static_cast<MSG*>(message);
-
-        if (msg->message == WM_NCHITTEST)
-        {
-            if (isMaximized())
-            {
-                return false;
-            }
-
-            *result = 0;
-            RECT winrect;
-            GetWindowRect(reinterpret_cast<HWND>(winId()), &winrect);
-
-            // must be short to correctly work with multiple monitors (negative coordinates)
-            short x = msg->lParam & 0x0000FFFF;
-            short y = (msg->lParam & 0xFFFF0000) >> 16;
-
-            bool resizeWidth = minimumWidth() != maximumWidth();
-            bool resizeHeight = minimumHeight() != maximumHeight();
-            if (resizeWidth)
-            {
-                //left border
-                if (x >= winrect.left && x < winrect.left + WINDOW_CURSOR_DETECT_SIZE)
-                {
-                    *result = HTLEFT;
-                }
-                //right border
-                if (x < winrect.right && x >= winrect.right - WINDOW_CURSOR_DETECT_SIZE)
-                {
-                    *result = HTRIGHT;
-                }
-            }
-            if (resizeHeight)
-            {
-                //bottom border
-                if (y < winrect.bottom && y >= winrect.bottom - WINDOW_CURSOR_DETECT_SIZE)
-                {
-                    *result = HTBOTTOM;
-                }
-                //top border
-                if (y >= winrect.top && y < winrect.top + WINDOW_CURSOR_DETECT_SIZE)
-                {
-                    *result = HTTOP;
-                }
-            }
-            if (resizeWidth && resizeHeight)
-            {
-                //bottom left corner
-                if (x >= winrect.left && x < winrect.left + WINDOW_CURSOR_DETECT_SIZE &&
-                    y < winrect.bottom && y >= winrect.bottom - WINDOW_CURSOR_DETECT_SIZE)
-                {
-                    *result = HTBOTTOMLEFT;
-                }
-                //bottom right corner
-                if (x < winrect.right && x >= winrect.right - WINDOW_CURSOR_DETECT_SIZE &&
-                    y < winrect.bottom && y >= winrect.bottom - WINDOW_CURSOR_DETECT_SIZE)
-                {
-                    *result = HTBOTTOMRIGHT;
-                }
-                //top left corner
-                if (x >= winrect.left && x < winrect.left + WINDOW_CURSOR_DETECT_SIZE &&
-                    y >= winrect.top && y < winrect.top + WINDOW_CURSOR_DETECT_SIZE)
-                {
-                    *result = HTTOPLEFT;
-                }
-                //top right corner
-                if (x < winrect.right && x >= winrect.right - WINDOW_CURSOR_DETECT_SIZE &&
-                    y >= winrect.top && y < winrect.top + WINDOW_CURSOR_DETECT_SIZE)
-                {
-                    *result = HTTOPRIGHT;
-                }
-            }
-
-            if (*result != 0)
-                return true;
-
-            QWidget *action = QApplication::widgetAt(QCursor::pos());
-            if (action == this)
-            {
-                *result = HTCAPTION;
-                return true;
-            }
-            //在鼠标进入中间区域后，将图标设置默认值
-            setCursor(Qt::ArrowCursor);
-        }
-    }
-#else
-    QMessageBox::warning(this,tr("Warning"),tr("System don't support resize window!"),QMessageBox::Yes,QMessageBox::Yes);
-#endif
-    return false;
+int Widget::countMouseArea(QPoint p, int row)
+{
+  if (p.y() < MOUSE_TRIGGER_SPACE)
+      return 10 + row;
+  else if (p.y()>height() - MOUSE_TRIGGER_SPACE)
+      return 30 + row;
+  else
+      return 20 + row;
 }
 
 /*!
- * @brief 对控件重新应用样式
- * @details 动态的改变控件的样式
- * @param[in] widget 待更新样式的控件
- * @return 无
+ * @brief 根据鼠标所属的区域设置鼠标样式
+ * @param[in] areaCode 区域代码
  */
-void Widget::repolish(QWidget *widget)
+void Widget::setCursorType(int areaCode)
 {
-    if(!widget)
+    Qt::CursorShape cursor;
+    switch (areaCode)
     {
-        return;
+        case 11:
+        case 33:
+            cursor = Qt::SizeFDiagCursor; break;
+        case 13:
+        case 31:
+            cursor = Qt::SizeBDiagCursor; break;
+        case 21:
+        case 23:
+            cursor = Qt::SizeHorCursor; break;
+        case 12:
+        case 32:
+            cursor = Qt::SizeVerCursor; break;
+        case 22:
+            cursor = Qt::ArrowCursor; break;
+        default:
+            cursor = Qt::ArrowCursor; break;
+            break;
     }
-    style()->unpolish(widget);
-    style()->polish(widget);
+    setCursor(cursor);
 }
 
 /*!
- * @brief 获取窗口阴影宽度
- * @details 当阴影可见时返回WINDOW_MARGIN_SIZE否则返回0
- * @param[in] 无
- * @return WINDOW_MARGIN_SIZE或者0
+ * @brief 计算鼠标水平方向所处位置
+ * @param[in]  p 鼠标当前的位置
+ * @return 区域代码
  */
-int Widget::shadowWidth()
+int Widget::countHorizonalArea(QPoint p)
 {
-    Q_D(Widget);
-    int t_width = 0;
-    if(d->isShadowVisible)
-    {
-        t_width = WINDOW_MARGIN_SIZE;
-    }
-    else
-    {
-        t_width= 0;
-    }
-    return t_width;
+    return (p.x() < MOUSE_TRIGGER_SPACE) ? 1 : ((width() - p.x() < MOUSE_TRIGGER_SPACE) ? 3 : 2);
 }
 
 }

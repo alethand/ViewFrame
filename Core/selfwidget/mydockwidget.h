@@ -35,7 +35,7 @@ namespace Core{
 class MyDockWidgetPrivate;
 class DockLayout;
 
-class MyDockWidget : public QWidget
+class MyDockWidget : public Widget
 {
     Q_OBJECT
     Q_FLAGS(DockWidgetFeatures)

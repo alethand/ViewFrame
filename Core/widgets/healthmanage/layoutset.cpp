@@ -423,6 +423,7 @@ void LayoutAndDisplay::choooseComponent(QModelIndex index)
 void LayoutAndDisplay::initView()
 {
     mWorkStateWidget = new QWidget();
+    mWorkStateWidget->setObjectName("mainWidget");
     mWorkStateWidget->setMinimumHeight(minRowInterval*2+mItemsHeight);
     mWorkStateWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     mWorkStateWidget->setLayout(new QGridLayout());
@@ -446,6 +447,7 @@ void LayoutAndDisplay::initView()
     StateLamp::initColorMap();
 
     QWidget *subStateInfoWidget = new QWidget();
+    subStateInfoWidget->setObjectName("mainWidget");
     QHBoxLayout *hlayout1 = new QHBoxLayout();
     hlayout1->setContentsMargins(0,0,0,0);
     hlayout1->addWidget(msubMachList);
@@ -468,17 +470,6 @@ void LayoutAndDisplay::initView()
     //update
     tableView = new QTableView;
     standItemModel = new QStandardItemModel();
-
-//    QTableView ta;
-
-//    QHeaderView hv(Qt::Vertical);
-
-//    hv.hide();
-//    tableView.setVerticalHeader(&hv);
-
-//    tableView->horizontalHeader()->hide();
-//    tableView->verticalHeader()->hide();
-//    QTableView::horizontalHeader()->hide();
 }
 
 void LayoutAndDisplay::retranslateUi()

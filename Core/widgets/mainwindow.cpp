@@ -39,9 +39,11 @@
 #include "network/tcpserver.h"
 #include "network/taskmanager.h"
 
+#include "selfwidget/modulesetting.h"
+
 #include "selfwidget/mydockwidget.h"
 #include "taskcontrol/taskcontrol.h"
-
+#include "Base/util/rutil.h"
 #include "mapview.h"
 
 #include <QDateTime>
@@ -623,6 +625,7 @@ void MainWindow::initComponent()
             }
 
             plugin = plugin->clone();
+            plugin->setName(mm.name);
             Core::MyDockWidget * dockContainer = new Core::MyDockWidget(this);
             dockContainer->setGeometry(mm.geometry);
             plugin->setDockContainer(dockContainer);
@@ -646,7 +649,7 @@ void MainWindow::initComponent()
         QWidget * widget = comp->initialize(dockContainer);
         if(widget){
             dockContainer->setWidget(widget);
-            dockContainer->setTitle(comp->pluginName());
+            dockContainer->setTitle(comp->name());
         }
 
         //将dock中控制显隐的action添加至菜单栏
@@ -676,7 +679,13 @@ void MainWindow::initComponent()
         }
         iter++;
     }
-//    connect(this,SIGNAL(sendForHealthPanelResize()),healthControl,SLOT(recForHealthPanelResize()));
+
+
+    Core::ModuleSetting * setting = new Core::ModuleSetting(this);
+    QRect screenGeometry = RUtil::screenGeometry();
+    int width = 300;
+    int height = 620;
+    setting->setGeometry(screenGeometry.width() - width,160,width,height);
 }
 
 void MainWindow::displayResize(){
