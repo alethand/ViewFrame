@@ -33,6 +33,7 @@ bool GlobalConfigFile::parseFile()
     systemConfigInfo.style = RUtil::getGlobalValue(Constant::SYSTEM_SETTING,Constant::SYSTEM_STYLE,systemConfigInfo.style).toString();
     systemConfigInfo.fullscreen = RUtil::getGlobalValue(Constant::SYSTEM_SETTING,Constant::SYSTEM_FULLSCREEN,systemConfigInfo.fullscreen).toBool();
     systemConfigInfo.topHint = RUtil::getGlobalValue(Constant::SYSTEM_SETTING,Constant::SYSTEM_TOPHINT,systemConfigInfo.topHint).toBool();
+    systemConfigInfo.menubarVisible = RUtil::getGlobalValue(Constant::SYSTEM_SETTING,Constant::SYSTEM_MENUBAR,systemConfigInfo.menubarVisible).toBool();
 
     return true;
 }
@@ -62,5 +63,6 @@ void GlobalConfigFile::saveFile()
     settings->setValue(Constant::SYSTEM_STYLE,systemConfigInfo.style);
     settings->setValue(Constant::SYSTEM_FULLSCREEN,systemConfigInfo.fullscreen);
     settings->setValue(Constant::SYSTEM_TOPHINT,systemConfigInfo.topHint);
+    settings->setValue(Constant::SYSTEM_MENUBAR,systemConfigInfo.menubarVisible);
     settings->endGroup();
 }

@@ -19,13 +19,10 @@ QWidget#Container
     border:1px solid #718eb4;
 }
 
-QDockWidget {
-    color:white;
-   /* background-color:rgba(255,0,0,100);*/
-    border: 1px solid red;
-    titlebar-close-icon: url(:/tech/resource/technology/close.png);
-    titlebar-normal-icon: url(:/tech/resource/technology/undock.png);
-}
+/*************************顶部标题栏区********************************/
+QLabel#titleBar_titlelabel{font-size:28px;font-weight:500;font-style: italic;color:rgba(255,195,0,245)}
+
+QDockWidget {color:white;border: 1px solid red;titlebar-close-icon: url(:/tech/resource/technology/close.png);titlebar-normal-icon: url(:/tech/resource/technology/undock.png);}
 
 QDockWidget>QWidget
 {
@@ -147,19 +144,21 @@ QMenuBar::item:pressed {
 QMenu {
     border: 1px solid #02a3cf;
     color: #eff0f1;
+    background-color:rgba(13,26,42,130);
+    margin-top:2px;
 }
 
 QMenu::separator {
     height: 2px;
     background: #00ccff;
+    background-color:rgba(17,227,246,60);
 }
 
 QMenu::item {
     border:none;
-    padding:5px;
+    padding:6px;
     padding-left:20px;
-    padding-right:30px;
-    background-color:#052d46;
+    padding-right:15px;
 }
 
 QMenu::item:selected {
@@ -754,17 +753,17 @@ QTreeView::item:selected {
 
 QTreeView::indicator:checked,
 QListView::indicator:checked {
-    border:1px solid red;
+    image: url(:/tech/resource/technology/checkbox_checked.png);
 }
 
 QTreeView::indicator:unchecked,
 QListView::indicator:unchecked {
-    border:1px solid green;
+    image: url(:/tech/resource/technology/checkbox_unchecked.png);
 }
 
 QTreeView::indicator:indeterminate,
 QListView::indicator:indeterminate {
-    image: url(:/tech/resource/technology/checkbox_unchecked.png);
+    image: url(:/tech/resource/technology/checkbox_indeterminate.png);
 }
 
 QTreeView::indicator:checked:hover,

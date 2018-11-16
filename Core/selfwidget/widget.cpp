@@ -7,8 +7,10 @@ namespace Core{
 
 #define MOUSE_TRIGGER_SPACE 5        //窗口各边对鼠标事件触发间距
 
+Widget::WidgetMap Widget::widgets;
+
 Widget::Widget(QWidget *parent):
-    QWidget(parent)
+    QWidget(parent),currentFeatures(AllWidgetFeatures)
 {
     setMouseTracking(true);
 }
@@ -18,9 +20,20 @@ Widget::~Widget()
 
 }
 
+void Widget::setWidgetFeatures(WidgetFeatures feature)
+{
+    currentFeatures = feature;
+    updateFeatures();
+}
+
+Widget::WidgetFeatures Widget::getWidgetFeatures()
+{
+    return currentFeatures;
+}
+
 void Widget::mousePressEvent(QMouseEvent *event)
 {
-    if(event->button() == Qt::LeftButton){
+    if(event->button() == Qt::LeftButton && testFeatures(WidgetResizeable)){
         globalMouseStartPoint = event->globalPos();
         leftButtonPressed = true;
         mousePressArea = countMouseArea(event->pos(), countHorizonalArea(event->pos()));
@@ -31,7 +44,7 @@ void Widget::mouseMoveEvent(QMouseEvent *event)
 {
     int poss = countMouseArea(event->pos(), countHorizonalArea(event->pos()));
 
-    if(leftButtonPressed)
+    if(leftButtonPressed && testFeatures(WidgetResizeable))
     {
         QPoint ptemp = event->globalPos() - globalMouseStartPoint;
         setCursorType(poss);
@@ -101,6 +114,19 @@ void Widget::setCursorType(int areaCode)
             break;
     }
     setCursor(cursor);
+}
+
+bool Widget::testFeatures(WidgetFeatures feature)
+{
+    return this->currentFeatures & feature;
+}
+
+void Widget::setObjectName(const QString &name)
+{
+    QWidget::setObjectName(name);
+    if(!widgets.contains(name)){
+        widgets.insert(name,this);
+    }
 }
 
 /*!

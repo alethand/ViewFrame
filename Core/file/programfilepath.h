@@ -32,6 +32,7 @@ public:
     //配置文件信息
     QString configFile;
     QString pluginFile;
+    QString layoutFile;
 };
 
 #endif // PROGRAMFILEPATH_H

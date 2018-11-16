@@ -23,6 +23,11 @@ namespace Ui {
 class MainWindow;
 }
 
+namespace Core{
+class TitleBar;
+class ModuleSetting;
+}
+
 class ActionContainer;
 class BaseInfoDockPanel;
 
@@ -47,6 +52,7 @@ protected:
 
 signals:
     void sendForHealthPanelResize();/*！导入布局信号*/
+
 private slots:
     void programExit();
 
@@ -63,7 +69,7 @@ private slots:
     void screenshotSettings();
 
     void importView();
-    void exportView();
+    void exportView(bool flag);
 
 private:
     void loadCmponent();
@@ -72,6 +78,8 @@ private:
     void updateLanguage(QString lanFileName);
     void loadUserSetting();
     void retranslateUi();
+
+    void setMenuTranslucent(QMenu * menu);
 
 private:
     Ui::MainWindow *ui;
@@ -100,6 +108,8 @@ private:
 
     MapView * mapView;
 
+    Core::TitleBar * titleBar;
+    Core::ModuleSetting * settingBar;
 };
 
 #endif // MAINWINDOW_H

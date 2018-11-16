@@ -30,6 +30,7 @@ const char SYSTEM_LOCALE[] = "locale";
 const char SYSTEM_STYLE[] = "stylesheet";
 const char SYSTEM_FULLSCREEN[] = "fullscreen";
 const char SYSTEM_TOPHINT[] = "tophint";
+const char SYSTEM_MENUBAR[] = "menubar";
 
 //日志模块
 const char LOG_LOG[] = "log";

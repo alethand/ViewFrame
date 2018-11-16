@@ -96,7 +96,8 @@ SOURCES += main.cpp \
     selfwidget/mydockwidget.cpp \
     selfwidget/widget.cpp \
     selfwidget/modulesetting.cpp \
-    selfwidget/titlebar.cpp
+    selfwidget/titlebar.cpp \
+    file/layoutparsemethod.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
@@ -166,7 +167,8 @@ HEADERS  += \
     selfwidget/mydockwidget.h \
     selfwidget/widget.h \
     selfwidget/modulesetting.h \
-    selfwidget/titlebar.h
+    selfwidget/titlebar.h \
+    file/layoutparsemethod.h
 
 FORMS    += mainwindow.ui \
     widgets/datadisplay/mfacquisitiongraphics.ui \

@@ -52,6 +52,7 @@ Action *ActionManager::registAction(Id id, QAction *newAction)
 
     Action * action = new Action(id);
     action->setAction(newAction);
+    newAction->setObjectName(id.data());
     action->setObjectName(id.data());
     actions.insert(id,action);
 

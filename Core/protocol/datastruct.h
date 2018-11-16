@@ -202,11 +202,12 @@ struct DatabaseConfigInfo
  */
 struct SystemConfigInfo
 {
-    SystemConfigInfo():defaultKeySchemes(true),fullscreen(true),topHint(false){
+    SystemConfigInfo():defaultKeySchemes(true),fullscreen(true),topHint(false),menubarVisible(false){
     }
     bool defaultKeySchemes;             /*!< 是否采用默认的快捷键设置，默认为true */
     bool fullscreen;                    /*!< 是否采用全屏显示 */
     bool topHint;                       /*!< 是否置顶显示 */
+    bool menubarVisible;                /*!< 菜单栏是否显示 */
     QString userKeySchemesName;         /*!< 自定义快捷键设置名称 @see defaultKeySchemes 为false时有效 */
     QString locale;                     /*!< 显示的语言 */
     QString style;                      /*!< 默认样式 */

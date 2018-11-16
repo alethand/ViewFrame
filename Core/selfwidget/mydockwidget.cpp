@@ -19,8 +19,7 @@ class MyDockWidgetPrivate
 {
     Q_DECLARE_PUBLIC(MyDockWidget)
 public:
-    MyDockWidgetPrivate(MyDockWidget * q):q_ptr(q),contentExpanded(true),
-        features(MyDockWidget::DockWidgetClosable| MyDockWidget::DockWidgetMovable| MyDockWidget::DockWidgetFloatable),content(NULL){
+    MyDockWidgetPrivate(MyDockWidget * q):q_ptr(q),contentExpanded(true), content(NULL),mouseMoveable(false){
         dockLayout = new DockLayout(q);
         dockLayout->setContentsMargins(1,1,1,1);
     }
@@ -44,14 +43,10 @@ public:
 
     MyDockWidget * q_ptr;
     DockLayout * dockLayout;
-    MyDockWidget::DockWidgetFeatures features;
 };
 
-static inline bool hasFeature(const MyDockWidgetPrivate *priv, MyDockWidget::DockWidgetFeature feature)
-{ return (priv->features & feature) == feature; }
-
-static inline bool hasFeature(const MyDockWidget *dockwidget, MyDockWidget::DockWidgetFeature feature)
-{ return (dockwidget->features() & feature) == feature; }
+static inline bool hasFeature(const MyDockWidgetPrivate *priv, Widget::WidgetFeatures feature)
+{ return (priv->q_ptr->getWidgetFeatures() & feature) == feature; }
 
 DockLayout::DockLayout(MyDockWidget *parent):QLayout(parent),items(MyDockWidget::RoleCount,NULL),verticalTitleBar(false)
 {
@@ -196,11 +191,11 @@ int DockLayout::minimumTitleWidth() const
 
     QSize closeSize(0, 0);
     QSize floatSize(0, 0);
-    if (hasFeature(q, MyDockWidget::DockWidgetClosable)) {
+    if (q->testFeatures(Widget::WidgetClosable)) {
         if (QLayoutItem *item = items[MyDockWidget::CloseButton])
             closeSize = item->widget()->sizeHint();
     }
-    if (hasFeature(q, MyDockWidget::DockWidgetFloatable)) {
+    if (q->testFeatures(Widget::WidgetFloatable)) {
         if (QLayoutItem *item = items[MyDockWidget::FloatButton])
             floatSize = item->widget()->sizeHint();
     }
@@ -414,7 +409,7 @@ void MyDockWidgetPrivate::init()
     QAbstractButton *closeButt = new MyDockWidgetTitleButton(q_ptr);
     closeButt->setFixedSize(22,22);
     closeButt->setObjectName(QLatin1String("dockwidget_closebutton"));
-    QObject::connect(closeButt, SIGNAL(clicked()), q_ptr, SLOT(close()));
+    QObject::connect(closeButt, SIGNAL(clicked()), q_ptr, SLOT(hideWidget()));
     dockLayout->addWidget(MyDockWidget::CloseButton, closeButt);
 
     QLabel * titleLabel = new QLabel(q_ptr);
@@ -426,6 +421,7 @@ void MyDockWidgetPrivate::init()
     toggleViewAction->setChecked(true);
     toggleViewAction->setText(fixedWindowTitle);
     QObject::connect(toggleViewAction, SIGNAL(triggered(bool)),q_ptr, SLOT(toggleView(bool)));
+    QObject::connect(toggleViewAction, SIGNAL(toggled(bool)),q_ptr, SLOT(toggleView(bool)));
 
     updateButtons();
 }
@@ -437,8 +433,8 @@ void MyDockWidgetPrivate::updateButtons()
 
     bool customTitleBar = dockLayout->getWidget(MyDockWidget::TitleBar) != 0;
 
-    bool canClose = hasFeature(this, MyDockWidget::DockWidgetClosable);
-    bool canFloat = hasFeature(this, MyDockWidget::DockWidgetFloatable);
+    bool canClose = hasFeature(this, Widget::WidgetClosable);
+    bool canFloat = hasFeature(this, Widget::WidgetFloatable);
 
     QAbstractButton *button
         = qobject_cast<QAbstractButton*>(dockLayout->getWidget(MyDockWidget::FloatButton));
@@ -475,11 +471,8 @@ bool MyDockWidgetPrivate::mouseMove(QMouseEvent *event)
         q_ptr->setCursor(Qt::ClosedHandCursor);
         return true;
     }
-
     return true;
 }
-
-
 
 bool MyDockWidgetPrivate::mouseRelease(QMouseEvent *event)
 {
@@ -509,19 +502,6 @@ MyDockWidget::MyDockWidget(QWidget * parent):Widget(parent),d_ptr(new MyDockWidg
 MyDockWidget::~MyDockWidget()
 {
 
-}
-
-void MyDockWidget::setFeatures(DockWidgetFeatures features)
-{
-    Q_D(MyDockWidget);
-    if(d->features == features)
-        return;
-}
-
-MyDockWidget::DockWidgetFeatures MyDockWidget::features() const
-{
-    Q_D(const MyDockWidget);
-    return d->features;
 }
 
 void MyDockWidget::setTitle(const QString title)
@@ -589,7 +569,19 @@ bool MyDockWidget::event(QEvent *event)
     return Widget::event(event);
 }
 
-void MyDockWidget::initStyleOption(QStyleOptionDockWidget *option) const
+/*!
+ * @brief 根据dock具有的feature特点，对控件进行设置
+ * @details 1.对控件显示状态进行设置 @n
+ *          2.对控件的移动、尺寸属性进行控制; @n
+ *          3.对控件的可嵌入属性控制; @n
+ */
+void MyDockWidget::updateFeatures()
+{
+    Q_D(MyDockWidget);
+    d->toggleViewAction->setChecked(testFeatures(WidgetVisible));
+}
+
+void MyDockWidget::initStyleOption(QStyleOptionDockWidget *option)
 {
     Q_D(const MyDockWidget);
     if (!option)
@@ -600,9 +592,9 @@ void MyDockWidget::initStyleOption(QStyleOptionDockWidget *option) const
     option->initFrom(this);
     option->rect = dwlayout->titleArea();
     option->title = d->fixedWindowTitle;
-    option->closable = hasFeature(this, MyDockWidget::DockWidgetClosable);
-    option->movable = hasFeature(this, MyDockWidget::DockWidgetMovable);
-    option->floatable = hasFeature(this, MyDockWidget::DockWidgetFloatable);
+    option->closable = testFeatures(Widget::WidgetClosable);
+    option->movable = testFeatures(Widget::WidgetMovable);
+    option->floatable = testFeatures(Widget::WidgetFloatable);
 }
 
 void MyDockWidget::toggleTopLevel()
@@ -613,6 +605,16 @@ void MyDockWidget::toggleTopLevel()
 void MyDockWidget::toggleView(bool visible)
 {
     this->setVisible(visible);
+    if(visible)
+        currentFeatures |= Widget::WidgetVisible;
+    else
+        currentFeatures &= ~Widget::WidgetVisible;
+}
+
+void MyDockWidget::hideWidget()
+{
+    Q_D(MyDockWidget);
+    d->toggleViewAction->setChecked(false);
 }
 
 }
