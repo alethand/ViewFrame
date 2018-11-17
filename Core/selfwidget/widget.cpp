@@ -10,7 +10,7 @@ namespace Core{
 Widget::WidgetMap Widget::widgets;
 
 Widget::Widget(QWidget *parent):
-    QWidget(parent),currentFeatures(AllWidgetFeatures)
+    QWidget(parent),currentFeatures(AllWidgetFeatures),widgetExpanded(true)
 {
     setMouseTracking(true);
 }
@@ -40,37 +40,44 @@ void Widget::mousePressEvent(QMouseEvent *event)
     }
 }
 
+/*!
+ * @details 鼠标移动需要对窗口的属性进行检测,需检测的包括: @a
+ *          1.WidgetResizeable
+ *          2.WidgetRangeLimit
+ */
 void Widget::mouseMoveEvent(QMouseEvent *event)
 {
-    int poss = countMouseArea(event->pos(), countHorizonalArea(event->pos()));
-
     if(leftButtonPressed && testFeatures(WidgetResizeable))
     {
+        int poss = countMouseArea(event->pos(), countHorizonalArea(event->pos()));
         QPoint ptemp = event->globalPos() - globalMouseStartPoint;
         setCursorType(poss);
         if (mousePressArea != 22)
         {
-            QRect wid = geometry();
+            QRect newGem = geometry();
             switch (mousePressArea)
             {
-                case 11:wid.setTopLeft(wid.topLeft() + ptemp); break;
-                case 12:wid.setTop(wid.top() + ptemp.y()); break;
-                case 13:wid.setTopRight(wid.topRight() + ptemp); break;
+                case 11:newGem.setTopLeft(newGem.topLeft() + ptemp); break;
+                case 12:newGem.setTop(newGem.top() + ptemp.y()); break;
+                case 13:newGem.setTopRight(newGem.topRight() + ptemp); break;
 
-                case 21:wid.setLeft(wid.left() + ptemp.x()); break;
-                case 23:wid.setRight(wid.right() + ptemp.x()); break;
+                case 21:newGem.setLeft(newGem.left() + ptemp.x()); break;
+                case 23:newGem.setRight(newGem.right() + ptemp.x()); break;
 
-                case 32:wid.setBottom(wid.bottom() + ptemp.y()); break;
-                case 33:wid.setBottomRight(wid.bottomRight() + ptemp); break;
-                case 31:wid.setBottomLeft(wid.bottomLeft() + ptemp); break;
+                case 32:newGem.setBottom(newGem.bottom() + ptemp.y()); break;
+                case 33:newGem.setBottomRight(newGem.bottomRight() + ptemp); break;
+                case 31:newGem.setBottomLeft(newGem.bottomLeft() + ptemp); break;
             }
-            setGeometry(wid);
+
+            if(newGem.width()<= minimumSize().width() || newGem.height() <=minimumSize().height())
+                return;
+            setGeometry(newGem);
         }
          globalMouseStartPoint = event->globalPos();
     }
 }
 
-void Widget::mouseReleaseEvent(QMouseEvent *event)
+void Widget::mouseReleaseEvent(QMouseEvent */*event*/)
 {
     leftButtonPressed = false;
     setCursor(Qt::ArrowCursor);
@@ -127,6 +134,31 @@ void Widget::setObjectName(const QString &name)
     if(!widgets.contains(name)){
         widgets.insert(name,this);
     }
+}
+
+void Widget::setGeometry(int ax, int ay, int aw, int ah)
+{
+    QWidget::setGeometry(ax,ay,aw,ah);
+}
+
+void Widget::setGeometry(const QRect &rect)
+{
+    QWidget::setGeometry(rect);
+}
+
+QRect Widget::getGeometry()const
+{
+    return geometry();
+}
+
+void Widget::setExpanded(bool expandable)
+{
+    widgetExpanded = expandable;
+}
+
+bool Widget::getExpanded()
+{
+    return widgetExpanded;
 }
 
 /*!

@@ -10,8 +10,10 @@
 #include <QEvent>
 #include <QMouseEvent>
 #include <QAction>
-
+#include <qmath.h>
 #include <QDebug>
+
+#include "Base/util/rutil.h"
 
 namespace Core{
 
@@ -19,10 +21,16 @@ class MyDockWidgetPrivate
 {
     Q_DECLARE_PUBLIC(MyDockWidget)
 public:
-    MyDockWidgetPrivate(MyDockWidget * q):q_ptr(q),contentExpanded(true), content(NULL),mouseMoveable(false){
+    MyDockWidgetPrivate(MyDockWidget * q):q_ptr(q), content(NULL),mouseMoveable(false){
         dockLayout = new DockLayout(q);
         dockLayout->setContentsMargins(1,1,1,1);
     }
+
+    enum WindowDirection{
+        W_Left = 0x01,
+        W_Right,
+        W_Bottom
+    };
 
     void init();
     void updateButtons();
@@ -32,14 +40,17 @@ public:
     bool mouseRelease(QMouseEvent * event);
     bool mouseDoubleClickEvent(QMouseEvent * event);
 
+    void setExpand(bool expandable);
+
     QString fixedWindowTitle;
     QPoint mouseStartPoint;     /*!< 鼠标按下位置 */
     QWidget * titleBar;         /*!< 标题栏,可只显示图标 */
     QWidget * content;          /*!< 内容区,可折叠 */
     bool mouseMoveable;         /*!< 鼠标点下的位置是否支持移动 */
-    bool contentExpanded;       /*!< 内容面板是否折叠 */
 
     QAction *toggleViewAction;
+
+    QRect currentGeometry;      /*!< 未压缩显示时窗口尺寸 */
 
     MyDockWidget * q_ptr;
     DockLayout * dockLayout;
@@ -105,6 +116,7 @@ void DockLayout::setGeometry(const QRect &geometry)
             item->setGeometry(geometry);
     } else {
         int titleHeight = this->titleHeight();
+        q->setMinimumSize(minimumTitleWidth(),titleHeight);
 
         if (verticalTitleBar) {
             _titleArea = QRect(QPoint(fw, fw),
@@ -286,10 +298,6 @@ QSize DockLayout::sizeFromContent(const QSize &content, bool floating) const
 
     uint explicitMin = 0;
     uint explicitMax = 0;
-//    if (w->d_func()->extra != 0) {
-//        explicitMin = w->d_func()->extra->explicitMinSize;
-//        explicitMax = w->d_func()->extra->explicitMaxSize;
-//    }
 
     if (!(explicitMin & Qt::Horizontal) || min.width() == 0)
         min.setWidth(-1);
@@ -311,7 +319,7 @@ QSize DockLayout::sizeHint() const
     QSize content(-1, -1);
     if (items[MyDockWidget::Content] != 0)
         content = items[MyDockWidget::Content]->sizeHint();
-qDebug()<<"++++"<<sizeFromContent(content, w->isFloating());
+
     return sizeFromContent(content, w->isFloating());
 }
 
@@ -368,7 +376,6 @@ QSize DockLayout::minimumSize()
             content = items[MyDockWidget::Content]->maximumSize();
         }
         content = sizeFromContent(content, parentWidget()->isWindow());
-        qDebug()<<content<<"==new";
         return content;
     } else {
         return parentWidget()->maximumSize();
@@ -453,25 +460,54 @@ bool MyDockWidgetPrivate::mousePress(QMouseEvent *event)
 {
     if(event->button() == Qt::LeftButton){
         mouseStartPoint = event->pos();
-        if(dockLayout->titleHeight() >= event->pos().y()){
-            mouseMoveable = true;
-        }else{
-            mouseMoveable = false;
+        if(q_ptr->testFeatures(Widget::WidgetMovable)){
+            if(dockLayout->titleHeight() >= event->pos().y()){
+                mouseMoveable = true;
+            }else{
+                mouseMoveable = false;
+            }
         }
     }
     q_ptr->raise();
     return true;
 }
 
+/*!
+ * @brief 处理dock移动事件
+ * @details 1.若设置了WidgetRangeLimitf属性，用于控制dock移动过程中任一边不能移出屏幕显示区域.
+ *            若检测到任一边超过了屏幕范围，程序及时修复对应边移动的大小。 @n
+ *          2.若设置了WidgetMovable属性，点击titleBar区域时，dock在处理完事件后，会终止事件流的传播，防止与widget中mousemove事件冲突，造成窗口移动混乱。
+ *
+ *          其它eature的处理，可参照父类widget的mousemove处理。
+ * @param[in] event 鼠标事件
+ * @return 是否终止事件流传播
+ */
 bool MyDockWidgetPrivate::mouseMove(QMouseEvent *event)
 {
     if(mouseMoveable){
         QPoint newPos = q_ptr->pos() + (event->pos() - mouseStartPoint);
+
+        if(q_ptr->testFeatures(Widget::WidgetRangeLimit)){
+            QRect newRect(newPos,q_ptr->size());
+            QRect screenSize = RUtil::screenGeometry();
+            if(!screenSize.contains(newRect)){
+                if(newPos.x() < screenSize.x())
+                    newPos.setX(screenSize.x());
+                else if(newPos.x() > (screenSize.width() - newRect.width()))
+                    newPos.setX(screenSize.width() - newRect.width());
+
+                if(newPos.y() < screenSize.y())
+                    newPos.setY(screenSize.y());
+                else if(newPos.y() > (screenSize.height() - newRect.height()))
+                    newPos.setY(screenSize.height() - newRect.height());
+            }
+        }
+
         q_ptr->move(newPos);
         q_ptr->setCursor(Qt::ClosedHandCursor);
         return true;
     }
-    return true;
+    return false;
 }
 
 bool MyDockWidgetPrivate::mouseRelease(QMouseEvent *event)
@@ -481,22 +517,93 @@ bool MyDockWidgetPrivate::mouseRelease(QMouseEvent *event)
     return true;
 }
 
+/*!
+ * @brief 处理双击titlebar区域事件
+ * @param[in] event 鼠标事件
+ * @return 是否终止事件传播流程
+ */
 bool MyDockWidgetPrivate::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if(event->button() == Qt::LeftButton && dockLayout->titleHeight() >= event->pos().y()){
-        QWidget * content = dockLayout->getWidget(MyDockWidget::Content);
-        if(content){
-            contentExpanded = !contentExpanded;
-            content->setVisible(contentExpanded);
-        }
+        if(q_ptr->widgetExpanded)
+            currentGeometry = q_ptr->geometry();
+         q_ptr->widgetExpanded = !q_ptr->widgetExpanded;
+         setExpand(q_ptr->widgetExpanded);
     }
     return true;
+}
+
+/*!
+ * @brief 设置内容显示区是否扩展显示
+ * @details 1.双击titlebar区域可控制内容区显示或隐藏; @n
+ *          2.隐藏时根据隐藏前与屏幕四周的距离进行计算停靠; @n
+ *              a.未隐藏前，四边与屏幕之间三边之一(左、右、下)之间的间距小于10px，将控件停靠在最小的一边；
+ *                若存在距离一致的情况，优先级为下>左>右
+ *              b.在其它区域隐藏时，则在原处展开。
+ *                若在隐藏时被拖动至三边(左、右、下)之一时，展开依据与a中一致。
+ *          3.隐藏展开时：
+ *              a.若未移动，则直接在原地展开；
+ *              b.若移动后，先判断若直接展开其尺寸是否会超过屏幕，若超过则在超过的方向反向减去一定值；
+ */
+void MyDockWidgetPrivate::setExpand(bool expandable)
+{
+    QWidget * content = dockLayout->getWidget(MyDockWidget::Content);
+    if(!content || !q_ptr->testFeatures(Widget::WidgetExpanable))
+        return;
+
+    typedef std::pair<WindowDirection,int> DirPair;
+    std::vector<DirPair> paris;
+
+    QRect screenSize = RUtil::screenGeometry();
+
+    if(expandable){
+        QPoint newPoint = q_ptr->pos();
+        QSize newSize(currentGeometry.width(),newPoint.y() + currentGeometry.height());
+        if(newSize.height() > screenSize.height()){
+            newPoint.setY(newPoint.y() + screenSize.height() - newSize.height());
+        }
+        q_ptr->setGeometry(QRect(newPoint,currentGeometry.size()));
+
+    }else{
+        int hotArea = 10;
+        paris.push_back({W_Bottom,abs(screenSize.bottom() - q_ptr->geometry().bottom())});
+        paris.push_back({W_Left,abs(screenSize.left() - q_ptr->geometry().left())});
+        paris.push_back({W_Right,abs(screenSize.right() - q_ptr->geometry().right())});
+
+        auto index = std::min_element(paris.begin(),paris.end(),[&](DirPair & a,DirPair & b){
+            return a.second < b.second;
+        });
+        DirPair minDir = *index;
+        QPoint pos;
+
+        //靠边停靠
+        if(minDir.second - hotArea <= 0 ){
+            switch(minDir.first){
+                case W_Left:
+                        pos = QPoint(screenSize.left(),q_ptr->y());
+                    break;
+                case W_Right:
+                        pos = QPoint(screenSize.right() - q_ptr->width(),q_ptr->y());
+                    break;
+                case W_Bottom:
+                        pos = QPoint(q_ptr->x(),screenSize.bottom()-q_ptr->minimumHeight());
+                    break;
+                default:
+                    break;
+            }
+        }else{
+            pos = q_ptr->pos();
+        }
+        q_ptr->setGeometry(QRect(pos,QSize(q_ptr->width(),q_ptr->minimumHeight())));
+    }
+    content->setVisible(expandable);
 }
 
 MyDockWidget::MyDockWidget(QWidget * parent):Widget(parent),d_ptr(new MyDockWidgetPrivate(this))
 {
     d_ptr->init();
     setFocusPolicy(Qt::ClickFocus);
+    setWidgetFeatures(currentFeatures |= WidgetRangeLimit);
 }
 
 MyDockWidget::~MyDockWidget()
@@ -537,6 +644,25 @@ QAction *MyDockWidget::toggleViewAction() const
     return d->toggleViewAction;
 }
 
+void MyDockWidget::setGeometry(const QRect &rect)
+{
+    Q_D(MyDockWidget);
+    if(widgetExpanded)
+        d->currentGeometry = rect;
+
+    Widget::setGeometry(rect);
+}
+
+QRect MyDockWidget::getGeometry() const
+{
+    Q_D(const MyDockWidget);
+    if(widgetExpanded){
+        return geometry();
+    }else{
+        return d->currentGeometry;
+    }
+}
+
 bool MyDockWidget::event(QEvent *event)
 {
     Q_D(MyDockWidget);
@@ -545,7 +671,8 @@ bool MyDockWidget::event(QEvent *event)
                 d->mousePress(dynamic_cast<QMouseEvent *>(event));
             break;
         case event->MouseMove:
-                d->mouseMove(dynamic_cast<QMouseEvent *>(event));
+                if(d->mouseMove(dynamic_cast<QMouseEvent *>(event)))
+                    return true;
             break;
         case event->MouseButtonRelease:
                 d->mouseRelease(dynamic_cast<QMouseEvent *>(event));
@@ -557,12 +684,10 @@ bool MyDockWidget::event(QEvent *event)
         case event->FocusIn:
             raise();
             break;
-        case event->ZOrderChange:
+        case event->Resize:
+            if(widgetExpanded)
+                d->currentGeometry = geometry();
             break;
-    case event->Enter:
-        break;
-    case event->Leave:
-        break;
         default:
             break;
     }
@@ -579,6 +704,7 @@ void MyDockWidget::updateFeatures()
 {
     Q_D(MyDockWidget);
     d->toggleViewAction->setChecked(testFeatures(WidgetVisible));
+    d->setExpand(widgetExpanded);
 }
 
 void MyDockWidget::initStyleOption(QStyleOptionDockWidget *option)

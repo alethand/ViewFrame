@@ -69,7 +69,9 @@ private slots:
     void screenshotSettings();
 
     void importView();
-    void exportView(bool flag);
+    void exportView(bool showOperateResult);
+
+    void rasieWidget(QString wid);
 
 private:
     void loadCmponent();

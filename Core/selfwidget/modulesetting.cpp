@@ -212,6 +212,24 @@ bool MSettingModel::setData(const QModelIndex &index, const QVariant &value, int
 }
 
 /*!
+ * @brief 根据父、子节点，获取子节点的id
+ * @param[in] parentIndex 父节点
+ * @param[in] childIndex 子节点
+ * @return 若存在则返回节点号，否则返回空
+ */
+QString MSettingModel::getNodeId(int parentIndex, int childIndex)
+{
+    if(parentIndex < 0 || parentIndex >= rootNode->nodes.size())
+        return QString("");
+
+    TreeNode * parentNode = rootNode->nodes.at(parentIndex);
+    if(childIndex < 0 || childIndex >= parentNode->nodes.size())
+        return QString("");
+
+    return parentNode->nodes.at(childIndex)->nodeId;
+}
+
+/*!
  * @brief 响应菜单列表中action勾选
  * @param[in] triggered 是否选中
  */
@@ -247,11 +265,10 @@ public:
     ModuleSetting* q_ptr;
 
     QTreeView * treeView;
+    MSettingModel * treeModel;
 
     RButton * sysSettingButt;
     RButton * networkButt;
-
-    MSettingModel * model;
 
     QMargins contentMargins;        /*!< 主窗口内容边距 */
     QRect controlRect;              /*!< 控制显示/隐藏区域 */
@@ -265,14 +282,15 @@ void ModuleSettingPrivate::init()
 
     treeView = new QTreeView(mainWidget);
 
-    model = new MSettingModel(treeView);
-    QObject::connect(model,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),q_ptr,SLOT(updatePluginState(QModelIndex,QModelIndex,QVector<int>)));
-    QObject::connect(model,SIGNAL(moduleStateChanged(MSettingModel::TreeNode *)),q_ptr,SLOT(updateModuelState(MSettingModel::TreeNode *)));
+    treeModel = new MSettingModel(treeView);
+    QObject::connect(treeModel,SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),q_ptr,SLOT(updatePluginState(QModelIndex,QModelIndex,QVector<int>)));
+    QObject::connect(treeModel,SIGNAL(moduleStateChanged(MSettingModel::TreeNode *)),q_ptr,SLOT(updateModuelState(MSettingModel::TreeNode *)));
+    QObject::connect(treeView,SIGNAL(clicked(QModelIndex)),q_ptr,SLOT(raiseModule(QModelIndex)));
 
     treeView->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Expanding);
     treeView->setFocusPolicy(Qt::TabFocus);
     treeView->header()->hide();
-    treeView->setModel(model);
+    treeView->setModel(treeModel);
     treeView->expandAll();
 
     QWidget * toolWidget = new QWidget(mainWidget);
@@ -466,6 +484,22 @@ void ModuleSetting::updateModuelState(MSettingModel::TreeNode * node)
         std::for_each(node->nodes.begin(),node->nodes.end(),func);
     }
     d->treeView->update();
+}
+
+/*!
+ * @brief 提升对应点击节点图层
+ * @param[in] index 节点信息
+ */
+void ModuleSetting::raiseModule(QModelIndex index)
+{
+    Q_D(ModuleSetting);
+    QModelIndex parent = index.parent();
+    if(parent.isValid()){
+       QString nodeId = d->treeModel->getNodeId(parent.row(),index.row());
+       if(nodeId.isEmpty())
+           return;
+       emit raiseWidget(nodeId);
+    }
 }
 
 void ModuleSetting::animationView(bool isVisible)

@@ -36,7 +36,7 @@ public:
 
     struct ModuleProtocol{
         NetworkType ntype;          /*!< 网络类型 */
-        QString moduleId;           /*!< 模块Id */
+        QString moduleId;           /*!< 模块Id,组件的objectName */
     };
 
     struct ProtocolHead{

@@ -531,7 +531,8 @@ void MainWindow::screenshotSettings()
 
 /*!
  * @brief 导入布局
- * @details 根据ObjName查找widget，则从文件中将信息设置回
+ * @details 根据ObjName查找widget，则从文件中将信息设置回各个显示控件 @n
+ * @warning 先设置组件的一般信息，最后设置features。
  */
 void MainWindow::importView()
 {
@@ -544,19 +545,21 @@ void MainWindow::importView()
         Core::Widget::WidgetMap maps = Core::Widget::getAllWidgets();
         std::for_each(items.begin(),items.end(),[&](Core::LayoutItem & item){
             Core::Widget * tmpWidget = maps.value(item.objName);
-            tmpWidget->setWidgetFeatures(static_cast<Core::Widget::WidgetFeature>(item.feature));
+            tmpWidget->setExpanded(item.expanded);
             tmpWidget->setGeometry(item.geometry);
+
+            tmpWidget->setWidgetFeatures(static_cast<Core::Widget::WidgetFeature>(item.feature));
         });
     }
 }
 
 /*!
  * @brief 保存布局
- * @details 保存内容：1.objname；2.WidgetFeatures; 3.Geometry @n
- *          保存路径：config/layout.bin
- *          保存范围：已激活使用的控件；上部菜单栏；右侧图层控制兰
+ * @details 保存内容：1.objname；2.WidgetFeatures; 3.Geometry 4.是否扩展显示; @n
+ *          保存路径：config/layout.bin @n
+ *          保存范围：已激活使用的控件；上部菜单栏；右侧图层控制栏 @n
  */
-void MainWindow::exportView(bool flag)
+void MainWindow::exportView(bool showOperateResult)
 {
     Core::LayoutParseMethod method;
     ProgramFilePath filePath;
@@ -568,21 +571,33 @@ void MainWindow::exportView(bool flag)
     Core::Widget::WidgetMap::iterator iter = maps.begin();
     while(iter != maps.end()){
         item.objName = (*iter)->objectName();
-        item.geometry = (*iter)->geometry();
+        item.geometry = (*iter)->getGeometry();
         item.feature = static_cast<int>((*iter)->getWidgetFeatures());
+        item.expanded = (*iter)->getExpanded();
         method.addItem(item);
         iter++;
     }
 
     //TODO 可增加状态显示栏，减少弹窗使用
     bool result = file.startSave(QFile::WriteOnly);
-    if(!flag){
+    if(!showOperateResult){
         if(result){
             QMessageBox::information(this,tr("information"),tr("export layout successfully!"));
         }else{
             QMessageBox::warning(this,tr("warning"),tr("export layout failed!"));
         }
     }
+}
+
+/*!
+ * @brief 提升组件显示层次
+ * @param[in] wid plugin的objectName
+ */
+void MainWindow::rasieWidget(QString wid)
+{
+    Core::RComponent * comp = RSingleton<Core::PluginManager>::instance()->getActivePlugin(wid);
+    if(comp)
+        comp->getDockContainer()->raise();
 }
 
 /*!
@@ -659,25 +674,27 @@ void MainWindow::initComponent()
     RSingleton<Core::ProtocolParseThread>::instance();
 
     //【2】实例化模块
-    Core::ModuleMap * moduleMap = RSingleton<Core::PluginLoader>::instance()->getModules();
-    Core::ModuleMap::iterator miter = moduleMap->begin();
-    while(miter != moduleMap->end()){
-        Datastruct::ModuleInfo mm = miter.value();
+    Core::ModuleList * moduleList = RSingleton<Core::PluginLoader>::instance()->getModules();
+    Core::ModuleList::iterator miter = moduleList->begin();
+    while(miter != moduleList->end()){
+        Datastruct::ModuleInfo mm = *miter;
 
         Core::RComponent * plugin = RSingleton<Core::PluginManager>::instance()->getAvailblePlugin(mm.pluginId);
         if(plugin){
+
+            plugin = plugin->clone();
+
             //2.1 向网络接收模块注册需要数据信息
             Core::TaskPtr tptr = RSingleton<Core::TaskManager>::instance()->getTask(mm.networkId);
             if(tptr){
                 std::shared_ptr<Core::TcpServer> tcpPtr = std::dynamic_pointer_cast<Core::TcpServer>(tptr);
                 if(tcpPtr){
-                    tcpPtr->registNetworkObserver(mm.pluginId,mm.protocols);
+                    tcpPtr->registNetworkObserver(plugin->id().toString(),mm.protocols);
                     //2.2 向网络解析模块注册需要解析的协议
-                    RSingleton<Core::ProtocolParseThread>::instance()->registNetworkObserver(mm.pluginId,mm.protocols,Datastruct::N_TCP);
+                    RSingleton<Core::ProtocolParseThread>::instance()->registNetworkObserver(plugin->id().toString(),mm.protocols,Datastruct::N_TCP);
                 }
             }
 
-            plugin = plugin->clone();
             plugin->setName(mm.name);
             Core::MyDockWidget * dockContainer = new Core::MyDockWidget(this);
             dockContainer->setGeometry(mm.geometry);
@@ -697,7 +714,6 @@ void MainWindow::initComponent()
     while(iter != maps.end()){
         Core::RComponent * comp = iter.value();
         Core::MyDockWidget * dockContainer = comp->getDockContainer();
-        dockContainer->setWidgetFeatures(Core::Widget::AllWidgetFeatures);
         dockContainer->setFloating(true);
         QWidget * widget = comp->initialize(dockContainer);
         if(widget){
@@ -737,15 +753,18 @@ void MainWindow::initComponent()
 
     //初始化控制面板、标题栏
     settingBar = new Core::ModuleSetting(this);
+    connect(settingBar,SIGNAL(raiseWidget(QString)),this,SLOT(rasieWidget(QString)));
     QRect screenGeometry = RUtil::screenGeometry();
-    int width = 300;
-    int height = 620;
-    settingBar->setGeometry(screenGeometry.width() - width,160,width,height);
+    int settingBarWidth = 300;
+    int settingBarHeight = 620;
+    settingBar->setMinimumSize(settingBarWidth,settingBarHeight);
+    settingBar->setGeometry(screenGeometry.width() - settingBarWidth,160,settingBarWidth,settingBarHeight);
 
-    height = 80;
     if(!RGlobal::G_GlobalConfigFile->systemConfigInfo.menubarVisible){
         titleBar = new Core::TitleBar(this);
-        titleBar->setGeometry(0,0,screenGeometry.width(),height);
+        int minTitileBarHeight = 80;
+        titleBar->setMinimumHeight(minTitileBarHeight);
+        titleBar->setGeometry(0,0,screenGeometry.width(),minTitileBarHeight);
         titleBar->addMenu(QStringLiteral("图层(&P)"),QString(Constant::MENU_VIEW),QPixmap(":/tech/resource/technology/system_setting.png"));
         titleBar->addMenu(QStringLiteral("工具(&T)"),QString(Constant::MENU_PROGRAM),QPixmap(":/tech/resource/technology/system_setting.png"));
         titleBar->addMenu(QStringLiteral("设置(&S)"),QString(Constant::MENU_SETTING),QPixmap(":/tech/resource/technology/system_setting.png"));

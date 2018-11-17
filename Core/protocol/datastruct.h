@@ -896,7 +896,6 @@ enum WindowLayout{
  *  @details
  */
 struct ModuleInfo{
-    QString id;             /*!< 模块ID */
     WindowLayout layout;    /*!< 在mainwindow中的位置方向 */
     QRect geometry;         /*!< 尺寸信息 */
     bool closeable;         /*!< 是否可关闭 */

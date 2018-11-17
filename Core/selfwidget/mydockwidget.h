@@ -56,6 +56,9 @@ public:
 
     QAction * toggleViewAction() const;
 
+    void setGeometry(const QRect &rect);
+    QRect getGeometry() const;
+
 protected:
     bool event(QEvent *event);
     void updateFeatures();

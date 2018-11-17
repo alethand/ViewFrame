@@ -7,13 +7,13 @@ namespace Core{
 
 QDataStream & operator << (QDataStream &stream, LayoutItem &item)
 {
-    stream<<item.objName<<item.geometry<<item.feature;
+    stream<<item.objName<<item.geometry<<item.feature<<item.expanded;
     return stream;
 }
 
 QDataStream & operator >> (QDataStream &stream, LayoutItem &item)
 {
-    stream>>item.objName>>item.geometry>>item.feature;
+    stream>>item.objName>>item.geometry>>item.feature>>item.expanded;
     return stream;
 }
 

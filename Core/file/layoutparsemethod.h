@@ -24,9 +24,9 @@ namespace Core{
 
 struct LayoutItem{
     QString objName;
-    QRect geometry;
+    QRect geometry;     /*!< 窗口实际尺寸,未设置expand属性时后的尺寸*/
     int feature;
-
+    bool expanded;      /*!< 是否停靠在边,dockwidget时有效 */
     friend QDataStream & operator << (QDataStream & stream,LayoutItem & item);
     friend QDataStream & operator >> (QDataStream & stream,LayoutItem & item);
 

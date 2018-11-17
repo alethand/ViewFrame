@@ -39,6 +39,8 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const Q_DECL_OVERRIDE;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole)Q_DECL_OVERRIDE;
 
+    QString getNodeId(int parentIndex,int childIndex);
+
 public:
     struct TreeNode{
         TreeNode():index(0),parentNode(NULL),visible(true){}
@@ -80,6 +82,9 @@ public:
 
     void onMessage(MessageType::MessType type);
 
+signals:
+    void raiseWidget(QString wid);
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
     void updateFeatures();
@@ -87,6 +92,7 @@ protected:
 private slots:
     void updatePluginState(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
     void updateModuelState(MSettingModel::TreeNode *node);
+    void raiseModule(QModelIndex index);
 
 private:
     void animationView(bool isVisible);

@@ -99,6 +99,7 @@ bool ProtocolParseThread::beforeParsing(ProtocolArray &array)
 
         //[4]
         std::for_each(list->begin(),list->end(),[&](ModuleProtocol module){
+            //BUG 20181117通过module.moduleId获取不到对应的插件
             RComponent * comp = RSingleton<PluginManager>::instance()->getActivePlugin(module.moduleId);
 //            if(comp)
 //                comp->onNetwork(array.protocolType,parsedResult);

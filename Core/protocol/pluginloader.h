@@ -22,7 +22,7 @@ public:
 
     bool initConfigFile();
 
-    ModuleMap * getModules(){return parsemethod->getModules();}
+    ModuleList * getModules(){return parsemethod->getModules();}
     NetworkMap * getNetworks(){return parsemethod->getNetworks();}
     PluginMap * getPlugins(){return parsemethod->getPlugins();}
 

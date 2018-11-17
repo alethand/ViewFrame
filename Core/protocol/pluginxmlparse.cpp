@@ -145,18 +145,14 @@ void PluginXmlParse::parseModule(QDomNode &moduleNode)
 {
     QDomNodeList nodes = moduleNode.toElement().childNodes();
     MoudleNode pnode;
-    modules = new ModuleMap;
+    modules = new ModuleList;
     for(int i = 0; i < nodes.size();i++){
         QDomNode child = nodes.at(i).firstChild();
         Datastruct::ModuleInfo minfo;
         while(!child.isNull()){
             QDomElement childElement = child.toElement();
             QString tagname = childElement.tagName();
-            if(tagname == pnode.id)
-            {
-                minfo.id = childElement.text();
-            }
-            else if(tagname == pnode.closeable)
+            if(tagname == pnode.closeable)
             {
                 minfo.closeable = childElement.text().toInt();
             }
@@ -224,7 +220,7 @@ void PluginXmlParse::parseModule(QDomNode &moduleNode)
             }
             child = child.nextSibling();
         }
-        modules->insert(minfo.id,minfo);
+        modules->push_back(minfo);
     }
 }
 
@@ -253,6 +249,8 @@ int PluginXmlParse::getRectSize(RectPos pos,QString content)
     }else{
         return content.toInt();
     }
+
+    return 0;
 }
 
 }
