@@ -12,8 +12,32 @@
 #define DIALOGPROXY_H
 
 #include <QDialog>
-
 #include "../base_global.h"
+
+class QLabel;
+
+class DialogTitleBar : public QWidget
+{
+    Q_OBJECT
+public:
+    explicit DialogTitleBar(QWidget * parent);
+    ~DialogTitleBar();
+
+    void setTitle(QString text);
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event);
+
+signals:
+    void newOffsetPos(QPoint point);
+
+private:
+    QWidget * titleContent;
+    QLabel * titleLabel;
+
+    QPoint mouseStartPoint;     /*!< 鼠标按下位置 */
+    bool mouseMoveable;         /*!< 鼠标点下的位置是否支持移动 */
+};
 
 class DialogProxyPrivate;
 
@@ -57,6 +81,7 @@ public:
 
     void setButton(int butts);
     void setContentWidget(QWidget * widget);
+
 signals:
     void buttClicked(StandardButton butt);
 
@@ -65,6 +90,7 @@ protected:
 
 private slots:
     void respButtonClicked();
+    void udpatePos(QPoint offsetPos);
 
 private:
     void addButton(DialogProxy::StandardButton buttType);

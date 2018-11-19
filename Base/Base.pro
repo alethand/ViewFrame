@@ -59,7 +59,8 @@ HEADERS += \
     common/stylemanager.h \
     common/languagemanager.h \
     common/validator/rvalidator.h \
-    common/validator/rcombinevalidator.h
+    common/validator/rcombinevalidator.h \
+    util/widgetpropsetting.h
 
 SOURCES += \
     actionmanager/action.cpp \
@@ -85,7 +86,8 @@ SOURCES += \
     common/stylemanager.cpp \
     common/languagemanager.cpp \
     common/validator/rvalidator.cpp \
-    common/validator/rcombinevalidator.cpp
+    common/validator/rcombinevalidator.cpp \
+    util/widgetpropsetting.cpp
 
 win32-msvc2013{
 

@@ -69,13 +69,18 @@ Action *ActionManager::action(Id id)
     return NULL;
 }
 
-ActionContainer *ActionManager::createMenu(Id id)
+ActionContainer *ActionManager::createMenu(Id id,bool enableTransparency)
 {
     if(contains<Id,ActionContainer>(menus,id))
         return menus.value(id);
 
     QMenu * menu = new QMenu();
     menu->setObjectName(id.data());
+
+    if(enableTransparency){
+        menu->setWindowFlags(menu->windowFlags() | Qt::FramelessWindowHint);
+        menu->setAttribute(Qt::WA_TranslucentBackground);
+    }
 
     MenuActionContainer * container = new MenuActionContainer(id);
     container->setMenu(menu);

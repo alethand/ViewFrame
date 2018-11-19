@@ -41,7 +41,7 @@ public:
     Action * registAction(Id id, QAction * newAction);
     Action * action(Id id);
 
-    ActionContainer * createMenu(Id id);
+    ActionContainer * createMenu(Id id,bool enableTransparency = true);
     ActionContainer * createMenuBar(Id id);
 
     ActionContainer * actionContainer(Id id);

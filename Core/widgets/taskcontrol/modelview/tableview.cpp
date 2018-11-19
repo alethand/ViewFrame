@@ -7,6 +7,7 @@
 #include <QContextMenuEvent>
 
 #include "../head.h"
+#include "base/util/widgetpropsetting.h"
 
 namespace TaskControlModel{
 
@@ -54,6 +55,7 @@ void TableView::addAction(QAction *action)
     if(d->m_Menu == nullptr){
         d->m_Menu = new QMenu;
     }
+    Base::WidgetPropSetting::enableWidgetTransparency(d->m_Menu,true);
     d->m_Menu->addAction(action);
 }
 

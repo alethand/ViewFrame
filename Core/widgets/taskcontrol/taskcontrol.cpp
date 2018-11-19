@@ -26,6 +26,7 @@
 #include "Core/file/programfilepath.h"
 #include "taskdialogproxy.h"
 #include "taskparsedmethod.h"
+#include "base/util/widgetpropsetting.h"
 
 namespace TaskControlModel {
 
@@ -157,7 +158,8 @@ void TaskControlPrivate::initTableView()
  */
 void TaskControlPrivate::initTableViewMenu()
 {
-    QMenu *m_AddMenu = new QMenu(q_ptr);
+    QMenu * m_AddMenu = new QMenu(q_ptr);
+    Base::WidgetPropSetting::enableWidgetTransparency(m_AddMenu,true);
 
     ProgramFilePath programPath;
     QDir dir(programPath.taskControlPath);

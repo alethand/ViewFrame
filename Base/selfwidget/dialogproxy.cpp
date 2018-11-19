@@ -1,12 +1,83 @@
 ﻿#include "dialogproxy.h"
 
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QCoreApplication>
 #include <QPushButton>
 #include <QVariant>
 #include <QHash>
+#include <QLabel>
+#include <QMouseEvent>
 
 #include "rbutton.h"
+
+DialogTitleBar::DialogTitleBar(QWidget *parent)
+{
+    setFixedHeight(22);
+
+    titleContent = new QWidget(this);
+
+    titleLabel = new QLabel(this);
+    titleLabel->setStyleSheet("background-color:rgba(17,227,246,120);");
+    titleLabel->installEventFilter(this);
+
+    QHBoxLayout * contentLayout = new QHBoxLayout;
+    contentLayout->addWidget(titleLabel);
+    contentLayout->setContentsMargins(0,0,0,0);
+    titleContent->setLayout(contentLayout);
+
+    QHBoxLayout * mainLayout = new QHBoxLayout;
+    mainLayout->setContentsMargins(0,0,0,0);
+    mainLayout->addWidget(titleContent);
+    this->setLayout(mainLayout);
+}
+
+DialogTitleBar::~DialogTitleBar()
+{
+
+}
+
+void DialogTitleBar::setTitle(QString text)
+{
+    titleLabel->setText(text);
+}
+
+bool DialogTitleBar::eventFilter(QObject *watched, QEvent *event)
+{
+    if(watched == titleLabel)
+    {
+        switch(event->type()){
+            case QEvent::MouseButtonPress:
+                {
+                    QMouseEvent * eve = dynamic_cast<QMouseEvent *>(event);
+                    if(eve){
+                        mouseStartPoint = eve->pos();
+                        mouseMoveable = true;
+                    }
+                }
+                break;
+            case QEvent::MouseMove:
+                {
+                    QMouseEvent * eve = dynamic_cast<QMouseEvent *>(event);
+                    if(eve){
+                        QPoint offsetPos =  eve->pos() - mouseStartPoint;
+                        emit newOffsetPos(offsetPos);
+                        setCursor(Qt::ClosedHandCursor);
+                    }
+                }
+                    break;
+            case QEvent::MouseButtonRelease:
+                {
+                    mouseMoveable = false;
+                    setCursor(Qt::ArrowCursor);
+                }
+                    break;
+            default:
+                break;
+        }
+    }
+    return QWidget::eventFilter(watched,event);
+}
 
 class DialogProxyPrivate : public QObject
 {
@@ -35,17 +106,21 @@ void DialogProxyPrivate::initView()
 {
     mainWidget = new QWidget(q_ptr);
 
+    DialogTitleBar *  titleBar = new DialogTitleBar(q_ptr);
+    connect(titleBar,SIGNAL(newOffsetPos(QPoint)),q_ptr,SLOT(udpatePos(QPoint)));
+
     contentWidget = new QWidget(mainWidget);
+    contentWidget->setObjectName("mainWidget");
     contentWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
-    buttonContainWidget = new QWidget(mainWidget);
+    buttonContainWidget = new QWidget(contentWidget);
 
     QVBoxLayout * mainLayout = new QVBoxLayout;
     mainLayout->setContentsMargins(1,1,1,1);
     mainLayout->setSpacing(2);
 
+    mainLayout->addWidget(titleBar);
     mainLayout->addWidget(contentWidget);
-    mainLayout->addWidget(buttonContainWidget);
 
     mainWidget->setLayout(mainLayout);
 
@@ -94,7 +169,8 @@ DialogProxy::DialogProxy(QWidget *parent):QDialog(parent),
 {
     Qt::WindowFlags  flags = Qt::Dialog;
     flags |= Qt::WindowCloseButtonHint;
-//    flags |=  Qt::FramelessWindowHint;
+    flags |=  Qt::FramelessWindowHint;
+    setAttribute(Qt::WA_TranslucentBackground);
     setWindowFlags(flags);
 }
 
@@ -133,9 +209,12 @@ void DialogProxy::setContentWidget(QWidget *widget)
         return;
 
     if(!d->contentWidget->layout()){
-        QHBoxLayout * layout = new QHBoxLayout;
+        QVBoxLayout * layout = new QVBoxLayout;
         layout->setContentsMargins(0,0,0,0);
+
         layout->addWidget(widget);
+        layout->addWidget(d->buttonContainWidget);
+
         d->contentWidget->setLayout(layout);
     }
 }
@@ -177,6 +256,11 @@ void DialogProxy::respButtonClicked()
         respButtClicked(but);
         emit buttClicked(but);
     }
+}
+
+void DialogProxy::udpatePos(QPoint offsetPos)
+{
+    this->move(pos() + offsetPos);
 }
 
 /*!

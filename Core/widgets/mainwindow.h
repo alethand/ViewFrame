@@ -81,8 +81,6 @@ private:
     void loadUserSetting();
     void retranslateUi();
 
-    void setMenuTranslucent(QMenu * menu);
-
 private:
     Ui::MainWindow *ui;
 

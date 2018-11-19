@@ -121,7 +121,6 @@ void MainWindow::initMenu()
 
     //程序菜单
     serverMenu = ActionManager::instance()->createMenu(Constant::MENU_PROGRAM);
-    setMenuTranslucent(serverMenu->menu());
     serverMenu->appendGroup(Constant::MENU_PROGRAM);
     menubar->addMenu(serverMenu, Constant::MENU_PROGRAM);
 
@@ -134,12 +133,10 @@ void MainWindow::initMenu()
 
     //视图菜单
     viewMenu = ActionManager::instance()->createMenu(Constant::MENU_VIEW);
-    setMenuTranslucent(viewMenu->menu());
     viewMenu->appendGroup(Constant::MENU_VIEW);
     menubar->addMenu(viewMenu, Constant::MENU_VIEW);
 
     viewManagerMenu = ActionManager::instance()->createMenu(Constant::VIEW_MANAGER);
-    setMenuTranslucent(viewManagerMenu->menu());
     viewManagerMenu->appendGroup(Constant::VIEW_MANAGER);
     viewMenu->addMenu(viewManagerMenu,Constant::VIEW_MANAGER);
 
@@ -160,7 +157,6 @@ void MainWindow::initMenu()
 
     //设置菜单
     settingsMenu = ActionManager::instance()->createMenu(Constant::MENU_SETTING);
-    setMenuTranslucent(settingsMenu->menu());
     settingsMenu->appendGroup(Constant::MENU_SETTING);
     menubar->addMenu(settingsMenu, Constant::MENU_SETTING);
 
@@ -183,7 +179,6 @@ void MainWindow::initMenu()
     //样式
     settingsMenu->appendGroup(Constant::CUSTOM_STYLE);
     styleMenu = ActionManager::instance()->createMenu(Constant::CUSTOM_STYLE);
-    setMenuTranslucent(styleMenu->menu());
     styleMenu->appendGroup(Constant::CUSTOM_STYLE);
     settingsMenu->addMenu(styleMenu,Constant::CUSTOM_STYLE);
 
@@ -208,7 +203,6 @@ void MainWindow::initMenu()
     //翻译文件
     settingsMenu->appendGroup(Constant::SYSTEM_LANGUAGE);
     lanMenu = ActionManager::instance()->createMenu(Constant::SYSTEM_LANGUAGE);
-    setMenuTranslucent(lanMenu->menu());
     lanMenu->appendGroup(Constant::SYSTEM_LANGUAGE);
     settingsMenu->addMenu(lanMenu,Constant::SYSTEM_LANGUAGE);
 
@@ -249,7 +243,6 @@ void MainWindow::initMenu()
 
     //帮助菜单
     helpMenu = ActionManager::instance()->createMenu(Constant::MENU_HELP);
-    setMenuTranslucent(helpMenu->menu());
     helpMenu->appendGroup(Constant::MENU_HELP);
     menubar->addMenu(helpMenu, Constant::MENU_HELP);
 
@@ -474,16 +467,6 @@ void MainWindow::retranslateUi()
         }
         iter++;
     }
-}
-
-/*!
- * @brief 开启Menu透明背景
- * @param[in] menu 待修改的背景
- */
-void MainWindow::setMenuTranslucent(QMenu *menu)
-{
-    menu->setWindowFlags(menu->windowFlags() | Qt::FramelessWindowHint);
-    menu->setAttribute(Qt::WA_TranslucentBackground);
 }
 
 void MainWindow::technicalSupport()
@@ -739,7 +722,6 @@ void MainWindow::initComponent()
                     container->addAction(module,mid);
 
                     moduleMenu = ActionManager::instance()->createMenu(mid);
-                    setMenuTranslucent(moduleMenu->menu());
                     moduleMenu->appendGroup(mid);
 
                     moduleAction->setMenu(moduleMenu->menu());

@@ -250,7 +250,7 @@ QPushButton:disabled {
 }
 
 QComboBox {
-    background-color: #0e2034;
+    background-color: rgba(13,26,42,150);
     border-style: solid;
     border: 1px solid #76797C;
     border-radius: 2px;
@@ -298,6 +298,7 @@ QComboBox QAbstractItemView {
 }
 
 QComboBox QAbstractItemView::item {
+    background-color:rgba(13,26,42,150);
     height:25px;
 }
 
@@ -791,4 +792,10 @@ QListView::indicator:indeterminate:hover,
 QListView::indicator:indeterminate:focus,
 QListView::indicator:indeterminate:pressed {
     image: url(:/tech/resource/technology/checkbox_indeterminate_focus.png);
+}
+
+QAbstractSpinBox{
+    padding-right: 15px;
+    background-color:rgba(0,0,0,0);
+    color:white;
 }
