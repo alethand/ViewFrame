@@ -35,7 +35,7 @@ private:
     static DataGenertor *instance;
 };
 
-Elem* getData_InPos(Protocol *protocol,int curCnt,int allCnt);
+Elem* getData_InPos(Protocol *protocol,int curCnt,int allCnt,bool isFilter);
 
 
 enum CtlOperate{///协议控制操作

@@ -38,7 +38,6 @@ class DockLayout;
 class MyDockWidget : public Widget
 {
     Q_OBJECT
-    Q_FLAGS(DockWidgetFeatures)
     Q_DECLARE_PRIVATE(MyDockWidget)
 public:
     explicit MyDockWidget(QWidget * parent = 0);
@@ -47,25 +46,6 @@ public:
     enum ButtonRole{
         Content, CloseButton, FloatButton, TitleBar, TitleLabel, RoleCount
     };
-
-    enum DockWidgetFeature {
-        DockWidgetClosable    = 0x01,
-        DockWidgetMovable     = 0x02,
-        DockWidgetFloatable   = 0x04,
-        DockWidgetVerticalTitleBar = 0x08,
-        DockWidgetExpanable = 0x0A,
-
-        DockWidgetFeatureMask = 0x0f,
-        AllDockWidgetFeatures = DockWidgetClosable|DockWidgetMovable|DockWidgetFloatable|DockWidgetExpanable,
-        NoDockWidgetFeatures  = 0x00,
-
-        Reserved              = 0xff
-    };
-    Q_DECLARE_FLAGS(DockWidgetFeatures, DockWidgetFeature)
-
-    void setFeatures(DockWidgetFeatures features);
-    MyDockWidget::DockWidgetFeatures features() const;
-
     void setTitle(const QString title);
 
     void setWidget(QWidget * widget);
@@ -76,15 +56,20 @@ public:
 
     QAction * toggleViewAction() const;
 
+    void setGeometry(const QRect &rect);
+    QRect getGeometry() const;
+
 protected:
     bool event(QEvent *event);
+    void updateFeatures();
 
 private:
-    void initStyleOption(QStyleOptionDockWidget *option) const;
+    void initStyleOption(QStyleOptionDockWidget *option);
 
 private slots:
     void toggleTopLevel();
     void toggleView(bool visible);
+    void hideWidget();
 
 private:
     MyDockWidgetPrivate * d_ptr;

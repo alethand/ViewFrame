@@ -111,7 +111,7 @@ RTextFile::RTextFile(const QString &fileName):RFile(fileName),parseMethod(NULL)
 
 RTextFile::~RTextFile()
 {
-    if(parseMethod)
+    if(parseMethod && isAutoReleaseParseMethod)
         delete parseMethod;
 }
 

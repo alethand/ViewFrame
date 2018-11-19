@@ -504,7 +504,9 @@ QSharedPointer<Protocol> DataGenertor::startParse(ProtocolArray &array,Datastruc
             pDomain = new DomainGroup();
             for(int i=0;i < protocol->startLen;i++) {
                 pDomain->mElems.append(new BitData());
-                pDomain->mElems.back()->read(stream);
+                quint8 temp;
+                stream>>temp;
+                pDomain->mElems.back()->read(QVariant(temp),1);
             }
             newData.data()->mElems.append(pDomain);
         }
@@ -645,13 +647,13 @@ int DataGenertor::getRepeatTimes(const QDataStream &stream, BaseProtocol *protoc
  * \param count
  * \return
  */
-Elem *getData_InPos(Protocol *protocol,int curCnt,int allCnt)
+Elem *getData_InPos(Protocol *protocol,int curCnt,int allCnt,bool isFilter)
 {
     QList<Elem*>::iterator ite = protocol->mElems.begin();
     while(ite != protocol->mElems.end()){
         switch((*ite)->mType){
         case T_Protocol:{
-             Elem* data = getData_InPos(dynamic_cast<Protocol*>(*ite),curCnt,allCnt);
+             Elem* data = getData_InPos(dynamic_cast<Protocol*>(*ite),curCnt,allCnt,isFilter);
              if(data != NULL)
                  return data;
              else
@@ -659,7 +661,7 @@ Elem *getData_InPos(Protocol *protocol,int curCnt,int allCnt)
             }
             break;
         case T_DomainGroup:{
-            Elem* data = getData_InPos(dynamic_cast<Protocol*>(*ite),curCnt,allCnt);
+            Elem* data = getData_InPos(dynamic_cast<Protocol*>(*ite),curCnt,allCnt,isFilter);
                 if(data != NULL)
                     return data;
                 else

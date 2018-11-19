@@ -18,7 +18,7 @@
 
 namespace Core{
 
-typedef QMap<QString,Datastruct::ModuleInfo> ModuleMap;
+typedef QList<Datastruct::ModuleInfo> ModuleList;
 typedef QMap<QString,Datastruct::NetworkInfo> NetworkMap;
 typedef QMap<QString,Datastruct::PluginInfo> PluginMap;
 
@@ -36,7 +36,7 @@ public:
         R_H
     };
 
-    ModuleMap * getModules(){return this->modules;}
+    ModuleList * getModules(){return this->modules;}
     NetworkMap * getNetworks(){return this->networks;}
     PluginMap * getPlugins(){return this->plugins;}
 
@@ -48,7 +48,7 @@ private:
     int getRectSize(RectPos, QString content);
 
 private:
-    ModuleMap * modules;
+    ModuleList * modules;
     NetworkMap * networks;
     PluginMap * plugins;
 };

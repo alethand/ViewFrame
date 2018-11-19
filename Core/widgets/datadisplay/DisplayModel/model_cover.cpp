@@ -1,4 +1,5 @@
 #include "model_cover.h"
+#include <QVariant>
 
 namespace DataView{
 
@@ -31,7 +32,7 @@ QVariant Model_Cover::headerData(int section, Qt::Orientation orientation, int r
     return QVariant();
 }
 
-void Model_Cover::getNewestInfo(QSharedPointer<NetParse::Protocol> *info)
+void Model_Cover::getNewestInfo(NetParse::Protocol *info)
 {
      //for(int i=0;i < mProtocol->)
      QMap<QVariant,CoverData>::iterator ite = mapInterceptInfo.begin();
@@ -55,10 +56,10 @@ QVariant Model_Cover::getData(int row, int column) const
         ite +=row;
         if(column < Observer::columnCount()){
 
-             NetParse::Elem *temp = NetParse::getData_InPos(te->pProtocol,0,column);
+             NetParse::Elem *temp = NetParse::getData_InPos(ite->pProtocol,0,column,isFilter);
              if(temp!= NULL)
                  return temp->getValue(this->isFilter);
-                 }
+
              return QVariant();
              }
         else {

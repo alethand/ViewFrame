@@ -31,6 +31,10 @@ public:
 
     virtual bool startParse(OpenMode openMode = QFile::ReadOnly);
     virtual bool startSave(OpenMode  openMode = QFile::WriteOnly | QFile::Truncate | QFile::Text);
+
+protected:
+    bool isAutoReleaseParseMethod;
+
 };
 
 /***********************************XML文件解析******************************************/
@@ -76,7 +80,6 @@ public:
     virtual bool startSave(OpenMode  openMode = QFile::WriteOnly | QFile::Truncate | QFile::Text);
 
 protected:
-    bool isAutoReleaseParseMethod;
     RXmlParseMethod * parseMethod;
 };
 
@@ -111,7 +114,8 @@ public:
     RTextFile(const QString & fileName);
     ~RTextFile();
 
-    void setParseMethod(RTextParseMethod * p){this->parseMethod = p;}
+    void setParseMethod(RTextParseMethod * p,bool autoRelease = true){this->parseMethod = p;
+                                                                     this->isAutoReleaseParseMethod = autoRelease;}
 
     virtual bool startParse(OpenMode  openMode = QFile::ReadOnly);
     virtual bool startSave(OpenMode  openMode = QFile::WriteOnly | QFile::Truncate | QFile::Text);

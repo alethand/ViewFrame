@@ -8,7 +8,7 @@ DataManager::DataManager(const Datastruct::BaseProtocol *protocol)
     positionFast();
 }
 
-void DataManager::handleNetInfo(QSharedPointer<NetParse::Protocol> *netInfo)
+void DataManager::handleNetInfo(NetParse::Protocol *netInfo)
 {
     originData.append(netInfo);
 

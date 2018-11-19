@@ -25,6 +25,7 @@ public:
 
 private slots:
     void switchMode();
+    void update();
 
 private:
     Mode curMode;                               /*!< 当前模式 */

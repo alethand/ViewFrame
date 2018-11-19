@@ -13,7 +13,7 @@ class Model_Details:public DataView::Observer
 public:
     Model_Details(DataManager *subject);
 
-    virtual void getNewestInfo(QSharedPointer<NetParse::Protocol>* info);
+    virtual void getNewestInfo(NetParse::Protocol* info);
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual QVariant getData(int row,int column) const ;
 

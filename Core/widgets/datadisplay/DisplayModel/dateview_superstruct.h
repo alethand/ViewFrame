@@ -21,17 +21,17 @@ public:
     explicit DataManager(const Datastruct::BaseProtocol *protocol);
 
     /*! @warning 此时默认Datastruct::ParsedResult 为一条网络数据报文 */
-    void handleNetInfo(QSharedPointer<NetParse::Protocol> *netInfo);            ///处理网络数据
+    void handleNetInfo(NetParse::Protocol *netInfo);            ///处理网络数据
     void register_DataObserver(Observer *obj);                                  ///注册成为观察者
 
-    const QList<QSharedPointer<NetParse::Protocol>*>*                           ///获取所有历史数据
+    const QList<NetParse::Protocol*>*                           ///获取所有历史数据
             getAllHistoryData(){return &originData;}
 
 private:
     void positionFast();                                                        ///快速定位
 
 private:
-    QList<QSharedPointer<NetParse::Protocol>*> originData;    /*! 原始数据-随时间递增*/
+    QList<NetParse::Protocol*> originData;    /*! 原始数据-随时间递增*/
     QList<Observer*> observers;                               /*! 观察者集合 */
     const Datastruct::BaseProtocol *mProtocol;                /*! 解析的协议   */
 };
@@ -45,7 +45,7 @@ class  Observer:public QAbstractTableModel{
 public:
     explicit Observer(DataManager *subject,bool openFilter = false);
 
-    virtual void getNewestInfo(QSharedPointer<NetParse::Protocol>* info)=0;    ///获取最新信息
+    virtual void getNewestInfo(NetParse::Protocol* info)=0;    ///获取最新信息
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const=0;
     virtual QVariant getData(int row,int column) const =0;
 

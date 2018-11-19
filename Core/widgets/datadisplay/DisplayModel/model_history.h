@@ -12,7 +12,7 @@ public:
     explicit Model_History(DataManager *subject,bool openFilter = false);
 
 
-    virtual void getNewestInfo(QSharedPointer<NetParse::Protocol>* info){ Q_UNUSED(info)}
+    virtual void getNewestInfo(NetParse::Protocol* info){ Q_UNUSED(info)}
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual QVariant getData(int row,int column) const ;
 private:

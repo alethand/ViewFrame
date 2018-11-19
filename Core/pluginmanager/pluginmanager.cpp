@@ -68,12 +68,12 @@ void PluginManager::addActivePlugin(RComponent *component)
     activeComponentMap.insert(component->id(),component);
 }
 
-RComponent *PluginManager::getActivePlugin(QString pluginId)
+RComponent *PluginManager::getActivePlugin(QString objectName)
 {
     std::lock_guard<std::mutex> lg(m_mutex);
     ComponentMap::iterator iter = activeComponentMap.begin();
     while(iter != activeComponentMap.end()){
-        if(iter.value()->getPluginId() == pluginId)
+        if(iter.value()->id().toString() == objectName)
             return iter.value();
         iter++;
     }

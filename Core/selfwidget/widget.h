@@ -17,6 +17,7 @@
 #define WIDGET_H
 
 #include <QWidget>
+#include <QMap>
 
 namespace Core{
 
@@ -25,15 +26,56 @@ class WidgetPrivate;
 class Widget : public QWidget
 {
     Q_OBJECT
+    Q_FLAGS(WidgetFeatures)
     Q_DECLARE_PRIVATE(Widget)
 public:
     explicit Widget(QWidget * parent);
     ~Widget();
 
+    typedef QMap<QString , Widget * > WidgetMap;
+
+    enum WidgetFeature{
+        WidgetClosable    = 0x0001,
+        WidgetMovable     = 0x0002,
+        WidgetFloatable   = 0x0004,
+        WidgetVerticalTitleBar = 0x0008,
+        WidgetExpanable = 0x0010,           /*!< 窗口是否展开，titlebar、modulesetting窗口是否隐藏 */
+        WidgetResizeable = 0x0020,
+        WidgetVisible = 0x0040,
+        WidgetRangeLimit = 0x0080,          /*!< 窗口的四周不能出屏幕可视区域*/
+
+        WidgetFeatureMask = 0xffff,
+        AllWidgetFeatures = WidgetClosable|WidgetMovable|WidgetFloatable|WidgetExpanable|WidgetResizeable|WidgetVisible,
+        NoWidgetFeatures  = 0x0000,
+
+        Reserved              = 0x00ff
+    };
+    Q_DECLARE_FLAGS(WidgetFeatures,WidgetFeature)
+
+    void setWidgetFeatures(WidgetFeatures feature);
+    Widget::WidgetFeatures getWidgetFeatures();
+    bool testFeatures(WidgetFeatures feature);
+
+    void setObjectName(const QString & name);
+
+    static WidgetMap getAllWidgets(){return widgets;}
+    void setGeometry(int ax, int ay, int aw, int ah);
+    virtual void setGeometry(const QRect &rect);
+    virtual QRect getGeometry() const;
+
+    void setExpanded(bool expandable);
+    bool getExpanded();
+
 protected:
     void mousePressEvent(QMouseEvent * event);
     void mouseMoveEvent(QMouseEvent * event);
     void mouseReleaseEvent(QMouseEvent * event);
+
+protected:
+    virtual void updateFeatures(){}
+
+    WidgetFeatures currentFeatures;
+    bool widgetExpanded;           /*!< 内容面板是否折叠 */
 
 private:
     int countMouseArea(QPoint p, int row);
@@ -45,6 +87,7 @@ private:
     int mousePressArea;
     QPoint globalMouseStartPoint;
 
+    static WidgetMap widgets;
 };
 
 }

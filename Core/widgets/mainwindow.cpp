@@ -22,9 +22,7 @@
 #include "Base/util/fileutils.h"
 #include "healthmanage/healthinfopannel.h"
 
-#include "datadisplay/allplusetable.h"
-#include "datadisplay/mfacquistiontable.h"
-#include "datadisplay/allplusegraphics.h"
+#include "datadisplay/radiusSource/panel.h"
 
 #include "network/protocolparsethread.h"
 
@@ -37,11 +35,13 @@
 #include "network/taskmanager.h"
 
 #include "selfwidget/modulesetting.h"
+#include "selfwidget/titlebar.h"
 
 #include "selfwidget/mydockwidget.h"
 #include "taskcontrol/taskcontrol.h"
 #include "Base/util/rutil.h"
 #include "mapview.h"
+#include "file/layoutparsemethod.h"
 
 #include <QDateTime>
 #include <QScreen>
@@ -54,6 +54,7 @@ using namespace Base;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
+    titleBar(NULL),settingBar(NULL),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -83,7 +84,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     RSingleton<Core::ProtocolParseThread>::instance()->stopMe();
-
 
     delete ui;
 }
@@ -116,6 +116,7 @@ void MainWindow::initMenu()
 
     //程序菜单
     serverMenu = ActionManager::instance()->createMenu(Constant::MENU_PROGRAM);
+    setMenuTranslucent(serverMenu->menu());
     serverMenu->appendGroup(Constant::MENU_PROGRAM);
     menubar->addMenu(serverMenu, Constant::MENU_PROGRAM);
 
@@ -128,10 +129,12 @@ void MainWindow::initMenu()
 
     //视图菜单
     viewMenu = ActionManager::instance()->createMenu(Constant::MENU_VIEW);
+    setMenuTranslucent(viewMenu->menu());
     viewMenu->appendGroup(Constant::MENU_VIEW);
     menubar->addMenu(viewMenu, Constant::MENU_VIEW);
 
     viewManagerMenu = ActionManager::instance()->createMenu(Constant::VIEW_MANAGER);
+    setMenuTranslucent(viewManagerMenu->menu());
     viewManagerMenu->appendGroup(Constant::VIEW_MANAGER);
     viewMenu->addMenu(viewManagerMenu,Constant::VIEW_MANAGER);
 
@@ -142,7 +145,7 @@ void MainWindow::initMenu()
     viewManagerMenu->addAction(importView,Constant::VIEW_MANAGER);
 
     exportViewAction = new QAction(this);
-    connect(exportViewAction,SIGNAL(triggered()),this,SLOT(exportView()));
+    connect(exportViewAction,SIGNAL(triggered(bool)),this,SLOT(exportView(bool)));
     Action * exportView = ActionManager::instance()->registAction(Constant::EXPORT_VIEW,exportViewAction);
     exportView->setDefaultKey(QKeySequence("Ctrl+Shift+E"));
     viewManagerMenu->addAction(exportView,Constant::VIEW_MANAGER);
@@ -152,6 +155,7 @@ void MainWindow::initMenu()
 
     //设置菜单
     settingsMenu = ActionManager::instance()->createMenu(Constant::MENU_SETTING);
+    setMenuTranslucent(settingsMenu->menu());
     settingsMenu->appendGroup(Constant::MENU_SETTING);
     menubar->addMenu(settingsMenu, Constant::MENU_SETTING);
 
@@ -174,6 +178,7 @@ void MainWindow::initMenu()
     //样式
     settingsMenu->appendGroup(Constant::CUSTOM_STYLE);
     styleMenu = ActionManager::instance()->createMenu(Constant::CUSTOM_STYLE);
+    setMenuTranslucent(styleMenu->menu());
     styleMenu->appendGroup(Constant::CUSTOM_STYLE);
     settingsMenu->addMenu(styleMenu,Constant::CUSTOM_STYLE);
 
@@ -198,6 +203,7 @@ void MainWindow::initMenu()
     //翻译文件
     settingsMenu->appendGroup(Constant::SYSTEM_LANGUAGE);
     lanMenu = ActionManager::instance()->createMenu(Constant::SYSTEM_LANGUAGE);
+    setMenuTranslucent(lanMenu->menu());
     lanMenu->appendGroup(Constant::SYSTEM_LANGUAGE);
     settingsMenu->addMenu(lanMenu,Constant::SYSTEM_LANGUAGE);
 
@@ -238,6 +244,7 @@ void MainWindow::initMenu()
 
     //帮助菜单
     helpMenu = ActionManager::instance()->createMenu(Constant::MENU_HELP);
+    setMenuTranslucent(helpMenu->menu());
     helpMenu->appendGroup(Constant::MENU_HELP);
     menubar->addMenu(helpMenu, Constant::MENU_HELP);
 
@@ -254,13 +261,9 @@ void MainWindow::initMenu()
     helpMenu->addAction(aboutProgram,Constant::MENU_HELP);
 }
 
-/*!
- * \brief 关闭窗口事件
- * \param event
- */
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    exportView();
+    exportView(true);
     event->accept();
     exit(0);
 }
@@ -468,6 +471,16 @@ void MainWindow::retranslateUi()
     }
 }
 
+/*!
+ * @brief 开启Menu透明背景
+ * @param[in] menu 待修改的背景
+ */
+void MainWindow::setMenuTranslucent(QMenu *menu)
+{
+    menu->setWindowFlags(menu->windowFlags() | Qt::FramelessWindowHint);
+    menu->setAttribute(Qt::WA_TranslucentBackground);
+}
+
 void MainWindow::technicalSupport()
 {
 
@@ -509,33 +522,77 @@ void MainWindow::screenshotSettings()
             QMessageBox::information(this,tr("information"),tr("save screenshot successfully!"));
         }
     }
-
 }
 
+/*!
+ * @brief 导入布局
+ * @details 根据ObjName查找widget，则从文件中将信息设置回各个显示控件 @n
+ * @warning 先设置组件的一般信息，最后设置features。
+ */
 void MainWindow::importView()
 {
-    QFile file("Layout.ini");
-    if (file.open(QIODevice::ReadOnly))
-    {
-        QByteArray ba;
-        QDataStream in(&file);
-        in >> ba;
-        file.close();
-        this->restoreState(ba);
+    Core::LayoutParseMethod method;
+    ProgramFilePath filePath;
+    Base::RTextFile file(filePath.layoutFile);
+    file.setParseMethod(&method,false);
+    if(file.startParse()){
+        QList<Core::LayoutItem> items = method.getItems();
+        Core::Widget::WidgetMap maps = Core::Widget::getAllWidgets();
+        std::for_each(items.begin(),items.end(),[&](Core::LayoutItem & item){
+            Core::Widget * tmpWidget = maps.value(item.objName);
+            tmpWidget->setExpanded(item.expanded);
+            tmpWidget->setGeometry(item.geometry);
+
+            tmpWidget->setWidgetFeatures(static_cast<Core::Widget::WidgetFeature>(item.feature));
+        });
     }
-    emit sendForHealthPanelResize();
 }
 
-
-void MainWindow::exportView()
+/*!
+ * @brief 保存布局
+ * @details 保存内容：1.objname；2.WidgetFeatures; 3.Geometry 4.是否扩展显示; @n
+ *          保存路径：config/layout.bin @n
+ *          保存范围：已激活使用的控件；上部菜单栏；右侧图层控制栏 @n
+ */
+void MainWindow::exportView(bool showOperateResult)
 {
-    QFile file("Layout.ini");
-    if(file.open(QIODevice::WriteOnly))
-    {
-        QDataStream out(&file);
-        out << this->saveState();
-        file.close();
+    Core::LayoutParseMethod method;
+    ProgramFilePath filePath;
+    Base::RTextFile file(filePath.layoutFile);
+    file.setParseMethod(&method,false);
+    Core::LayoutItem item;
+
+    Core::Widget::WidgetMap maps = Core::Widget::getAllWidgets();
+    Core::Widget::WidgetMap::iterator iter = maps.begin();
+    while(iter != maps.end()){
+        item.objName = (*iter)->objectName();
+        item.geometry = (*iter)->getGeometry();
+        item.feature = static_cast<int>((*iter)->getWidgetFeatures());
+        item.expanded = (*iter)->getExpanded();
+        method.addItem(item);
+        iter++;
     }
+
+    //TODO 可增加状态显示栏，减少弹窗使用
+    bool result = file.startSave(QFile::WriteOnly);
+    if(!showOperateResult){
+        if(result){
+            QMessageBox::information(this,tr("information"),tr("export layout successfully!"));
+        }else{
+            QMessageBox::warning(this,tr("warning"),tr("export layout failed!"));
+        }
+    }
+}
+
+/*!
+ * @brief 提升组件显示层次
+ * @param[in] wid plugin的objectName
+ */
+void MainWindow::rasieWidget(QString wid)
+{
+    Core::RComponent * comp = RSingleton<Core::PluginManager>::instance()->getActivePlugin(wid);
+    if(comp)
+        comp->getDockContainer()->raise();
 }
 
 /*!
@@ -551,26 +608,35 @@ void MainWindow::loadCmponent()
     //DataView::RadiationSourceTable * radiationTable = new DataView::RadiationSourceTable;
    // DataView::AllPluseDock * allPluseTable = new DataView::AllPluseDock;
 //    DataView::MFAcquistionTable * acquistionTable = new DataView::MFAcquistionTable;
-    DataView::AllPluseGraphics * allPluseGraphics = new DataView::AllPluseGraphics;
+     RadiusPanel * radiationSrc = new RadiusPanel;
   //  DataView::MFAcquisitionGraphics * mfGraphics = new DataView::MFAcquisitionGraphics;
 
     RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(taskControl);
     RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(healthControl);
 
-   // RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(radiationTable);
+    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(radiationSrc);
   //  RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(allPluseTable);
 //    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(acquistionTable);
 
-    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(allPluseGraphics);
+  //  RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(allPluseGraphics);
   //  RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(mfGraphics);
 }
 
 /*!
  * @brief   初始化各个组件
+ * @details 1.加载可用的插件 @n
+ *          2.解析plugins.xml文件 @n
+ *          3.初始化网路接收、网络解析模块 @n
+ *          4.初始化配置的模块
  */
 void MainWindow::initComponent()
 {
     setDockNestingEnabled(true);
+
+    //【0】设置主窗口信息
+    if(!RGlobal::G_GlobalConfigFile->systemConfigInfo.menubarVisible){
+        menuBar()->hide();
+    }
 
     mapView = new MapView(centralWidget());
     QHBoxLayout * mainLayout = new QHBoxLayout;
@@ -601,25 +667,27 @@ void MainWindow::initComponent()
     RSingleton<Core::ProtocolParseThread>::instance();
 
     //【2】实例化模块
-    Core::ModuleMap * moduleMap = RSingleton<Core::PluginLoader>::instance()->getModules();
-    Core::ModuleMap::iterator miter = moduleMap->begin();
-    while(miter != moduleMap->end()){
-        Datastruct::ModuleInfo mm = miter.value();
+    Core::ModuleList * moduleList = RSingleton<Core::PluginLoader>::instance()->getModules();
+    Core::ModuleList::iterator miter = moduleList->begin();
+    while(miter != moduleList->end()){
+        Datastruct::ModuleInfo mm = *miter;
 
         Core::RComponent * plugin = RSingleton<Core::PluginManager>::instance()->getAvailblePlugin(mm.pluginId);
         if(plugin){
+
+            plugin = plugin->clone();
+
             //2.1 向网络接收模块注册需要数据信息
             Core::TaskPtr tptr = RSingleton<Core::TaskManager>::instance()->getTask(mm.networkId);
             if(tptr){
                 std::shared_ptr<Core::TcpServer> tcpPtr = std::dynamic_pointer_cast<Core::TcpServer>(tptr);
                 if(tcpPtr){
-                    tcpPtr->registNetworkObserver(mm.pluginId,mm.protocols);
+                    tcpPtr->registNetworkObserver(plugin->id().toString(),mm.protocols);
                     //2.2 向网络解析模块注册需要解析的协议
-                    RSingleton<Core::ProtocolParseThread>::instance()->registNetworkObserver(mm.pluginId,mm.protocols,Datastruct::N_TCP);
+                    RSingleton<Core::ProtocolParseThread>::instance()->registNetworkObserver(plugin->id().toString(),mm.protocols,Datastruct::N_TCP);
                 }
             }
 
-            plugin = plugin->clone();
             plugin->setName(mm.name);
             Core::MyDockWidget * dockContainer = new Core::MyDockWidget(this);
             dockContainer->setGeometry(mm.geometry);
@@ -639,11 +707,11 @@ void MainWindow::initComponent()
     while(iter != maps.end()){
         Core::RComponent * comp = iter.value();
         Core::MyDockWidget * dockContainer = comp->getDockContainer();
-        dockContainer->setFeatures(Core::MyDockWidget::AllDockWidgetFeatures);
         dockContainer->setFloating(true);
         QWidget * widget = comp->initialize(dockContainer);
         if(widget){
             dockContainer->setWidget(widget);
+            dockContainer->setObjectName(comp->objectName());
             dockContainer->setTitle(comp->name());
         }
 
@@ -664,6 +732,7 @@ void MainWindow::initComponent()
                     container->addAction(module,mid);
 
                     moduleMenu = ActionManager::instance()->createMenu(mid);
+                    setMenuTranslucent(moduleMenu->menu());
                     moduleMenu->appendGroup(mid);
 
                     moduleAction->setMenu(moduleMenu->menu());
@@ -675,12 +744,26 @@ void MainWindow::initComponent()
         iter++;
     }
 
-
-    Core::ModuleSetting * setting = new Core::ModuleSetting(this);
+    //初始化控制面板、标题栏
+    settingBar = new Core::ModuleSetting(this);
+    connect(settingBar,SIGNAL(raiseWidget(QString)),this,SLOT(rasieWidget(QString)));
     QRect screenGeometry = RUtil::screenGeometry();
-    int width = 300;
-    int height = 620;
-    setting->setGeometry(screenGeometry.width() - width,160,width,height);
+    int settingBarWidth = 300;
+    int settingBarHeight = 620;
+    settingBar->setMinimumSize(settingBarWidth,settingBarHeight);
+    settingBar->setGeometry(screenGeometry.width() - settingBarWidth,160,settingBarWidth,settingBarHeight);
+
+    if(!RGlobal::G_GlobalConfigFile->systemConfigInfo.menubarVisible){
+        titleBar = new Core::TitleBar(this);
+        int minTitileBarHeight = 80;
+        titleBar->setMinimumHeight(minTitileBarHeight);
+        titleBar->setGeometry(0,0,screenGeometry.width(),minTitileBarHeight);
+        titleBar->addMenu(QStringLiteral("图层(&P)"),QString(Constant::MENU_VIEW),QPixmap(":/tech/resource/technology/system_setting.png"));
+        titleBar->addMenu(QStringLiteral("工具(&T)"),QString(Constant::MENU_PROGRAM),QPixmap(":/tech/resource/technology/system_setting.png"));
+        titleBar->addMenu(QStringLiteral("设置(&S)"),QString(Constant::MENU_SETTING),QPixmap(":/tech/resource/technology/system_setting.png"));
+        titleBar->addMenu(QStringLiteral("帮助(&Ha)"),QString(Constant::MENU_HELP),QPixmap(":/tech/resource/technology/system_setting.png"));
+        titleBar->setTitle(QStringLiteral("XX型数据显控系统"));
+    }
 }
 
 void MainWindow::displayResize(){

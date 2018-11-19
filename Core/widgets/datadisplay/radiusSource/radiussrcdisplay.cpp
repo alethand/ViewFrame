@@ -5,6 +5,7 @@
 #include "protocol/protocolmanager.h"
 #include <QGroupBox>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 
 
 RadiusSrcDisplay::RadiusSrcDisplay(const Datastruct::BaseProtocol *protocol)
@@ -32,12 +33,21 @@ void RadiusSrcDisplay::initView()
     groupBox->layout()->addWidget(but_CoverRefresh);
 
     QWidget *container =new QWidget();
+    container->setFixedHeight(50);
     container->setLayout(new QHBoxLayout());
     container->layout()->addWidget(groupBox);
     dynamic_cast<QHBoxLayout*>(container->layout())->insertStretch(0);
 
 
     stackWidget = new QStackedWidget();
+    update();
+    stackWidget->insertWidget(0,&view_ScrollRefresh);
+    stackWidget->insertWidget(1,&view_CoverRefresh);
+
+    QVBoxLayout *vlayout = new QVBoxLayout();
+    vlayout->addWidget(container);
+    vlayout->addWidget(stackWidget);
+
 
 
 
@@ -55,11 +65,19 @@ void RadiusSrcDisplay::switchMode()
 
     }
     else if(obj->objectName() == but_ScrollFlush->objectName()) {
-
+         stackWidget->setCurrentIndex(0);
+         update();
     }
     else  if(obj->objectName() == but_CoverRefresh->objectName()) {
-
+         stackWidget->setCurrentIndex(1);
+         update();
     }
 
     //RSingleton<Core::PluginLoader>::instance()->getModules()->find("0x0003").v  ;
+}
+
+void RadiusSrcDisplay::update()
+{
+    view_ScrollRefresh.setModel(&model_ScrollRefresh);
+    view_CoverRefresh.setModel(&model_CoverRefresh);
 }

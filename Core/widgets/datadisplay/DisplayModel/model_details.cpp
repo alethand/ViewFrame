@@ -8,7 +8,7 @@ Model_Details::Model_Details(DataManager *subject)
 
 }
 
-void Model_Details::getNewestInfo(QSharedPointer<NetParse::Protocol> *info)
+void Model_Details::getNewestInfo(NetParse::Protocol *info)
 {
 
 }

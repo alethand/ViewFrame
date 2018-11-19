@@ -16,4 +16,5 @@ ProgramFilePath::ProgramFilePath()
 
     configFile = configPath + QDir::separator() + QString("config.ini");
     pluginFile = configPath + QDir::separator() + QString("plugins.xml");
+    layoutFile = configPath + QDir::separator() + QString("layout.bin");
 }

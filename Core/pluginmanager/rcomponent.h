@@ -15,6 +15,7 @@
 #include "Base/actionmanager/id.h"
 #include "Base/messagetype.h"
 #include "pluginmanager/observer.h"
+#include "network/netparseinfo.h"
 #include "protocol/datastruct.h"
 #include "selfwidget/mydockwidget.h"
 
@@ -44,13 +45,15 @@ public:
     virtual RComponent * clone(){return NULL;}
 
     virtual void onMessage(MessageType::MessType type);
-    virtual void onNetwork(int protocolType,Datastruct::FieldValues & data) = 0;
+     virtual void onNetWork(int protocolType,NetParse::Protocol *data){}
+    virtual void onNetwork(int protocolType,Datastruct::FieldValues & data){}
+
 protected:
     virtual void retranslateUi(){}
 
 protected:
-    Id m_id;
-    QString pluginId;
+    Id m_id;                      /*!< 插件唯一Id，用于身份访问。插件创建时自动产生 */
+    QString pluginId;             /*!< 如0x0001,用于在plugin.xml中引用 */
     QString m_name;               /*!< dockwidget titlebar */
     static int compIndex;         /*!< 组件索引 */
     MyDockWidget * dockContainer;    /*!<  插件绑定的容器 */

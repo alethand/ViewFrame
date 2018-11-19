@@ -30,12 +30,14 @@ public:
 
     void load();
 
+    //可用插件
     void addAvailblePlugin(RComponent * component);
     RComponent* getAvailblePlugin(QString pluginId);
     ComponentMap getAllAvailblePlugins();
 
+    //被实例化插件
     void addActivePlugin(RComponent * component);
-    RComponent * getActivePlugin(QString pluginId);
+    RComponent * getActivePlugin(QString objectName);
     ComponentMap getAllActivePlugins();
 
 private:

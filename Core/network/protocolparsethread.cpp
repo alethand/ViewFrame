@@ -4,6 +4,7 @@
 #include "pluginmanager/rcomponent.h"
 #include "Base/util/rsingleton.h"
 #include "protocol/protocolmanager.h"
+#include "network/netparseinfo.h"
 
 #include <QDebug>
 
@@ -94,13 +95,21 @@ bool ProtocolParseThread::beforeParsing(ProtocolArray &array)
         return false;
 
     //[3]
-    Datastruct::ParsedResult parsedResult;
-    if(parsedProtocol(array,parsedResult)){
+   // Datastruct::ParsedResult parsedResult;
+    //if(parsedProtocol(array,parsedResult))
+    bool existed = false;
+    Datastruct::BaseProtocol *protocol =const_cast< Datastruct::BaseProtocol*>
+            (RSingleton<ProtocolManager>::instance()->getProtocol(array.protocolType,&existed) );
+
+    QSharedPointer<NetParse::Protocol> pcurProtocol = NetParse::DataGenertor::startParse(array,protocol);
+    {
 
         //[4]
         std::for_each(list->begin(),list->end(),[&](ModuleProtocol module){
+            //BUG 20181117通过module.moduleId获取不到对应的插件
             RComponent * comp = RSingleton<PluginManager>::instance()->getActivePlugin(module.moduleId);
-//            if(comp)
+            if(comp)
+                 comp->onNetWork(array.protocolType,pcurProtocol.data());
 //                comp->onNetwork(array.protocolType,parsedResult);
         });
         return true;

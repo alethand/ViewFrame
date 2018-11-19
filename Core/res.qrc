@@ -51,5 +51,6 @@
         <file>resource/technology/Vsepartoolbar.png</file>
         <file>resource/technology/left_bottom.png</file>
         <file>resource/technology/logo1.jpg</file>
+        <file>resource/technology/system_setting.png</file>
     </qresource>
 </RCC>

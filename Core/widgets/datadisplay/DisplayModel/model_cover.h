@@ -28,7 +28,7 @@ public:
 
 
     virtual QVariant headerData(int section, Qt::Orientation orientation,int role) const;
-    virtual void getNewestInfo(QSharedPointer<NetParse::Protocol>* info);
+    virtual void getNewestInfo(NetParse::Protocol* info);
     virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
     virtual QVariant getData(int row,int column) const ;
 
