@@ -40,11 +40,13 @@ public:
 
     virtual QWidget * initialize(QWidget * parent) = 0;
     virtual void release() = 0;
-    virtual QString pluginName() = 0;
-    virtual RComponent * clone() = 0;
+    virtual QString pluginName();
+    virtual RComponent * clone(){return NULL;}
 
-    virtual void onMessage(MessageType::MessType type) = 0;
+    virtual void onMessage(MessageType::MessType type);
     virtual void onNetwork(int protocolType,Datastruct::FieldValues & data) = 0;
+protected:
+    virtual void retranslateUi(){}
 
 protected:
     Id m_id;

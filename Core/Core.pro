@@ -50,8 +50,6 @@ SOURCES += main.cpp \
     widgets/taskcontrol/net/taskdispatcher.cpp \
     widgets/datadisplay/allplusegraphics.cpp \
     widgets/datadisplay/allplusetable.cpp \
-    widgets/datadisplay/mfacquisitiongraphics.cpp \
-    widgets/datadisplay/mfacquistiontable.cpp \
     widgets/datadisplay/table.cpp \
     widgets/datadisplay/modelview/tableviewdata.cpp \
     widgets/datadisplay/modelview/tableviewmodelcustom.cpp \
@@ -71,10 +69,6 @@ SOURCES += main.cpp \
     widgets/datadisplay/Graphics/superparent.cpp \
     widgets/datadisplay/Graphics/histogram.cpp \
     widgets/datadisplay/Graphics/energybar.cpp \
-    widgets/datadisplay/radiusSource/radiasourcemap.cpp \
-    widgets/datadisplay/radiusSource/radiationsourcetable.cpp \
-    widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.cpp \
-    widgets/datadisplay/filterdockpanel.cpp \
     protocol/commonprotocolparse.cpp \
     protocol/protocolmanager.cpp \
     protocol/pluginxmlparse.cpp \
@@ -96,7 +90,15 @@ SOURCES += main.cpp \
     selfwidget/mydockwidget.cpp \
     selfwidget/widget.cpp \
     selfwidget/modulesetting.cpp \
-    selfwidget/titlebar.cpp
+    selfwidget/titlebar.cpp \
+    widgets/datadisplay/radiusSource/panel.cpp \
+    widgets/datadisplay/radiusSource/radiussrcdisplay.cpp \
+    widgets/datadisplay/DisplayModel/model_cover.cpp \
+    widgets/datadisplay/DisplayModel/model_details.cpp \
+    widgets/datadisplay/DisplayModel/model_history.cpp \
+    widgets/datadisplay/datadisplay.cpp \
+    network/netparseinfo.cpp \
+    widgets/datadisplay/DisplayModel/dateview_superstruct.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
@@ -120,8 +122,6 @@ HEADERS  += \
     widgets/taskcontrol/net/taskdispatcher.h \
     widgets/datadisplay/allplusegraphics.h \
     widgets/datadisplay/allplusetable.h \
-    widgets/datadisplay/mfacquisitiongraphics.h \
-    widgets/datadisplay/mfacquistiontable.h \
     widgets/datadisplay/table.h \
     widgets/datadisplay/modelview/tableviewdata.h \
     widgets/datadisplay/modelview/tableviewmodelcustom.h \
@@ -140,10 +140,6 @@ HEADERS  += \
     widgets/datadisplay/Graphics/superparent.h \
     widgets/datadisplay/Graphics/histogram.h \
     widgets/datadisplay/Graphics/energybar.h \
-    widgets/datadisplay/radiusSource/radiasourcemap.h \
-    widgets/datadisplay/radiusSource/radiationsourcetable.h \
-    widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.h \
-    widgets/datadisplay/filterdockpanel.h \
     protocol/commonprotocolparse.h \
     protocol/protocolmanager.h \
     protocol/pluginxmlparse.h \
@@ -166,16 +162,26 @@ HEADERS  += \
     selfwidget/mydockwidget.h \
     selfwidget/widget.h \
     selfwidget/modulesetting.h \
-    selfwidget/titlebar.h
+    selfwidget/titlebar.h \
+    widgets/datadisplay/radiusSource/panel.h \
+    widgets/datadisplay/radiusSource/radiussrcdisplay.h \
+    widgets/datadisplay/DisplayModel/dateview_superstruct.h \
+    widgets/datadisplay/DisplayModel/model_cover.h \
+    widgets/datadisplay/DisplayModel/model_details.h \
+    widgets/datadisplay/DisplayModel/model_history.h \
+    widgets/datadisplay/datadisplay.h \
+    network/netparseinfo.h
 
 FORMS    += mainwindow.ui \
     widgets/datadisplay/mfacquisitiongraphics.ui \
-    widgets/datadisplay/radiusSource/radiasourcemap.ui \
     widgets/datadisplay/radiusSource/radiationsourcetable.ui \
     widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.ui \
     widgets/datadisplay/radiationsourcetablerenovate.ui \
     widgets/datadisplay/spectrumgraphics.ui \
-    widgets/datadisplay/filterdockpanel.ui
+    widgets/datadisplay/filterdockpanel.ui \
+    widgets/datadisplay/radiasourcemap.ui \
+    widgets/datadisplay/radiationsourcetable.ui \
+    widgets/datadisplay/radiationsourcetablerenovatedialog.ui
 
 win32-msvc2013{
     LIBS+= ../Lib/Base.lib

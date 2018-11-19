@@ -38,6 +38,7 @@ bool ProtocolManager::parseLocalDir(QString dirname)
  * @brief 解析指定的配置文件
  * @param[in] fullFilePath 待解析文件的全路径
  * @return true 解析成功 false 解析失败
+ * @warning 此函数内部会出现2次 Datastruct::BaseProtocol的复制。可以进行优化
  */
 bool ProtocolManager::parseLocalProtocol(QString fullFilePath)
 {
@@ -57,7 +58,7 @@ bool ProtocolManager::parseLocalProtocol(QString fullFilePath)
  * @param[in] protocolType 协议类型
  * @return true 存在；false 不存在
  */
-bool ProtocolManager::existed(int protocolType)
+bool ProtocolManager::isExisted(int protocolType)
 {
     BaseProtocolMap::iterator iter = protocols.begin();
     while(iter != protocols.end()){
@@ -77,14 +78,14 @@ bool ProtocolManager::existed(int protocolType)
  * @param[in/out]  existed true：对应的协议是否存在;false：对应的协议不存在
  * @return 协议描述
  */
-Datastruct::BaseProtocol ProtocolManager::getProtocol(QString protocolName, bool &existed)
+const Datastruct::BaseProtocol* ProtocolManager::getProtocol(QString protocolName, bool *existed)
 {
     Datastruct::BaseProtocol bprotocol;
-    existed = protocols.contains(protocolName);
-    if(existed)
-        bprotocol = protocols.value(protocolName);
+    *existed = protocols.contains(protocolName);
+    if(*existed)
+        return &(protocols.value(protocolName));
 
-    return bprotocol;
+    return NULL;
 }
 
 /*!
@@ -93,20 +94,18 @@ Datastruct::BaseProtocol ProtocolManager::getProtocol(QString protocolName, bool
  * @param[in/out]  existed true：对应的协议是否存在;false：对应的协议不存在
  * @return 协议描述
  */
-Datastruct::BaseProtocol ProtocolManager::getProtocol(int protocolType,bool & existed)
+const Datastruct::BaseProtocol* ProtocolManager::getProtocol(int protocolType,bool *existed)
 {
-    Datastruct::BaseProtocol bprotocol;
     BaseProtocolMap::iterator iter = protocols.begin();
     while(iter != protocols.end()){
         if(iter.value().type == protocolType){
-            existed = true;
-            bprotocol = iter.value();
-            break;
+            *existed = true;
+            return &(iter.value());
         }
         iter++;
     }
 
-    return bprotocol;
+    return NULL;
 }
 
 }

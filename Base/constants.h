@@ -62,11 +62,11 @@ const char LAY_WINDOWSTATE[] = "windowState";
 const char PLUGIN_CORE[] = "Plugin.Core.Core";
 const char PLUGIN_TASK_CONTROL[] = "Plugin.TaskControl.TaskControl";
 const char PLUGIN_HEALTH_MANAGER[] = "Plugin.HealthManager.HealthManager";
-const char PLUGIN_RADIATION_SOURCE_TABLE[] = "Plugin.DataDisplay.RadiationSourceTable";
+
+const char PLUGIN_RADIATION_SOURCE[] = "Plugin.DataDisplay.RadiationSource";
+const char PLUGIN_RADIA_SOURCE_MAP[] = "Plugin.DataDisplay.RadiaSourceMap";
 const char PLUGIN_ALL_PLUS_TABLE[] = "Plugin.DataDisplay.AllPluseTable";
 const char PLUGIN_MF_ACQUISTION_TABLE[] = "Plugin.DataDisplay.MFAcquistionTable";
-const char PLUGIN_RADIA_SOURCE_MAP[] = "Plugin.DataDisplay.RadiaSourceMap";
-const char PLUGIN_ALL_PLUS_GRAPHICS[] = "Plugin.DataDisplay.AllPluseGraphics";
 const char PLUGIN_MF_QUISITION_GRAPHICS[] = "Plugin.DataDisplay.MFAcquisitionGraphics";
 const char PLUGIN_SPECTRUM_GRAPHICS[] = "Plugin.DataDisplay.SpectrumGraphics";
 

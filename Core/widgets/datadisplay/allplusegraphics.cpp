@@ -88,7 +88,7 @@ void AllPluseGraphicsPrivate::initView()
 
 AllPluseGraphics::AllPluseGraphics(QWidget *parent) :timeScatter(QStringLiteral("时间特性图")),freqHistogram(QStringLiteral("频度直方图")),
     timeAreaWaveForm(QStringLiteral("时域波形图")),
-    Core::RComponent(Constant::PLUGIN_ALL_PLUS_GRAPHICS,parent),d_ptr(new AllPluseGraphicsPrivate(this))
+    Core::RComponent(Constant::PLUGIN_ALL_PLUS_TABLE,parent),d_ptr(new AllPluseGraphicsPrivate(this))
 {
     RSingleton<Core::Subject>::instance()->attach(this);
     retranslateUi();
