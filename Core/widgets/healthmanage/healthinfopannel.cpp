@@ -15,9 +15,7 @@ using namespace std;
 HealthInfoDockPanel::HealthInfoDockPanel(QWidget *parent)
     :Core::RComponent(Constant::PLUGIN_HEALTH_MANAGER,parent)
 {
-    retranslateUi();
     pluginId = "0x0001";
-    RSingleton<Core::Subject>::instance()->attach(this);
 }
 
 QWidget *HealthInfoDockPanel::initialize(QWidget *parent)
@@ -27,7 +25,9 @@ QWidget *HealthInfoDockPanel::initialize(QWidget *parent)
     RSingleton<Core::ProtocolManager>::instance()->parseLocalDir(filePath.healthManagePath);
 
     bool existed = false;
-    Datastruct::BaseProtocol bprotocol = RSingleton<Core::ProtocolManager>::instance()->getProtocol(QStringLiteral("健康管理"),existed);
+    const Datastruct::BaseProtocol *bprotocol = RSingleton<Core::ProtocolManager>::instance()->getProtocol(QStringLiteral("健康管理"),&existed);
+    if(NULL == bprotocol)
+        return NULL;
 
     infoWidget = new HealthState_Display(parent);
 

@@ -22,12 +22,7 @@
 #include "Base/util/fileutils.h"
 #include "healthmanage/healthinfopannel.h"
 
-#include "widgets/datadisplay/radiusSource/radiationsourcetable.h"
-#include "datadisplay/allplusetable.h"
-#include "datadisplay/mfacquistiontable.h"
-#include "widgets/datadisplay/radiusSource/radiasourcemap.h"
-#include "datadisplay/allplusegraphics.h"
-#include "datadisplay/mfacquisitiongraphics.h"
+#include "datadisplay/radiusSource/panel.h"
 
 #include "network/protocolparsethread.h"
 
@@ -593,23 +588,21 @@ void MainWindow::loadCmponent()
     TaskControlModel::TaskControlPanel * taskControl = new TaskControlModel::TaskControlPanel;
     HealthInfoDockPanel *healthControl = new HealthInfoDockPanel;
 
-    DataView::RadiationSourceTable * radiationTable = new DataView::RadiationSourceTable;
-    DataView::AllPluseDock * allPluseTable = new DataView::AllPluseDock;
+    //DataView::RadiationSourceTable * radiationTable = new DataView::RadiationSourceTable;
+   // DataView::AllPluseDock * allPluseTable = new DataView::AllPluseDock;
 //    DataView::MFAcquistionTable * acquistionTable = new DataView::MFAcquistionTable;
-    DataView::RadiaSourceMap * radiaSourceMap = new DataView::RadiaSourceMap;
-    DataView::AllPluseGraphics * allPluseGraphics = new DataView::AllPluseGraphics;
-    DataView::MFAcquisitionGraphics * mfGraphics = new DataView::MFAcquisitionGraphics;
+     RadiusPanel * radiationSrc = new RadiusPanel;
+  //  DataView::MFAcquisitionGraphics * mfGraphics = new DataView::MFAcquisitionGraphics;
 
     RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(taskControl);
     RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(healthControl);
 
-    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(radiationTable);
-    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(allPluseTable);
+    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(radiationSrc);
+  //  RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(allPluseTable);
 //    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(acquistionTable);
-    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(radiaSourceMap);
 
-    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(allPluseGraphics);
-    RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(mfGraphics);
+  //  RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(allPluseGraphics);
+  //  RSingleton<Core::PluginManager>::instance()->addAvailblePlugin(mfGraphics);
 }
 
 /*!

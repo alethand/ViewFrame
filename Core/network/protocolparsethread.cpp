@@ -4,6 +4,7 @@
 #include "pluginmanager/rcomponent.h"
 #include "Base/util/rsingleton.h"
 #include "protocol/protocolmanager.h"
+#include "network/netparseinfo.h"
 
 #include <QDebug>
 
@@ -85,7 +86,7 @@ void ProtocolParseThread::run()
 bool ProtocolParseThread::beforeParsing(ProtocolArray &array)
 {
     //[1]
-    if(!RSingleton<ProtocolManager>::instance()->existed(array.protocolType))
+    if(!RSingleton<ProtocolManager>::instance()->isExisted(array.protocolType))
         return false;
 
     //[2]
@@ -94,14 +95,21 @@ bool ProtocolParseThread::beforeParsing(ProtocolArray &array)
         return false;
 
     //[3]
-    Datastruct::ParsedResult parsedResult;
-    if(parsedProtocol(array,parsedResult)){
+   // Datastruct::ParsedResult parsedResult;
+    //if(parsedProtocol(array,parsedResult))
+    bool existed = false;
+    Datastruct::BaseProtocol *protocol =const_cast< Datastruct::BaseProtocol*>
+            (RSingleton<ProtocolManager>::instance()->getProtocol(array.protocolType,&existed) );
+
+    QSharedPointer<NetParse::Protocol> pcurProtocol = NetParse::DataGenertor::startParse(array,protocol);
+    {
 
         //[4]
         std::for_each(list->begin(),list->end(),[&](ModuleProtocol module){
             //BUG 20181117通过module.moduleId获取不到对应的插件
             RComponent * comp = RSingleton<PluginManager>::instance()->getActivePlugin(module.moduleId);
-//            if(comp)
+            if(comp)
+                 comp->onNetWork(array.protocolType,pcurProtocol.data());
 //                comp->onNetwork(array.protocolType,parsedResult);
         });
         return true;
@@ -125,25 +133,27 @@ bool ProtocolParseThread::beforeParsing(ProtocolArray &array)
 bool ProtocolParseThread::parsedProtocol(ProtocolArray &array,Datastruct::ParsedResult & values)
 {
     bool existed = false;
-    Datastruct::BaseProtocol protocol = RSingleton<ProtocolManager>::instance()->getProtocol(array.protocolType,existed);
+    const Datastruct::BaseProtocol *protocol = RSingleton<ProtocolManager>::instance()->getProtocol(array.protocolType,&existed);
+    if(NULL == protocol)
+        return false;
 
     int posPointer = 0;
-    if(protocol.startLen > 0 && protocol.startLen < array.data.length()){
-        posPointer = protocol.startLen;
+    if(protocol->startLen > 0 && protocol->startLen < array.data.length()){
+        posPointer = protocol->startLen;
     }else{
         return false;
     }
 
     //[1]
-    int dataRepeatTime = getProtocolRepeatTime(array,protocol.memoryBytes,protocol.count,posPointer);
+    int dataRepeatTime = getProtocolRepeatTime(array,protocol->memoryBytes,protocol->count,posPointer);
     if(dataRepeatTime == -1)
         return false;
 
     //[2]
-    for(int i = 0 ; i < dataRepeatTime; i++){
+    for(int i = 0 ; i < dataRepeatTime; i++){//最外层协议重复次数
         ParsedResult * outerResult = new ParsedResult;
-        for(int j = 0; j < protocol.protocols.size();j++){
-            Datastruct::SignalProtocol signalProtcol = protocol.protocols.at(j);
+        for(int j = 0; j < protocol->contents.size();j++){//协议循环体中单层协议个数
+            Datastruct::SingleProtocol signalProtcol = protocol->contents.at(j);
             ParsedResult * innerResult = new ParsedResult;
             if(!parsedSignalProtocol(array,posPointer,signalProtcol,innerResult)){
                 delete innerResult;
@@ -166,7 +176,7 @@ bool ProtocolParseThread::parsedProtocol(ProtocolArray &array,Datastruct::Parsed
  * @return true：解析成功
  *         false：解析失败
  */
-bool ProtocolParseThread::parsedSignalProtocol(const ProtocolArray &array,int & posPointer,Datastruct::SignalProtocol & protocol,Datastruct::ParsedResult * result)
+bool ProtocolParseThread::parsedSignalProtocol(const ProtocolArray &array,int & posPointer,Datastruct::SingleProtocol & protocol,Datastruct::ParsedResult * result)
 {
     int sprotocolRepeatTime = getProtocolRepeatTime(array,protocol.memoryBytes,protocol.count,posPointer);
     if(sprotocolRepeatTime == -1)
@@ -175,12 +185,12 @@ bool ProtocolParseThread::parsedSignalProtocol(const ProtocolArray &array,int & 
     bool isError = false;
 
 
-    for(int i = 0; i<sprotocolRepeatTime; i++)
+    for(int i = 0; i<sprotocolRepeatTime; i++)//单层协议循环次数
     {
         Datastruct::ParsedResult * protocolResult = new Datastruct::ParsedResult;
-        for(int j=0;j<protocol.fields.size();j++)
+        for(int j=0;j<protocol.fields.size();j++)//单层协议字段个数
         {
-            FieldData fieldData = protocol.fields.at(j);
+            Data_Word fieldData = protocol.fields.at(j);
 
             //1.根据字段中repeat节点来获取多个值
             int repeatTime = 0;
@@ -190,7 +200,7 @@ bool ProtocolParseThread::parsedSignalProtocol(const ProtocolArray &array,int & 
                 repeatTime = fieldData.repeat;
             }
 
-            Datastruct::FieldValue fieldValue;
+            Datastruct::Field_Protocol fieldValue;
             fieldValue.index = fieldData.index;
             for(int k = 0;k<repeatTime;k++){
                 //2`.判断是为位操作还是字节操作

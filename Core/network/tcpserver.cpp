@@ -71,12 +71,12 @@ void TcpServer::registNetworkObserver(QString mid, QStringList protos)
 {
     std::for_each(protos.begin(),protos.end(),[&](QString protocol){
         bool existed = false;
-        Datastruct::BaseProtocol prot =RSingleton<Core::ProtocolManager>::instance()->getProtocol(protocol.toInt(),existed);
-        if(existed){
+        const Datastruct::BaseProtocol *prot =RSingleton<Core::ProtocolManager>::instance()->getProtocol(protocol.toInt(),&existed);
+        if(existed && prot != NULL){
             ModuleProtocol mprotocol;
-            mprotocol.startCode = prot.startCode;
-            mprotocol.endCode = prot.endCode;
-            mprotocol.type = prot.type;
+            mprotocol.startCode = prot->startCode;
+            mprotocol.endCode = prot->endCode;
+            mprotocol.type = prot->type;
             mprotocol.moduleId = mid;
             observeredProtocol.insert(protocol.toInt(),mprotocol);
         }

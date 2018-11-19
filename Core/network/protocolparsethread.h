@@ -52,7 +52,7 @@ protected:
 private:
     bool beforeParsing(Datastruct::ProtocolArray & array);
     bool parsedProtocol(ProtocolArray &array, ParsedResult &values);
-    bool parsedSignalProtocol(const ProtocolArray &array, int & posPointer, Datastruct::SignalProtocol & protocol, Datastruct::ParsedResult *result);
+    bool parsedSignalProtocol(const ProtocolArray &array, int & posPointer, Datastruct::SingleProtocol & protocol, Datastruct::ParsedResult *result);
     int getProtocolRepeatTime(const ProtocolArray &array,int memoryBytes,int count,int &pos);
     QVariant getBytesData(const ProtocolArray &array,Datastruct::ControlType type,int & pos,int bytes,bool & error);
     FieldValues getBitsData(const ProtocolArray &array,Datastruct::ControlType type,int & pos,int bytes,bool & error);

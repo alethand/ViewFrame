@@ -23,12 +23,12 @@ public:
     ProtocolManager();
 
     bool parseLocalDir(QString dirname);
-    bool parseLocalProtocol(QString fullFilePath);
+    bool parseLocalProtocol(QString fullFilePath);//可优化
 
-    bool existed(int protocolType);
+    bool isExisted(int protocolType);
 
-    Datastruct::BaseProtocol getProtocol(QString protocolName,bool & existed);
-    Datastruct::BaseProtocol getProtocol(int protocolType,bool & existed);
+    const Datastruct::BaseProtocol* getProtocol(QString protocolName,bool *isExisted = NULL);
+    const Datastruct::BaseProtocol* getProtocol(int protocolType,bool *isExisted = NULL);
 
     int size(){return protocols.size();}
 

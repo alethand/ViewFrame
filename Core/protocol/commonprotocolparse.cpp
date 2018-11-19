@@ -28,6 +28,12 @@ CommonProtocolParse::CommonProtocolParse()
 
 }
 
+/*!
+ * \brief CommonProtocolParse::startParse
+ * \param rootNode
+ * \attention parsedProtocol中协议族列表中的个数为 Protocol下的子节点个数
+ * \return
+ */
 bool CommonProtocolParse::startParse(QDomNode &rootNode)
 {
     ProtocolStruct pstruct;
@@ -79,7 +85,7 @@ bool CommonProtocolParse::startParse(QDomNode &rootNode)
 bool CommonProtocolParse::parseItems(QDomNode & itemsNode)
 {
     ProtocolStruct pstruct;
-    Datastruct::SignalProtocol protocol;
+    Datastruct::SingleProtocol protocol;
 
     QDomElement itemsElement = itemsNode.toElement();
     if(itemsElement.hasAttribute(pstruct.itemsCount))
@@ -90,12 +96,16 @@ bool CommonProtocolParse::parseItems(QDomNode & itemsNode)
 
     if(itemsElement.hasAttribute(pstruct.itemsLen))
         protocol.length = itemsElement.attribute(pstruct.itemsLen).toInt();
+    if(itemsElement.hasAttribute("isProtocol"))
+        protocol.isProtocol = true;
+    else
+         protocol.isProtocol = false;
 
     QDomNodeList items = itemsNode.childNodes();
 
     for(int i = 0; i < items.size(); i++)
     {
-        Datastruct::FieldData fieldData;
+        Datastruct::Data_Word fieldData;
         fieldData.index = i;
 
         QDomNode itemNode = items.at(i);
@@ -104,7 +114,7 @@ bool CommonProtocolParse::parseItems(QDomNode & itemsNode)
         protocol.fields.append(fieldData);
     }
 
-    parsedProtocol.protocols.append(protocol);
+    parsedProtocol.contents.append(protocol);
     return true;
 }
 
@@ -113,7 +123,7 @@ bool CommonProtocolParse::parseItems(QDomNode & itemsNode)
  * @details  1.若item中有位操作，需要单独解析bits节点。
  * @param[in] itemNode 待解析的item节点
  */
-void CommonProtocolParse::parseItem(QDomNode &node,Datastruct::FieldData & fieldData)
+void CommonProtocolParse::parseItem(QDomNode &node,Datastruct::Data_Word & fieldData)
 {
     bool hasAtttribut = true;
     QDomElement * domElem = NULL;
@@ -210,7 +220,7 @@ void CommonProtocolParse::parseItem(QDomNode &node,Datastruct::FieldData & field
  * @param[in] node 待解析类型节点
  * @param[in] data 保存解析后的协议信息
  */
-void CommonProtocolParse::parseFieldType(QDomNode &node, Datastruct::FieldData &data)
+void CommonProtocolParse::parseFieldType(QDomNode &node, Datastruct::Data_Word &data)
 {
     Datastruct::WidgetType wtype;
     QDomElement *domElem = NULL;
@@ -264,6 +274,21 @@ void CommonProtocolParse::parseFieldType(QDomNode &node, Datastruct::FieldData &
     {
         data.type = Datastruct::ControlType::List;
     }
+    else if(domElem->text() == wtype.count)
+    {
+        data.type = Datastruct::ControlType::Count;
+    }
+}
+
+
+void CommonProtocolParse::parseGroup(QDomNode &node, Datastruct::Data_Word &data)
+{
+    QDomElement *domElem = NULL;
+    domElem = &(node.toElement());
+    if(domElem->tagName() == "Group")
+    {
+
+    }
 }
 
 /*!
@@ -271,7 +296,7 @@ void CommonProtocolParse::parseFieldType(QDomNode &node, Datastruct::FieldData &
  * @param[in] node 待解析类型节点
  * @param[in] data 保存解析后的协议信息
  */
-void CommonProtocolParse::parseBits(QDomNode &node, Datastruct::FieldData &data)
+void CommonProtocolParse::parseBits(QDomNode &node, Datastruct::Data_Word &data)
 {
     QDomNodeList bits = node.childNodes();
     for(int i = 0; i < bits.size();i++)
@@ -281,7 +306,7 @@ void CommonProtocolParse::parseBits(QDomNode &node, Datastruct::FieldData &data)
         bool hasAtttribut = true;
         Datastruct::NodeInfo nodeInfo;
 
-        Datastruct::BitData bitData;
+        Datastruct::Data_Bit bitData;
         bitData.index = i;
 
         QDomNode childNode = bitNode.firstChild();
@@ -355,7 +380,7 @@ void CommonProtocolParse::parseBits(QDomNode &node, Datastruct::FieldData &data)
  * @brief 解析bit位所显示的控件类型
  * @details 因bit位特殊，一般不作为浮点、日期等的显示，常用于整形数据显示。因此其解析的字段类型比FieldData较少。
  */
-void CommonProtocolParse::parseBitType(QDomNode &node, Datastruct::BitData &data)
+void CommonProtocolParse::parseBitType(QDomNode &node, Datastruct::Data_Bit &data)
 {
     Datastruct::WidgetType wtype;
     QDomElement *domElem = NULL;

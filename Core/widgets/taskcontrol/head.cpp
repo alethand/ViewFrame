@@ -10,7 +10,7 @@ QDataStream & operator<<(QDataStream & stream,const NewTaskInfo & info)
          <<static_cast<int>(info.dstate);
 
     stream<<info.fields.size();
-    QMap<int,Datastruct::FieldData>::const_iterator iter = info.fields.cbegin();
+    QMap<int,Datastruct::Data_Word>::const_iterator iter = info.fields.cbegin();
     while(iter != info.fields.cend()){
         stream<<iter.value();
         iter++;
@@ -31,7 +31,7 @@ QDataStream & operator>>(QDataStream & stream,NewTaskInfo & info)
     int fieldSize = 0;
     stream>>fieldSize;
     for(int i = 0;i < fieldSize; i++){
-        Datastruct::FieldData data;
+        Datastruct::Data_Word data;
         stream>>data;
         info.fields.insert(i,data);
     }

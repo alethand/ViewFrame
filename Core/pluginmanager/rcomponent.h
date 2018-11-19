@@ -15,6 +15,7 @@
 #include "Base/actionmanager/id.h"
 #include "Base/messagetype.h"
 #include "pluginmanager/observer.h"
+#include "network/netparseinfo.h"
 #include "protocol/datastruct.h"
 #include "selfwidget/mydockwidget.h"
 
@@ -40,11 +41,15 @@ public:
 
     virtual QWidget * initialize(QWidget * parent) = 0;
     virtual void release() = 0;
-    virtual QString pluginName() = 0;
-    virtual RComponent * clone() = 0;
+    virtual QString pluginName();
+    virtual RComponent * clone(){return NULL;}
 
-    virtual void onMessage(MessageType::MessType type) = 0;
-    virtual void onNetwork(int protocolType,Datastruct::FieldValues & data) = 0;
+    virtual void onMessage(MessageType::MessType type);
+     virtual void onNetWork(int protocolType,NetParse::Protocol *data){}
+    virtual void onNetwork(int protocolType,Datastruct::FieldValues & data){}
+
+protected:
+    virtual void retranslateUi(){}
 
 protected:
     Id m_id;                      /*!< 插件唯一Id，用于身份访问。插件创建时自动产生 */

@@ -98,7 +98,7 @@ void DataDisplayPrivate::initAction()
 DataDisplay::DataDisplay(QWidget *parent) :
     QWidget(parent),d_ptr(new DataDisplayPrivate(this))
 {
-    RSingleton<Base::Subject>::instance()->attach(this);
+    RSingleton<Core::Subject>::instance()->attach(this);
 
     retranslateUi();
 }
