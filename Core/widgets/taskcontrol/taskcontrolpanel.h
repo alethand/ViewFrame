@@ -25,11 +25,10 @@ public:
     ~TaskControlPanel();
 
     QWidget *initialize(QWidget * parent);
-    void release();
+    void release(){}
     QString pluginName();
     Core::RComponent * clone();
 
-    void onMessage(MessageType::MessType type);
     void onNetwork(int protocolType,Datastruct::FieldValues & data);
 
     QSize sizeHint()const;

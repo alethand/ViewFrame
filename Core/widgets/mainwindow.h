@@ -12,6 +12,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QCloseEvent>
 #include <QList>
 class QAction;
 

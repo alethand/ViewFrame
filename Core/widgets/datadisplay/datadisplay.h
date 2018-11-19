@@ -11,11 +11,11 @@
 #include <QWidget>
 #include <QGridLayout>
 #include "protocol/datastruct.h"
-#include "Base/pluginmanager/observer.h"
+#include "Core/pluginmanager/observer.h"
 
 class DataDisplayPrivate;
 
-class DataDisplay : public QWidget,public Base::Observer
+class DataDisplay : public QWidget,public Core::Observer
 {
     Q_OBJECT
     Q_DECLARE_PRIVATE(DataDisplay)

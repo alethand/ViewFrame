@@ -47,6 +47,7 @@
 
 #include "Base/util/fileutils.h"
 #include "datastruct.h"
+//!应使用内部类，仅由ProtocolManager进行调用，拒绝所有的其他外部使用者
 
 namespace Core{
 
@@ -58,15 +59,16 @@ public:
     bool  startParse(QDomNode & rootNode);
     Datastruct::BaseProtocol getProtocol(){return parsedProtocol;}
 
-    static void parseBits(QDomNode &node, Datastruct::FieldData &data);
+    static void parseBits(QDomNode &node, Datastruct::Data_Word &data);
 
 private:
     bool parseItems(QDomNode & itemsNode);
 
-    void parseItem(QDomNode &node, Datastruct::FieldData &fieldData);
-    void parseFieldType(QDomNode &node, Datastruct::FieldData &data);
+    void parseItem(QDomNode &node, Datastruct::Data_Word &fieldData);
+    void parseFieldType(QDomNode &node, Datastruct::Data_Word &data);
+    void parseGroup(QDomNode &node, Datastruct::Data_Word &data);
 
-    static void parseBitType(QDomNode &node, Datastruct::BitData &data);
+    static void parseBitType(QDomNode &node, Datastruct::Data_Bit &data);
 
 private:
     Datastruct::BaseProtocol parsedProtocol;

@@ -91,7 +91,7 @@ struct NewTaskInfo
     QDateTime excuteTime;           /*!< 任务执行时间 */
     quint32 lastTime;               /*!< 任务执行时长 */
     DistuributeState dstate;        /*!< 下发状态 */
-    QMap<int,Datastruct::FieldData> fields;     /*!< 某个任务下字段集合,key:int对应当前字段在所有字段中的索引，value:QVaraint,对应字段的值 */
+    QMap<int,Datastruct::Data_Word> fields;     /*!< 某个任务下字段集合,key:int对应当前字段在所有字段中的索引，value:QVaraint,对应字段的值 */
 
     QString localParsedFileName;    /*!< 本地xml文件全路径 */
 

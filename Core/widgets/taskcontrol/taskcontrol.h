@@ -36,6 +36,7 @@ public:
     void onMessage(MessageType::MessType type);
     
 private slots:
+    /****  右键菜单选项  *****/
     void viewTask(QModelIndex);
     void mouseHoverItem(QModelIndex index);
     void modifyTask();
@@ -43,6 +44,7 @@ private slots:
     void copyTask();
     void pasteTask();
 
+    /***** 任务操作 ******/
     void importTask();
     void exportTask();
     void distributeTask();
