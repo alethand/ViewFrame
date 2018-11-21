@@ -79,6 +79,7 @@ void TaskDialogProxy::showMe()
     Q_D(TaskDialogProxy);
     if(d->parseResult){
         setContentWidget(d->limitDisplay->getContainer()->continer.widget);
+        setTitle(d->parsedFileName);
         exec();
     }
 }

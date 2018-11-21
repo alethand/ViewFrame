@@ -43,18 +43,11 @@ private:
 
 void SwitchPagePrivate::initView()
 {
-    int fixedButtWidth = 80;
     firstPage = new QPushButton();
     prePage = new QPushButton();
     nextPage = new QPushButton();
     lastPage = new QPushButton();
     jumpPage = new QPushButton();
-
-    firstPage->setFixedWidth(fixedButtWidth);
-    prePage->setFixedWidth(fixedButtWidth);
-    nextPage->setFixedWidth(fixedButtWidth);
-    lastPage->setFixedWidth(fixedButtWidth);
-    jumpPage->setFixedWidth(fixedButtWidth);
 
     mspinBox = new QSpinBox();
     mspinBox->setFixedWidth(40);
@@ -78,6 +71,9 @@ void SwitchPagePrivate::initView()
 
 void SwitchPagePrivate::genetateLayout()
 {
+    QWidget * container = new QWidget();
+    container->setObjectName("mainWidget");
+
     QBoxLayout *layout = NULL;
     if(mOrientation == Qt::Horizontal)
         layout = new QHBoxLayout();
@@ -119,7 +115,12 @@ void SwitchPagePrivate::genetateLayout()
     }
     layout->addStretch(1);
     layout->setContentsMargins(0,0,0,0);
-    q_ptr->setLayout(layout);
+    container->setLayout(layout);
+
+    QHBoxLayout * mainLayout = new QHBoxLayout;
+    mainLayout->setContentsMargins(0,0,0,0);
+    mainLayout->addWidget(container);
+    q_ptr->setLayout(mainLayout);
 
     switch(mButNums)
     {

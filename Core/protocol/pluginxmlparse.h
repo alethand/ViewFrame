@@ -1,6 +1,7 @@
 ﻿/*!
  *  @brief     插件xml文件解析
  *  @details   1.解析plugins.xml文件
+ *             2.保存修改后的plugin.xml文件
  *  @author    wey
  *  @version   1.0
  *  @date      2018.11.08
@@ -28,6 +29,7 @@ public:
     PluginXmlParse();
 
     bool  startParse(QDomNode & rootNode);
+    bool  startSave(QDomDocument & doc);
 
     enum RectPos{
         R_X,
@@ -44,6 +46,10 @@ private:
     void parsePlugin(QDomNode & pluginsNode);
     void parseNetwork(QDomNode & networkNode);
     void parseModule(QDomNode & moduleNode);
+
+    void savePlugin(QDomDocument & doc, QDomElement & pluginNodes);
+    void saveNetwork(QDomDocument & doc,QDomElement & network);
+    void saveModule(QDomDocument & doc, QDomElement & moduleNodess);
 
     int getRectSize(RectPos, QString content);
 

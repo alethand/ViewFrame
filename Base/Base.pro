@@ -60,7 +60,9 @@ HEADERS += \
     common/languagemanager.h \
     common/validator/rvalidator.h \
     common/validator/rcombinevalidator.h \
-    util/widgetpropsetting.h
+    util/widgetpropsetting.h \
+    selfwidget/titlebarbutton.h \
+    selfwidget/ripwidget.h
 
 SOURCES += \
     actionmanager/action.cpp \
@@ -87,7 +89,9 @@ SOURCES += \
     common/languagemanager.cpp \
     common/validator/rvalidator.cpp \
     common/validator/rcombinevalidator.cpp \
-    util/widgetpropsetting.cpp
+    util/widgetpropsetting.cpp \
+    selfwidget/titlebarbutton.cpp \
+    selfwidget/ripwidget.cpp
 
 win32-msvc2013{
 

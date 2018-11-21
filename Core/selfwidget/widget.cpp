@@ -10,7 +10,7 @@ namespace Core{
 Widget::WidgetMap Widget::widgets;
 
 Widget::Widget(QWidget *parent):
-    QWidget(parent),currentFeatures(AllWidgetFeatures),widgetExpanded(true)
+    QWidget(parent),currentFeatures(AllWidgetFeatures),widgetExpanded(true),leftButtonPressed(false)
 {
     setMouseTracking(true);
 }

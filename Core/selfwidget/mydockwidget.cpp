@@ -12,8 +12,11 @@
 #include <QAction>
 #include <qmath.h>
 #include <QDebug>
+#include <QMenu>
+#include <QMap>
 
 #include "Base/util/rutil.h"
+#include "Base/util/widgetpropsetting.h"
 
 namespace Core{
 
@@ -21,7 +24,7 @@ class MyDockWidgetPrivate
 {
     Q_DECLARE_PUBLIC(MyDockWidget)
 public:
-    MyDockWidgetPrivate(MyDockWidget * q):q_ptr(q), content(NULL),mouseMoveable(false){
+    MyDockWidgetPrivate(MyDockWidget * q):q_ptr(q), content(NULL),mouseMoveable(false),rightPopMenu(NULL){
         dockLayout = new DockLayout(q);
         dockLayout->setContentsMargins(1,1,1,1);
     }
@@ -39,6 +42,7 @@ public:
     bool mouseMove(QMouseEvent * event);
     bool mouseRelease(QMouseEvent * event);
     bool mouseDoubleClickEvent(QMouseEvent * event);
+    bool contextMenu(QContextMenuEvent * event);
 
     void setExpand(bool expandable);
 
@@ -47,6 +51,9 @@ public:
     QWidget * titleBar;         /*!< 标题栏,可只显示图标 */
     QWidget * content;          /*!< 内容区,可折叠 */
     bool mouseMoveable;         /*!< 鼠标点下的位置是否支持移动 */
+
+    QMenu * rightPopMenu;       /*!< 标题栏右键菜单 */
+    QMap<Widget::WidgetFeature,QAction *> popActions;  /*!< 标题栏弹出按钮 */
 
     QAction *toggleViewAction;
 
@@ -143,7 +150,7 @@ void DockLayout::setGeometry(const QRect &geometry)
                 }
             }
 
-            if (QLayoutItem *item = items[MyDockWidget::FloatButton]) {
+            if (QLayoutItem *item = items[MyDockWidget::MoveButton]) {
                 if (!item->isEmpty()) {
                     leftPos -= item->widget()->width();
                     leftPos -= itemSpace;
@@ -207,8 +214,8 @@ int DockLayout::minimumTitleWidth() const
         if (QLayoutItem *item = items[MyDockWidget::CloseButton])
             closeSize = item->widget()->sizeHint();
     }
-    if (q->testFeatures(Widget::WidgetFloatable)) {
-        if (QLayoutItem *item = items[MyDockWidget::FloatButton])
+    if (q->testFeatures(Widget::WidgetMovable)) {
+        if (QLayoutItem *item = items[MyDockWidget::MoveButton])
             floatSize = item->widget()->sizeHint();
     }
 
@@ -237,16 +244,15 @@ int DockLayout::titleHeight() const
     QSize floatSize(0, 0);
     if (QLayoutItem *item = items[MyDockWidget::CloseButton])
         closeSize = item->widget()->sizeHint();
-
-    if (QLayoutItem *item = items[MyDockWidget::FloatButton])
+    if (QLayoutItem *item = items[MyDockWidget::MoveButton])
         floatSize = item->widget()->sizeHint();
 
-    int buttonHeight = qMax(perp(verticalTitleBar, closeSize),
+    int buttonHeight = qMin(perp(verticalTitleBar, closeSize),
                             perp(verticalTitleBar, floatSize));
-
     QFontMetrics titleFontMetrics = q->fontMetrics();
     int mw = q->style()->pixelMetric(QStyle::PM_DockWidgetTitleMargin, 0, q);
-    return qMax(buttonHeight + 2, titleFontMetrics.height() + 2*mw);
+
+    return qMax(buttonHeight , titleFontMetrics.height() + 2*mw);
 }
 
 QSize DockLayout::sizeFromContent(const QSize &content, bool floating) const
@@ -373,7 +379,7 @@ QSize DockLayout::minimumSize()
     if (items[MyDockWidget::Content] != 0) {
         QSize content;
         if(items[MyDockWidget::Content]->widget()->isVisible()){
-            content = items[MyDockWidget::Content]->maximumSize();
+            content = items[MyDockWidget::Content]->minimumSize();
         }
         content = sizeFromContent(content, parentWidget()->isWindow());
         return content;
@@ -388,7 +394,7 @@ QSize DockLayout::maximumSize()
 
     QSize content(0, 0);
     if (items[MyDockWidget::Content] != 0)
-        content = items[MyDockWidget::Content]->minimumSize();
+        content = items[MyDockWidget::Content]->maximumSize();
 
     return sizeFromContent(content, w->isFloating());
 }
@@ -407,11 +413,11 @@ void DockLayout::removeWidget(QWidget *widget)
 
 void MyDockWidgetPrivate::init()
 {
-    QAbstractButton *floatButt = new MyDockWidgetTitleButton(q_ptr);
-    floatButt->setFixedSize(22,22);
-    floatButt->setObjectName(QLatin1String("dockwidget_floatbutton"));
-    QObject::connect(floatButt, SIGNAL(clicked()), q_ptr, SLOT(toggleTopLevel()));
-    dockLayout->addWidget(MyDockWidget::FloatButton, floatButt);
+    QAbstractButton * moveButt = new MyDockWidgetTitleButton(q_ptr);
+    moveButt->setFixedSize(22,22);
+    moveButt->setObjectName(QLatin1String("dockwidget_floatbutton"));
+    QObject::connect(moveButt, SIGNAL(clicked()), q_ptr, SLOT(toggleTopLevel()));
+    dockLayout->addWidget(MyDockWidget::MoveButton, moveButt);
 
     QAbstractButton *closeButt = new MyDockWidgetTitleButton(q_ptr);
     closeButt->setFixedSize(22,22);
@@ -430,6 +436,35 @@ void MyDockWidgetPrivate::init()
     QObject::connect(toggleViewAction, SIGNAL(triggered(bool)),q_ptr, SLOT(toggleView(bool)));
     QObject::connect(toggleViewAction, SIGNAL(toggled(bool)),q_ptr, SLOT(toggleView(bool)));
 
+    /**********右键弹出菜单************/
+    rightPopMenu = new QMenu();
+    Base::WidgetPropSetting::enableWidgetTransparency(rightPopMenu,true);
+
+    QAction * action = new QAction(rightPopMenu);
+    QObject::connect(action, SIGNAL(triggered(bool)), q_ptr, SLOT(triggerMoveable(bool)));
+    action->setCheckable(true);
+    popActions.insert(Widget::WidgetMovable,action);
+
+    action = new QAction(rightPopMenu);
+    action->setCheckable(true);
+    QObject::connect(action, SIGNAL(triggered(bool)), q_ptr, SLOT(triggerResizeable(bool)));
+    popActions.insert(Widget::WidgetResizeable,action);
+
+    action = new QAction(rightPopMenu);
+    action->setCheckable(true);
+    QObject::connect(action, SIGNAL(triggered(bool)), q_ptr, SLOT(triggerExpanable(bool)));
+    popActions.insert(Widget::WidgetExpanable,action);
+
+    action = new QAction(rightPopMenu);
+    action->setCheckable(true);
+    QObject::connect(action, SIGNAL(triggered(bool)), q_ptr, SLOT(hideWidget()));
+    popActions.insert(Widget::WidgetVisible,action);
+
+    QList<QAction *> valueList = popActions.values();
+    std::for_each(valueList.begin(),valueList.end(),[&](QAction * action){
+        rightPopMenu->addAction(action);
+    });
+
     updateButtons();
 }
 
@@ -441,19 +476,24 @@ void MyDockWidgetPrivate::updateButtons()
     bool customTitleBar = dockLayout->getWidget(MyDockWidget::TitleBar) != 0;
 
     bool canClose = hasFeature(this, Widget::WidgetClosable);
-    bool canFloat = hasFeature(this, Widget::WidgetFloatable);
+    bool canMove = hasFeature(this, Widget::WidgetMovable);
 
-    QAbstractButton *button
-        = qobject_cast<QAbstractButton*>(dockLayout->getWidget(MyDockWidget::FloatButton));
-    button->setIcon(q_ptr->style()->standardIcon(QStyle::SP_TitleBarNormalButton, &opt, q_ptr));
-    button->setVisible(canFloat && !customTitleBar);
+    QAbstractButton *button = qobject_cast<QAbstractButton*>(dockLayout->getWidget(MyDockWidget::MoveButton));
+    QIcon icon;
+    if(canMove)
+        icon = QIcon(":/tech/resource/technology/unlocked.png");
+    else
+        icon = QIcon(":/tech/resource/technology/Lock_Locked.png");
 
-    button
-        = qobject_cast <QAbstractButton*>(dockLayout->getWidget(MyDockWidget::CloseButton));
-    button->setIcon(q_ptr->style()->standardIcon(QStyle::SP_TitleBarCloseButton, &opt, q_ptr));
+    button->setIcon(icon);
+    button->setVisible(!customTitleBar);
+
+    button = qobject_cast <QAbstractButton*>(dockLayout->getWidget(MyDockWidget::CloseButton));
+    button->setIcon(QIcon(":/tech/resource/technology/dock_close.png"));
+//    button->setIcon(q_ptr->style()->standardIcon(QStyle::SP_TitleBarCloseButton, &opt, q_ptr));
     button->setVisible(canClose && !customTitleBar);
 
-    q_ptr->setAttribute(Qt::WA_ContentsPropagated,(canFloat || canClose) && customTitleBar);
+    q_ptr->setAttribute(Qt::WA_ContentsPropagated,(canMove || canClose) && customTitleBar);
 }
 
 bool MyDockWidgetPrivate::mousePress(QMouseEvent *event)
@@ -525,11 +565,19 @@ bool MyDockWidgetPrivate::mouseRelease(QMouseEvent *event)
 bool MyDockWidgetPrivate::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if(event->button() == Qt::LeftButton && dockLayout->titleHeight() >= event->pos().y()){
-        if(q_ptr->widgetExpanded)
-            currentGeometry = q_ptr->geometry();
-         q_ptr->widgetExpanded = !q_ptr->widgetExpanded;
-         setExpand(q_ptr->widgetExpanded);
+        q_ptr->triggerExpanable(false);
     }
+    return true;
+}
+
+bool MyDockWidgetPrivate::contextMenu(QContextMenuEvent *event)
+{
+    popActions[Widget::WidgetMovable]->setText(QObject::tr("moveable"));
+    popActions[Widget::WidgetResizeable]->setText(QObject::tr("resizeable"));
+    popActions[Widget::WidgetExpanable]->setText(QObject::tr("expanded"));
+    popActions[Widget::WidgetVisible]->setText(QObject::tr("visible"));
+
+    rightPopMenu->exec(event->globalPos());
     return true;
 }
 
@@ -681,6 +729,9 @@ bool MyDockWidget::event(QEvent *event)
             if(d->mouseDoubleClickEvent(dynamic_cast<QMouseEvent *>(event)))
                 return true;
             break;
+        case event->ContextMenu:
+                return d->contextMenu(dynamic_cast<QContextMenuEvent *>(event));
+            break;
         case event->FocusIn:
             raise();
             break;
@@ -703,8 +754,17 @@ bool MyDockWidget::event(QEvent *event)
 void MyDockWidget::updateFeatures()
 {
     Q_D(MyDockWidget);
+
     d->toggleViewAction->setChecked(testFeatures(WidgetVisible));
+
+    d->popActions[Widget::WidgetVisible]->setChecked(testFeatures(WidgetVisible));
+    d->popActions[Widget::WidgetResizeable]->setChecked(testFeatures(WidgetResizeable));
+    d->popActions[Widget::WidgetMovable]->setChecked(testFeatures(WidgetMovable));
+    d->popActions[Widget::WidgetExpanable]->setChecked(widgetExpanded);
+
     d->setExpand(widgetExpanded);
+
+    d->updateButtons();
 }
 
 void MyDockWidget::initStyleOption(QStyleOptionDockWidget *option)
@@ -720,21 +780,54 @@ void MyDockWidget::initStyleOption(QStyleOptionDockWidget *option)
     option->title = d->fixedWindowTitle;
     option->closable = testFeatures(Widget::WidgetClosable);
     option->movable = testFeatures(Widget::WidgetMovable);
-    option->floatable = testFeatures(Widget::WidgetFloatable);
+    option->floatable = testFeatures(Widget::WidgetMovable);
 }
 
 void MyDockWidget::toggleTopLevel()
 {
-
+    Q_D(MyDockWidget);
+    triggerMoveable(!testFeatures(Widget::WidgetMovable));
+    d->popActions[Widget::WidgetMovable]->setChecked(testFeatures(Widget::WidgetMovable));
 }
 
 void MyDockWidget::toggleView(bool visible)
 {
+    Q_D(MyDockWidget);
     this->setVisible(visible);
+    d->popActions[Widget::WidgetVisible]->setChecked(visible);
     if(visible)
         currentFeatures |= Widget::WidgetVisible;
     else
         currentFeatures &= ~Widget::WidgetVisible;
+}
+
+void MyDockWidget::triggerMoveable(bool moveable)
+{
+    Q_D(MyDockWidget);
+    if(moveable)
+        currentFeatures |= Widget::WidgetMovable;
+    else
+        currentFeatures &= ~Widget::WidgetMovable;
+    d->updateButtons();
+}
+
+void MyDockWidget::triggerResizeable(bool resizeable)
+{
+    Q_D(MyDockWidget);
+    if(resizeable)
+        currentFeatures |= Widget::WidgetResizeable;
+    else
+        currentFeatures &= ~Widget::WidgetResizeable;
+}
+
+void MyDockWidget::triggerExpanable(bool /*expanded*/)
+{
+    Q_D(MyDockWidget);
+    if(widgetExpanded)
+        d->currentGeometry = geometry();
+     widgetExpanded = !widgetExpanded;
+     d->setExpand(widgetExpanded);
+     d->popActions[Widget::WidgetExpanable]->setChecked(widgetExpanded);
 }
 
 void MyDockWidget::hideWidget()

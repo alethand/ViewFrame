@@ -12,9 +12,11 @@
 #define DIALOGPROXY_H
 
 #include <QDialog>
+#include <QLayout>
 #include "../base_global.h"
 
 class QLabel;
+class TitleLayout;
 
 class DialogTitleBar : public QWidget
 {
@@ -23,6 +25,10 @@ public:
     explicit DialogTitleBar(QWidget * parent);
     ~DialogTitleBar();
 
+    enum ButtonRole{
+        IconLabel = 0x00,TitleLabel,MinButton,MaxButton,CloseButton,RoleCount
+    };
+
     void setTitle(QString text);
 
 protected:
@@ -30,6 +36,10 @@ protected:
 
 signals:
     void newOffsetPos(QPoint point);
+    void widgetClose();
+
+private:
+    void updateButtons();
 
 private:
     QWidget * titleContent;
@@ -37,6 +47,32 @@ private:
 
     QPoint mouseStartPoint;     /*!< 鼠标按下位置 */
     bool mouseMoveable;         /*!< 鼠标点下的位置是否支持移动 */
+
+    TitleLayout * layout;
+};
+
+class TitleLayout : public QLayout
+{
+public:
+    explicit TitleLayout(QWidget * parent = 0);
+
+    void addWidget(DialogTitleBar::ButtonRole role,QWidget * w);
+    QWidget * getWidget(DialogTitleBar::ButtonRole role) const;
+
+    void addItem(QLayoutItem * item);
+    void setGeometry(const QRect &geometry);
+    QLayoutItem *itemAt(int index)const;
+    QLayoutItem *takeAt(int index);
+    int count() const;
+    QSize minimumSize();
+    QSize sizeHint() const;
+
+private:
+    enum SizeType { MinimumSize, SizeHint };
+    QSize calculateSize(SizeType sizeType) const;
+
+private:
+    QVector<QWidgetItem *> items;
 };
 
 class DialogProxyPrivate;
@@ -87,6 +123,7 @@ signals:
 
 protected:
     virtual void respButtClicked(StandardButton butt);
+    void setTitle(QString content);
 
 private slots:
     void respButtonClicked();

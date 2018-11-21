@@ -1,38 +1,41 @@
-﻿#include "mydockwidgettitlebutton.h"
+﻿#include "titlebarbutton.h"
 
 #include <QStyle>
 #include <QPainter>
-#include <QDebug>
 #include <QStyleOptionToolButton>
 
-namespace Core{
-
-MyDockWidgetTitleButton::MyDockWidgetTitleButton(QWidget *dockWidget)
-    : QAbstractButton(dockWidget)
+TitleBarButton::TitleBarButton(QWidget *widget):QAbstractButton(widget)
 {
     setFocusPolicy(Qt::NoFocus);
 }
 
-QSize MyDockWidgetTitleButton::sizeHint() const
+QSize TitleBarButton::sizeHint() const
 {
     ensurePolished();
 
-    return QSize(22,22);
+    int size = 2*style()->pixelMetric(QStyle::PM_TitleBarHeight, 0, this);
+    if (!icon().isNull()) {
+        int iconSize = style()->pixelMetric(QStyle::PM_SmallIconSize, 0, this);
+        QSize sz = icon().actualSize(QSize(iconSize, iconSize));
+        size += qMax(sz.width(), sz.height());
+    }
+
+    return QSize(size, size);
 }
 
-void MyDockWidgetTitleButton::enterEvent(QEvent *event)
+void TitleBarButton::enterEvent(QEvent *event)
 {
     if (isEnabled()) update();
     QAbstractButton::enterEvent(event);
 }
 
-void MyDockWidgetTitleButton::leaveEvent(QEvent *event)
+void TitleBarButton::leaveEvent(QEvent *event)
 {
     if (isEnabled()) update();
     QAbstractButton::leaveEvent(event);
 }
 
-void MyDockWidgetTitleButton::paintEvent(QPaintEvent *)
+void TitleBarButton::paintEvent(QPaintEvent *)
 {
     QPainter p(this);
 
@@ -56,9 +59,7 @@ void MyDockWidgetTitleButton::paintEvent(QPaintEvent *)
     opt.activeSubControls = 0;
     opt.features = QStyleOptionToolButton::None;
     opt.arrowType = Qt::NoArrow;
-    int size = style()->pixelMetric(QStyle::PM_IconViewIconSize, 0, this);
+    int size = style()->pixelMetric(QStyle::PM_SmallIconSize, 0, this);
     opt.iconSize = QSize(size, size);
     style()->drawComplexControl(QStyle::CC_ToolButton, &opt, &p, this);
-}
-
 }

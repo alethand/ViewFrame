@@ -18,6 +18,7 @@
 #include "Base/actionmanager/actionmanager.h"
 #include "Base/actionmanager/action.h"
 #include "base/util/rutil.h"
+#include "networksettingdialog.h"
 
 namespace Core{
 
@@ -298,6 +299,7 @@ void ModuleSettingPrivate::init()
 
     sysSettingButt = new RButton(toolWidget);
     networkButt = new RButton(toolWidget);
+    QObject::connect(networkButt,SIGNAL(pressed()),q_ptr,SLOT(showNetSetting()));
 
     QHBoxLayout * toolLayout = new QHBoxLayout;
     toolLayout->setContentsMargins(1,1,1,1);
@@ -500,6 +502,18 @@ void ModuleSetting::raiseModule(QModelIndex index)
            return;
        emit raiseWidget(nodeId);
     }
+}
+
+/*!
+ * @brief 显示网络设置窗口
+ * @attention NetworkSettingDialog设置了WA_DeleteOnClose属性，创建对象时需要在堆上申请空间。若在栈上会因为局部变量问题，导致多次释放 @a
+ *          造成释放失败问题。
+ */
+void ModuleSetting::showNetSetting()
+{
+    Q_D(ModuleSetting);
+    NetworkSettingDialog  * setting = new NetworkSettingDialog(parentWidget());
+    setting->exec();
 }
 
 void ModuleSetting::animationView(bool isVisible)

@@ -21,6 +21,8 @@ class QTreeView;
 
 namespace Core{
 
+class NetworkSettingDialog;
+
 class MSettingModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -93,6 +95,7 @@ private slots:
     void updatePluginState(const QModelIndex &topLeft, const QModelIndex &bottomRight, const QVector<int> &roles);
     void updateModuelState(MSettingModel::TreeNode *node);
     void raiseModule(QModelIndex index);
+    void showNetSetting();
 
 private:
     void animationView(bool isVisible);

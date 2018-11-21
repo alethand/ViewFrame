@@ -1,4 +1,4 @@
-#ifndef PANEL_H
+﻿#ifndef PANEL_H
 #define PANEL_H
 
 #include "pluginmanager/rcomponent.h"
@@ -15,6 +15,8 @@ public:
 
     QWidget *initialize(QWidget * parent);
     void release(){}
+    QString pluginName();
+    Core::RComponent * clone();
     void onNetwork(int protocolType,Datastruct::FieldValues & data);
     void onNetWork(int protocolType,NetParse::Protocol *data);
 

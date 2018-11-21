@@ -47,7 +47,8 @@ QDockWidget::float-button:hover {
     background: rgba(255, 255, 255, 10);
 }
 
-QAbstractButton#dockwidget_floatbutton,QAbstractButton#dockwidget_closebutton{
+QAbstractButton#dockwidget_floatbutton,QAbstractButton#dockwidget_closebutton,
+QAbstractButton#title_closebutton{
     background-color:rgba(17,227,246,120);
 }
 
@@ -57,7 +58,7 @@ QDockWidget::float-button:pressed {
     background: rgba(255, 255, 255, 10);
 }
 
-QLabel#dockwidget_titlelabel{
+QLabel#dockwidget_titlelabel,QLabel#titlebar_titlelabel{
     background-color:rgba(17,227,246,120);
     padding-left:2px;
     font-size:14px;
@@ -144,7 +145,7 @@ QMenuBar::item:pressed {
 QMenu {
     border: 1px solid #02a3cf;
     color: #eff0f1;
-    background-color:rgba(13,26,42,130);
+    background-color:rgba(13,26,42,200);
     margin-top:2px;
 }
 
@@ -609,16 +610,10 @@ QScrollBar::sub-page:vertical {
     background: none;
 }
 
-QTabWidget {
-
-}
-
 QTabWidget::pane {
     border: 1px solid #718eb4;
-    padding: 5px;
-    margin: 0px;
+    padding:0px;
 }
-
 QTabBar::tab:top {
     color: #eff0f1;
     padding-left:15px;
@@ -639,6 +634,13 @@ QTabBar::tab:top:selected {
     min-width: 50px;
     padding-left:15px;
     padding-right:15px;
+}
+
+QTabBar::tab:top:!selected {
+    color: #eff0f1;
+    background-color: rgba(13,26,42,150);
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
 }
 
 QTabBar::tab:top:!selected:hover {
@@ -798,4 +800,16 @@ QAbstractSpinBox{
     padding-right: 15px;
     background-color:rgba(0,0,0,0);
     color:white;
+}
+
+/**************************健康管理*********************************/
+QListView#healthManager_sublist,QListView#networsetting_netlist{
+    color: white;
+    background-color: rgba(0,0,0,0);
+    border-right:1px solid rgba(0,204,255,150);
+    text-align:right;
+}
+
+QStackedWidget{
+    background-color: rgba(13,26,42,0);
 }

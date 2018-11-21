@@ -1,4 +1,4 @@
-#include "netparseinfo.h"
+﻿#include "netparseinfo.h"
 #include <QDataStream>
 
 namespace NetParse{

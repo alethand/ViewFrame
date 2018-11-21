@@ -1,4 +1,4 @@
-#ifndef RADIUSSRCDISPLAY_H
+﻿#ifndef RADIUSSRCDISPLAY_H
 #define RADIUSSRCDISPLAY_H
 
 #include <QWidget>
@@ -19,7 +19,7 @@ public:
        ListRefresh_Roll,        //滚动刷新模式
        ListRefresh_Cover,       //覆盖刷新模式
     };
-    explicit RadiusSrcDisplay(const Datastruct::BaseProtocol *protocol);
+    explicit RadiusSrcDisplay(const Datastruct::BaseProtocol *protocol,QWidget * parent = 0);
     void initView();
 
 
@@ -35,8 +35,6 @@ private:
     TableView    view_CoverRefresh;
     Model_History model_ScrollRefresh;
     Model_Cover   model_CoverRefresh;
-
-
 
     /*** 界面按钮控件 ***/
     QRadioButton *but_MapDraw;

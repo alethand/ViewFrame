@@ -588,7 +588,7 @@ void MainWindow::loadCmponent()
     TaskControlModel::TaskControlPanel * taskControl = new TaskControlModel::TaskControlPanel;
     HealthInfoDockPanel *healthControl = new HealthInfoDockPanel;
 
-    //DataView::RadiationSourceTable * radiationTable = new DataView::RadiationSourceTable;
+//    DataView::RadiationSourceTable * radiationTable = new DataView::RadiationSourceTable;
    // DataView::AllPluseDock * allPluseTable = new DataView::AllPluseDock;
 //    DataView::MFAcquistionTable * acquistionTable = new DataView::MFAcquistionTable;
      RadiusPanel * radiationSrc = new RadiusPanel;

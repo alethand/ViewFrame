@@ -52,5 +52,8 @@
         <file>resource/technology/left_bottom.png</file>
         <file>resource/technology/logo1.jpg</file>
         <file>resource/technology/system_setting.png</file>
+        <file>resource/technology/Lock_Locked.png</file>
+        <file>resource/technology/unlocked.png</file>
+        <file>resource/technology/dock_close.png</file>
     </qresource>
 </RCC>

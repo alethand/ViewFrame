@@ -272,19 +272,27 @@ void TaskLayoutParse::parseType(QDomNode &node, Datastruct::PubHead *element)
 
     Datastruct::WidgetType wtype;
 
+    int fixedHeight = 24;
+
     if(domElem->text()== wtype.combox) {
         element->type = Datastruct::ControlType::ComboBox;
         QComboBox * comb = new QComboBox();
-        comb->setView(new QListView());
+        QListView * listView = new QListView();
+        listView->setAttribute(Qt::WA_TranslucentBackground);
+        listView->setWindowFlags(listView->windowFlags() | Qt::FramelessWindowHint);
+        comb->setView(listView);
         element->widget = comb;
+        element->widget->setFixedHeight(fixedHeight);
     }
     else if(domElem->text() == wtype.checkBox) {
         element->type = Datastruct::ControlType::CheckBox;
         element->widget = new QCheckBox();
+        element->widget->setFixedHeight(fixedHeight);
     }
     else if(domElem->text() == wtype.radioButton) {
         element->type = Datastruct::ControlType::RadioButton;
         element->widget = new QRadioButton();
+        element->widget->setFixedHeight(fixedHeight);
     }
     else if(domElem->text() == wtype.textEdit) {
         element->type = Datastruct::ControlType::TextEdit;
@@ -293,18 +301,22 @@ void TaskLayoutParse::parseType(QDomNode &node, Datastruct::PubHead *element)
     else if(domElem->text() == wtype.valueint) {
         element->type = Datastruct::ControlType::ValueIntEdit;
         element->widget = new QSpinBox();
+        element->widget->setFixedHeight(fixedHeight);
     }
     else if(domElem->text() == wtype.valuefloat) {
         element->type = Datastruct::ControlType::ValueFloatEdit;
         element->widget = new QDoubleSpinBox();
+        element->widget->setFixedHeight(fixedHeight);
     }
     else if(domElem->text() == wtype.dateEdit) {
         element->type = Datastruct::ControlType::DateEdit;
         element->widget = new QDateEdit();
+        element->widget->setFixedHeight(fixedHeight);
     }
     else if(domElem->text() == wtype.timeEdit) {
         element->type = Datastruct::ControlType::TimeEdit;
         element->widget = new QTimeEdit();
+        element->widget->setFixedHeight(fixedHeight);
     }
     else if(domElem->text() == wtype.dialog) {
         element->type = Datastruct::ControlType::Dialog;
@@ -322,6 +334,9 @@ void TaskLayoutParse::parseType(QDomNode &node, Datastruct::PubHead *element)
         element->type = Datastruct::ControlType::List;
         element->widget = new QListWidget();
     }
+
+    if(element->widget)
+        element->widget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 }
 
 /*!

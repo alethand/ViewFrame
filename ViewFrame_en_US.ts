@@ -2,20 +2,84 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="en_US">
 <context>
-    <name>DataView::AllPluseDock</name>
+    <name>Core::NetworkSettingDialog</name>
     <message>
-        <location filename="Core/widgets/datadisplay/allplusetable.cpp" line="66"/>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="237"/>
+        <source>Net settings</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="404"/>
+        <source>question</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="404"/>
+        <source>Are you sure you want to delete selected item?</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="522"/>
+        <source>port input range is invalid!</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="530"/>
+        <source>network id has existed!</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="539"/>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="549"/>
+        <source>network ip is invalid!</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="558"/>
+        <source>warning</source>
+        <translation></translation>
+    </message>
+</context>
+<context>
+    <name>DataDisplay</name>
+    <message>
+        <location filename="Core/widgets/datadisplay/datadisplay.cpp" line="137"/>
         <source>DataDisplay panel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="Core/widgets/datadisplay/allplusetable.cpp" line="380"/>
-        <source>Save as...</source>
+        <location filename="Core/widgets/datadisplay/datadisplay.cpp" line="139"/>
+        <source>List of data sources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="Core/widgets/datadisplay/allplusetable.cpp" line="381"/>
-        <source>EXCEL files (*.xls *.xlsx);;HTML-Files (*.htm *.html);;</source>
+        <location filename="Core/widgets/datadisplay/datadisplay.cpp" line="140"/>
+        <source>Full Pulse List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="Core/widgets/datadisplay/datadisplay.cpp" line="141"/>
+        <source>Intermediate Frequency Data List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="Core/widgets/datadisplay/datadisplay.cpp" line="142"/>
+        <source>Data source Map</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="Core/widgets/datadisplay/datadisplay.cpp" line="143"/>
+        <source>Full Pulse graphics information</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="Core/widgets/datadisplay/datadisplay.cpp" line="144"/>
+        <source>Intermediate Frequency Data Graphics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="Core/widgets/datadisplay/datadisplay.cpp" line="145"/>
+        <source>Spectral data graph</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -29,92 +93,15 @@
     </message>
 </context>
 <context>
-    <name>DataView::MFAcquisitionGraphics</name>
+    <name>DataView::Model_Cover</name>
     <message>
-        <location filename="Core/widgets/datadisplay/mfacquisitiongraphics.cpp" line="74"/>
-        <source>DataDisplay panel</source>
+        <location filename="Core/widgets/datadisplay/DisplayModel/model_cover.cpp" line="26"/>
+        <source>截获次数</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="Core/widgets/datadisplay/mfacquisitiongraphics.cpp" line="138"/>
-        <source>Intermediate Frequency Data Graphics</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DataView::MFAcquistionTable</name>
-    <message>
-        <location filename="Core/widgets/datadisplay/mfacquistiontable.cpp" line="122"/>
-        <source>DataDisplay panel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/mfacquistiontable.cpp" line="157"/>
-        <source>Intermediate Frequency Data List</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/mfacquistiontable.cpp" line="221"/>
-        <source>Save as...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/mfacquistiontable.cpp" line="222"/>
-        <source>EXCEL files (*.xls *.xlsx);;HTML-Files (*.htm *.html);;</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DataView::RadiaSourceMap</name>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiasourcemap.cpp" line="56"/>
-        <source>DataDisplay panel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiasourcemap.cpp" line="82"/>
-        <source>Data source Map</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DataView::RadiationSourceTable</name>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="164"/>
-        <source>DataDisplay panel</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="424"/>
-        <source>Radiation source data</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="427"/>
-        <source>Overwrite Refresh</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="428"/>
-        <source>Scrolling Refresh</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="482"/>
-        <source>Save as...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="483"/>
-        <source>EXCEL files (*.xls *.xlsx);;HTML-Files (*.htm *.html);;</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DataView::RadiationSourceTableRenovateDialog</name>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.cpp" line="17"/>
-        <source>Data source Renovate</source>
+        <location filename="Core/widgets/datadisplay/DisplayModel/model_cover.cpp" line="27"/>
+        <source>截获时间</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -129,14 +116,14 @@
 <context>
     <name>LayoutAndDisplay</name>
     <message>
-        <location filename="Core/widgets/healthmanage/layoutset.cpp" line="458"/>
-        <location filename="Core/widgets/healthmanage/layoutset.cpp" line="478"/>
+        <location filename="Core/widgets/healthmanage/layoutset.cpp" line="463"/>
+        <location filename="Core/widgets/healthmanage/layoutset.cpp" line="483"/>
         <source>WorkState</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="Core/widgets/healthmanage/layoutset.cpp" line="459"/>
-        <location filename="Core/widgets/healthmanage/layoutset.cpp" line="479"/>
+        <location filename="Core/widgets/healthmanage/layoutset.cpp" line="464"/>
+        <location filename="Core/widgets/healthmanage/layoutset.cpp" line="484"/>
         <source>Sub-component</source>
         <translation type="unfinished"></translation>
     </message>
@@ -157,155 +144,167 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="64"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="62"/>
         <source>ViewFrame</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="67"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="65"/>
         <source>Technology style</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="68"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="66"/>
         <source>Dark style</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="69"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="67"/>
         <source>Light style</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="70"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="68"/>
         <source>Technology(Big) style</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="71"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="69"/>
         <source>Dark(Big) style</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="72"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="70"/>
         <source>Light(Big) style</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="416"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="409"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="565"/>
         <source>warning</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="416"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="409"/>
         <source>User defined shortcut keys not available!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="432"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="425"/>
         <source>Program(&amp;P)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="433"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="426"/>
         <source>Exit(&amp;X)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="435"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="428"/>
         <source>View(&amp;V)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="436"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="429"/>
         <source>View manager</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="437"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="430"/>
         <source>Import view</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="438"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="431"/>
         <source>Export view</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="440"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="433"/>
         <source>Settings(&amp;S)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="441"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="434"/>
         <source>Top hint</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="442"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="435"/>
         <source>Full screen</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="444"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="437"/>
         <source>Styles(&amp;Y)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="445"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="438"/>
         <source>Language(&amp;L)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="446"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="439"/>
         <source>Shortcut settings(&amp;T)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="447"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="440"/>
         <source>Screenshot(&amp;S)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="449"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="442"/>
         <source>Help(&amp;H)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="450"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="443"/>
         <source>Technical support(&amp;T)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="451"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="444"/>
         <source>About program(&amp;A)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="499"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="492"/>
         <source>save screenshot</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="510"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="503"/>
         <source>save screenshot failed!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="512"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="505"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="563"/>
         <source>information</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="512"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="505"/>
         <source>save screenshot successfully!</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/widgets/mainwindow.cpp" line="563"/>
+        <source>export layout successfully!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="Core/widgets/mainwindow.cpp" line="565"/>
+        <source>export layout failed!</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>QCoreApplication</name>
     <message>
-        <location filename="Core/widgets/mainwindow.cpp" line="510"/>
+        <location filename="Core/widgets/mainwindow.cpp" line="503"/>
         <source>warning</source>
         <translation></translation>
     </message>
@@ -313,27 +312,27 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="Core/widgets/pageinfo.cpp" line="215"/>
+        <location filename="Core/widgets/pageinfo.cpp" line="216"/>
         <source>First page</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/pageinfo.cpp" line="216"/>
+        <location filename="Core/widgets/pageinfo.cpp" line="217"/>
         <source>Pre page</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/pageinfo.cpp" line="217"/>
+        <location filename="Core/widgets/pageinfo.cpp" line="218"/>
         <source>Next page</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/pageinfo.cpp" line="218"/>
+        <location filename="Core/widgets/pageinfo.cpp" line="219"/>
         <source>Last page</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/pageinfo.cpp" line="219"/>
+        <location filename="Core/widgets/pageinfo.cpp" line="220"/>
         <source>Jump page</source>
         <translation></translation>
     </message>
@@ -373,310 +372,6 @@
         <location filename="Core/main.cpp" line="78"/>
         <source>Create schemes path failed!</source>
         <translation></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/Util/tipdialog.cpp" line="19"/>
-        <location filename="Core/widgets/Util/tipdialog.cpp" line="22"/>
-        <location filename="Core/widgets/Util/tipdialog.cpp" line="29"/>
-        <location filename="Core/widgets/Util/tipdialog.cpp" line="32"/>
-        <source>Information</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/allplusetable.cpp" line="132"/>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="79"/>
-        <source>Output</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="194"/>
-        <source>Clear Table</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/mfacquistiontable.cpp" line="153"/>
-        <source>serial number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/mfacquistiontable.cpp" line="153"/>
-        <source>acquisition time</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/mfacquistiontable.cpp" line="153"/>
-        <source>acquisition mode</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/mfacquistiontable.cpp" line="153"/>
-        <source>collection pulse number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/mfacquistiontable.cpp" line="154"/>
-        <source>collection points</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="252"/>
-        <source>Serial number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="252"/>
-        <source>Radiation source batch number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="252"/>
-        <source>Interpulse type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="252"/>
-        <source>Intrapulse type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="252"/>
-        <source>Number of carrier frequencies</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="253"/>
-        <source>Continuous wave mark</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="253"/>
-        <source>Number of pulses in carrier frequency group</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="253"/>
-        <source>Carrier frequency band code</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="253"/>
-        <source>RF1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="253"/>
-        <source>RF2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="254"/>
-        <source>RF3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="254"/>
-        <source>RF4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="254"/>
-        <source>RF5</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="254"/>
-        <source>RF6</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="254"/>
-        <source>RF7</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="255"/>
-        <source>RF8</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="255"/>
-        <source>Re-frequency type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="255"/>
-        <source>Re-frequency number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="255"/>
-        <source>Number of pulses in the re-frequency group</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="255"/>
-        <source>PRI1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="256"/>
-        <source>PRI2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="256"/>
-        <source>PRI3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="256"/>
-        <source>PRI4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="256"/>
-        <source>PRI5</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="256"/>
-        <source>PRI6</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="257"/>
-        <source>PRI7</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="257"/>
-        <source>PRI8</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="257"/>
-        <source>Pulse width type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="257"/>
-        <source>Pulse width number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="257"/>
-        <source>Pulse width pulse number</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="258"/>
-        <source>PW1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="258"/>
-        <source>PW2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="258"/>
-        <source>PW3</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="258"/>
-        <source>PW4</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="258"/>
-        <source>PW5</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="259"/>
-        <source>PW6</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="259"/>
-        <source>PW7</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="259"/>
-        <source>PW8</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="259"/>
-        <source>Digital amplitude</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="259"/>
-        <source>Analog amplitude</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="260"/>
-        <source>Digital power</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="260"/>
-        <source>Analog power</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="260"/>
-        <source>Azimuth</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="260"/>
-        <source>Pitch angle</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="260"/>
-        <source>Longitude</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="261"/>
-        <source>Latitude</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="261"/>
-        <source>Height</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="261"/>
-        <source>Intra-pulse effective identification</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="261"/>
-        <source>Intra-pulse characteristic information</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="261"/>
-        <source>CRC check</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="266"/>
-        <source>Interceptions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.cpp" line="266"/>
-        <source>Interception time</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="Core/widgets/shortcutsettings.cpp" line="121"/>
@@ -729,67 +424,67 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="216"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="210"/>
         <source>Add task</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="217"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="211"/>
         <source>Delete task</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="218"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="212"/>
         <source>Modify task</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="219"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="213"/>
         <source>Copy task</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="220"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="214"/>
         <source>Paste task</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="223"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="217"/>
         <source>Issued task</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="225"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="219"/>
         <source>Suspend issued</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="228"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="222"/>
         <source>Import tasks...</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="229"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="223"/>
         <source>Export tasks...</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="231"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="225"/>
         <source>Reset issued</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/selfwidget/modulesetting.cpp" line="51"/>
+        <location filename="Core/selfwidget/modulesetting.cpp" line="64"/>
         <source>Plugin Name</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
-        <location filename="Core/selfwidget/modulesetting.cpp" line="192"/>
+        <location filename="Core/selfwidget/modulesetting.cpp" line="330"/>
         <source>System setting</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/selfwidget/modulesetting.cpp" line="195"/>
+        <location filename="Core/selfwidget/modulesetting.cpp" line="331"/>
         <source>Network setting</source>
         <translation></translation>
     </message>
@@ -799,100 +494,180 @@
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrolpanel.cpp" line="38"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrolpanel.cpp" line="31"/>
         <source>TaskControl panel</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/mydockwidget.cpp" line="441"/>
+        <source>moveable</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/mydockwidget.cpp" line="446"/>
+        <source>resizeable</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/mydockwidget.cpp" line="451"/>
+        <source>expanded</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/mydockwidget.cpp" line="456"/>
+        <source>visible</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="112"/>
+        <source>Protocol:</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="128"/>
+        <source>Type:</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="141"/>
+        <source>Network id:</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="149"/>
+        <source>Ip address:</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="157"/>
+        <source>Port:</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="165"/>
+        <source>Multicast:</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="170"/>
+        <source>Multicast ip:</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="177"/>
+        <source>Apply</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/selfwidget/networksettingdialog.cpp" line="181"/>
+        <source>Cancel</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/widgets/Util/tipdialog.cpp" line="19"/>
+        <source>warning</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/widgets/Util/tipdialog.cpp" line="22"/>
+        <source>information</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="Core/widgets/datadisplay/radiusSource/panel.cpp" line="32"/>
+        <source>Dataview panel</source>
         <translation></translation>
     </message>
 </context>
 <context>
     <name>QPlatformTheme</name>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="194"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="317"/>
         <source>OK</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="196"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="319"/>
         <source>Save</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="198"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="321"/>
         <source>SaveAll</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="200"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="323"/>
         <source>Open</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="202"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="325"/>
         <source>Yes</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="204"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="327"/>
         <source>YesToAll</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="206"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="329"/>
         <source>No</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="208"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="331"/>
         <source>NoToAll</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="210"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="333"/>
         <source>Abort</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="212"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="335"/>
         <source>Retry</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="214"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="337"/>
         <source>Ignore</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="216"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="339"/>
         <source>Close</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="218"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="341"/>
         <source>Cancel</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="220"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="343"/>
         <source>Discard</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="222"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="345"/>
         <source>Help</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="224"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="347"/>
         <source>Apply</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="226"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="349"/>
         <source>Reset</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Base/selfwidget/dialogproxy.cpp" line="228"/>
+        <location filename="Base/selfwidget/dialogproxy.cpp" line="351"/>
         <source>RestoreDefaults</source>
         <translation></translation>
     </message>
@@ -900,12 +675,12 @@
 <context>
     <name>RadiaSourceMap</name>
     <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiasourcemap.ui" line="14"/>
+        <location filename="Core/widgets/datadisplay/radiasourcemap.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="Core/widgets/datadisplay/radiusSource/radiasourcemap.ui" line="26"/>
+        <location filename="Core/widgets/datadisplay/radiasourcemap.ui" line="26"/>
         <source>数据源地图</source>
         <translation type="unfinished"></translation>
     </message>
@@ -913,21 +688,25 @@
 <context>
     <name>RadiationSourceTable</name>
     <message>
+        <location filename="Core/widgets/datadisplay/radiationsourcetable.ui" line="14"/>
         <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.ui" line="14"/>
         <source>Form</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="Core/widgets/datadisplay/radiationsourcetable.ui" line="32"/>
         <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.ui" line="32"/>
         <source>覆盖刷新</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="Core/widgets/datadisplay/radiationsourcetable.ui" line="51"/>
         <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.ui" line="51"/>
         <source>滚动刷新</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="Core/widgets/datadisplay/radiationsourcetable.ui" line="64"/>
         <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetable.ui" line="64"/>
         <source>数据源信息列表</source>
         <translation type="unfinished"></translation>
@@ -944,8 +723,17 @@
 <context>
     <name>RadiationSourceTableRenovateDialog</name>
     <message>
+        <location filename="Core/widgets/datadisplay/radiationsourcetablerenovatedialog.ui" line="14"/>
         <location filename="Core/widgets/datadisplay/radiusSource/radiationsourcetablerenovatedialog.ui" line="14"/>
         <source>Dialog</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>RadiusPanel</name>
+    <message>
+        <location filename="Core/widgets/datadisplay/radiusSource/panel.cpp" line="13"/>
+        <source>RadiusSrc panel</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1091,68 +879,68 @@
 <context>
     <name>TaskControlModel::TaskControl</name>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="259"/>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="321"/>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="479"/>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="511"/>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="532"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="253"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="315"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="473"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="505"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="526"/>
         <source>warning</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="259"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="253"/>
         <source>Selected task list is empty!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="321"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="315"/>
         <source>layout file doesn&apos;t existed!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="425"/>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="509"/>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="530"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="419"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="503"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="524"/>
         <source>information</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="425"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="419"/>
         <source>Delete selected task?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="479"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="473"/>
         <source>No tasks to paste!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="501"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="495"/>
         <source>choose file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="509"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="503"/>
         <source>import successfully!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="511"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="505"/>
         <source>import failed!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="523"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="517"/>
         <source>save file</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="530"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="524"/>
         <source>export successfully!</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="532"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrol.cpp" line="526"/>
         <source>export failed!</source>
         <translation></translation>
     </message>
@@ -1160,9 +948,9 @@
 <context>
     <name>TaskControlModel::TaskControlPanel</name>
     <message>
-        <location filename="Core/widgets/taskcontrol/taskcontrolpanel.cpp" line="16"/>
+        <location filename="Core/widgets/taskcontrol/taskcontrolpanel.cpp" line="15"/>
         <source>TaskControl panel</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>

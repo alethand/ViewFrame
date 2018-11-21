@@ -1,4 +1,4 @@
-#ifndef NETPARSEINFO_H
+﻿#ifndef NETPARSEINFO_H
 #define NETPARSEINFO_H
 
 #include <QList>

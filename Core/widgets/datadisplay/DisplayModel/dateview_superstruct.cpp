@@ -5,7 +5,7 @@ namespace DataView {
 DataManager::DataManager(const Datastruct::BaseProtocol *protocol)
 {
     mProtocol = protocol;
-    positionFast();
+//    positionFast();
 }
 
 void DataManager::handleNetInfo(NetParse::Protocol *netInfo)
@@ -57,7 +57,7 @@ Observer::Observer(DataManager *subject,bool openFilter)
 {
     subject->register_DataObserver(this);
     isFilter = openFilter;
-    ensureDisplayData();
+//    ensureDisplayData();
 }
 
 QVariant Observer::data(const QModelIndex &index, int role) const
@@ -84,18 +84,26 @@ QVariant Observer::data(const QModelIndex &index, int role) const
  */
 void Observer::ensureDisplayData()
 {
-    QList<Data_Word>::iterator ite = const_cast <Datastruct::BaseProtocol*>(mProtocol)
-            ->contents.first().fields.begin();
-    while(ite != mProtocol->contents.first().fields.end()) {
-        if(!ite->name.isEmpty()) {
-            if(false == isFilter)
-                mNeedsDisplayData.append(&(*ite));
-            else
-                if(true == ite->visible )
-                    mNeedsDisplayData.append(&(*ite));
+    QList<SingleProtocol>::iterator ite_SingleProtocol = const_cast <Datastruct::BaseProtocol *>(mProtocol)
+                                                            ->contents.begin();
+        while(ite_SingleProtocol != const_cast <Datastruct::BaseProtocol *>(mProtocol)
+                                     ->contents.end()){
+
+            QList<Data_Word>::iterator ite = ite_SingleProtocol->fields.begin();
+            while(ite !=ite_SingleProtocol->fields.end()) {
+                if(!ite->name.isEmpty()) {
+                    if(false == isFilter)
+                        mNeedsDisplayData.append(&(*ite));
+                    else
+                        if(true == ite->visible )
+                            mNeedsDisplayData.append(&(*ite));
+                }
+                ite++;
+            }
+
+        ite_SingleProtocol++;
         }
-        ite++;
-    }
+
 }
 
 

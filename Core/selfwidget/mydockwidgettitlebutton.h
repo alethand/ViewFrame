@@ -20,7 +20,6 @@ class MyDockWidget;
 class MyDockWidgetTitleButton : public QAbstractButton
 {
     Q_OBJECT
-
 public:
     MyDockWidgetTitleButton(QWidget *dockWidget);
 

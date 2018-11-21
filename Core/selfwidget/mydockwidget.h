@@ -44,7 +44,7 @@ public:
     ~MyDockWidget();
 
     enum ButtonRole{
-        Content, CloseButton, FloatButton, TitleBar, TitleLabel, RoleCount
+        Content, CloseButton, MoveButton, TitleBar, TitleLabel, RoleCount
     };
     void setTitle(const QString title);
 
@@ -69,6 +69,9 @@ private:
 private slots:
     void toggleTopLevel();
     void toggleView(bool visible);
+    void triggerMoveable(bool moveable);
+    void triggerResizeable(bool resizeable);
+    void triggerExpanable(bool expanded);
     void hideWidget();
 
 private:

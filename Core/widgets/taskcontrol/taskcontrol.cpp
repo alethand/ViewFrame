@@ -81,32 +81,24 @@ void TaskControlPrivate::initView()
     mainWidget = new QWidget(q_ptr);
     mainWidget->setObjectName("mainWidget");
 
-    const int buttWidth = 120;
     const int buttHeight = 26;
 
     importButt = new QPushButton(mainWidget);
     QObject::connect(importButt, SIGNAL(pressed()), q_ptr, SLOT(importTask()));
-    importButt->setMinimumWidth(buttWidth);
     importButt->setFixedHeight(buttHeight);
 
 
     exportButt = new QPushButton(mainWidget);
     QObject::connect(exportButt, SIGNAL(pressed()), q_ptr, SLOT(exportTask()));
-    exportButt->setMinimumWidth(buttWidth);
     exportButt->setFixedHeight(buttHeight);
-
 
     distrbuteButt = new QPushButton(mainWidget);
     QObject::connect(distrbuteButt, SIGNAL(pressed()), q_ptr, SLOT(distributeTask()));
-    distrbuteButt->setMinimumWidth(buttWidth);
     distrbuteButt->setFixedHeight(buttHeight);
-
 
     resetButt = new QPushButton(mainWidget);
     QObject::connect(resetButt, SIGNAL(pressed()), q_ptr, SLOT(resetTask()));
-    resetButt->setMinimumWidth(buttWidth);
     resetButt->setFixedHeight(buttHeight);
-
 
     QWidget * toolWidget = new QWidget;
     QHBoxLayout * hlayout = new QHBoxLayout;

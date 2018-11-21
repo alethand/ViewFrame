@@ -919,8 +919,8 @@ struct NetworkBase{
  */
 struct NetworkInfo{
     QString id;             /*!< 网络Id */
-    NetworkType protocol;   /*!< 传输类型 */
     NetworkBase baseInfo;   /*!< 基础信息 */
+    NetworkType protocol;   /*!< 传输类型 */
 };
 
 enum WindowLayout{

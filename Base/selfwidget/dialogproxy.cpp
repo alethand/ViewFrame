@@ -8,8 +8,12 @@
 #include <QHash>
 #include <QLabel>
 #include <QMouseEvent>
+#include <QDebug>
+#include <QStyle>
+#include <QStyleOptionDockWidget>
 
 #include "rbutton.h"
+#include "titlebarbutton.h"
 
 DialogTitleBar::DialogTitleBar(QWidget *parent)
 {
@@ -17,14 +21,23 @@ DialogTitleBar::DialogTitleBar(QWidget *parent)
 
     titleContent = new QWidget(this);
 
-    titleLabel = new QLabel(this);
-    titleLabel->setStyleSheet("background-color:rgba(17,227,246,120);");
-    titleLabel->installEventFilter(this);
+    layout = new TitleLayout(titleContent);
 
-    QHBoxLayout * contentLayout = new QHBoxLayout;
-    contentLayout->addWidget(titleLabel);
-    contentLayout->setContentsMargins(0,0,0,0);
-    titleContent->setLayout(contentLayout);
+    titleLabel = new QLabel(titleContent);
+    titleLabel->setObjectName("titlebar_titlelabel");
+    titleLabel->setStyleSheet("background-color:rgba(17,227,246,120);padding-left:3px;text-aligcn:");
+    titleLabel->installEventFilter(this);
+    layout->addWidget(DialogTitleBar::TitleLabel,titleLabel);
+
+    QAbstractButton *closeButt = new TitleBarButton(titleContent);
+    closeButt->setFixedSize(22,22);
+    closeButt->setObjectName(QLatin1String("title_closebutton"));
+    connect(closeButt,SIGNAL(pressed()),this,SIGNAL(widgetClose()));
+    layout->addWidget(DialogTitleBar::CloseButton, closeButt);
+
+    titleContent->setLayout(layout);
+
+    updateButtons();
 
     QHBoxLayout * mainLayout = new QHBoxLayout;
     mainLayout->setContentsMargins(0,0,0,0);
@@ -79,6 +92,24 @@ bool DialogTitleBar::eventFilter(QObject *watched, QEvent *event)
     return QWidget::eventFilter(watched,event);
 }
 
+void DialogTitleBar::updateButtons()
+{
+    QStyleOptionDockWidget option;
+    option.initFrom(this);
+    option.rect = this->rect();
+    option.title = titleLabel->text();
+    option.closable = true;
+    option.movable = true;
+
+    bool canClose = true;
+
+    QAbstractButton *button  = qobject_cast<QAbstractButton*>(layout->getWidget(DialogTitleBar::CloseButton));
+    button->setIcon(style()->standardIcon(QStyle::SP_TitleBarCloseButton, &option, this));
+    button->setVisible(canClose);
+
+    setAttribute(Qt::WA_ContentsPropagated,canClose);
+}
+
 class DialogProxyPrivate : public QObject
 {
     Q_DECLARE_PUBLIC(DialogProxy)
@@ -97,6 +128,7 @@ private:
     QWidget * mainWidget;
     QWidget * contentWidget;                /*!< 中心显示区 */
     QWidget * buttonContainWidget;          /*!< 按钮区 */
+    DialogTitleBar *  titleBar;
 
     QList<RButton *> buttList;
     QHash<RButton *,DialogProxy::StandardButton> buttHash;
@@ -106,8 +138,9 @@ void DialogProxyPrivate::initView()
 {
     mainWidget = new QWidget(q_ptr);
 
-    DialogTitleBar *  titleBar = new DialogTitleBar(q_ptr);
+    titleBar = new DialogTitleBar(q_ptr);
     connect(titleBar,SIGNAL(newOffsetPos(QPoint)),q_ptr,SLOT(udpatePos(QPoint)));
+    connect(titleBar,SIGNAL(widgetClose()),q_ptr,SLOT(close()));
 
     contentWidget = new QWidget(mainWidget);
     contentWidget->setObjectName("mainWidget");
@@ -229,6 +262,12 @@ void DialogProxy::respButtClicked(DialogProxy::StandardButton /*butt*/)
 
 }
 
+void DialogProxy::setTitle(QString content)
+{
+    Q_D(DialogProxy);
+    d->titleBar->setTitle(content);
+}
+
 void DialogProxy::addButton(DialogProxy::StandardButton buttType)
 {
     Q_D(DialogProxy);
@@ -315,4 +354,164 @@ QString DialogProxy::standardButtText(DialogProxy::StandardButton butt)
         }
     }
     return QString();
+}
+
+TitleLayout::TitleLayout(QWidget *parent):QLayout(parent),items(DialogTitleBar::RoleCount,NULL)
+{
+
+}
+
+void TitleLayout::addWidget(DialogTitleBar::ButtonRole role, QWidget *w)
+{
+    QWidget * tmpWidget = getWidget(role);
+    if(tmpWidget){
+        tmpWidget->hide();
+        removeWidget(w);
+    }
+
+    if(w){
+        QWidgetItem * item = new QWidgetItem(w);
+        items[role] = item;
+        w->show();
+    }else{
+        items[role] = NULL;
+    }
+}
+
+QWidget *TitleLayout::getWidget(DialogTitleBar::ButtonRole role) const
+{
+    QLayoutItem * item = items.at(role);
+    return item == 0 ? 0 : item->widget();
+}
+
+void TitleLayout::addItem(QLayoutItem *item)
+{
+    qWarning() << "please use DockLayout::addWidget()";
+    return;
+}
+
+void TitleLayout::setGeometry(const QRect &geometry)
+{
+    int titleWidth = geometry.width();
+    int leftPos = titleWidth;
+    int rightPos = 0;
+    int itemSpace = 1;
+
+    //closebutton
+    if(QLayoutItem * item = items[DialogTitleBar::CloseButton]){
+        if(!item->isEmpty()){
+            leftPos -= item->widget()->width();
+            leftPos -= itemSpace;
+            item->setGeometry(QRect(leftPos,0,item->widget()->width(),item->widget()->height()));
+        }
+    }
+
+    //maxbutton
+    if(QLayoutItem * item = items[DialogTitleBar::MaxButton]){
+        if(!item->isEmpty()){
+            leftPos -= item->widget()->width();
+            leftPos -= itemSpace;
+            item->setGeometry(QRect(leftPos,0,item->widget()->width(),item->widget()->height()));
+        }
+    }
+
+    //minbutton
+    if(QLayoutItem * item = items[DialogTitleBar::MinButton]){
+        if(!item->isEmpty()){
+            leftPos -= item->widget()->width();
+            leftPos -= itemSpace;
+            item->setGeometry(QRect(leftPos,0,item->widget()->width(),item->widget()->height()));
+        }
+    }
+
+    //iconlabel
+    if(QLayoutItem * item = items[DialogTitleBar::IconLabel]){
+        if(!item->isEmpty()){
+            rightPos += item->widget()->width();
+            rightPos += itemSpace;
+            item->setGeometry(QRect(0,0,item->widget()->width(),item->widget()->height()));
+        }
+    }
+
+    //TitleLabel
+    if(QLayoutItem * item = items[DialogTitleBar::TitleLabel]){
+        if(!item->isEmpty()){
+            item->setGeometry(QRect(rightPos,0,leftPos - rightPos,geometry.height()));
+        }
+    }
+}
+
+QLayoutItem *TitleLayout::itemAt(int index) const
+{
+    int cnt = 0;
+    for (int i = 0; i < items.count(); ++i) {
+        QLayoutItem *item = items.at(i);
+        if (item == 0)
+            continue;
+        if (index == cnt++)
+            return item;
+    }
+    return 0;
+}
+
+QLayoutItem *TitleLayout::takeAt(int index)
+{
+    int j = 0;
+    for (int i = 0; i < items.count(); ++i) {
+        QLayoutItem *item = items.at(i);
+        if (item == 0)
+            continue;
+
+        if (index == j)
+        {
+            items[i] = 0;
+            invalidate();
+            return item;
+        }
+        ++j;
+    }
+    return 0;
+}
+
+int TitleLayout::count() const
+{
+    int result = 0;
+    for (int i = 0; i < items.count(); ++i) {
+        if (items.at(i))
+            ++result;
+    }
+    return result;
+}
+
+QSize TitleLayout::minimumSize()
+{
+    return calculateSize(MinimumSize);
+}
+
+QSize TitleLayout::sizeHint() const
+{
+    return calculateSize(SizeHint);
+}
+
+QSize TitleLayout::calculateSize(TitleLayout::SizeType sizeType) const
+{
+    QSize totalSize;
+
+    for (int i = 0; i < items.size(); ++i) {
+        QWidgetItem  * item = items.at(i);
+        if(item == NULL || item->isEmpty())
+            continue;
+        QSize itemSize;
+
+        if (sizeType == MinimumSize){
+            itemSize = item->widget()->minimumSize();
+        }
+        else{
+            itemSize = item->widget()->sizeHint();
+        }
+
+        totalSize.rheight() += itemSize.height();
+    }
+
+    return totalSize;
 }

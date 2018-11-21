@@ -21,6 +21,7 @@ public:
     explicit PluginLoader();
 
     bool initConfigFile();
+    bool saveConfigFile();
 
     ModuleList * getModules(){return parsemethod->getModules();}
     NetworkMap * getNetworks(){return parsemethod->getNetworks();}

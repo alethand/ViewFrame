@@ -423,7 +423,6 @@ void LayoutAndDisplay::choooseComponent(QModelIndex index)
 void LayoutAndDisplay::initView()
 {
     mWorkStateWidget = new QWidget();
-    mWorkStateWidget->setObjectName("mainWidget");
     mWorkStateWidget->setMinimumHeight(minRowInterval*2+mItemsHeight);
     mWorkStateWidget->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
     mWorkStateWidget->setLayout(new QGridLayout());
@@ -433,26 +432,32 @@ void LayoutAndDisplay::initView()
     mSwPgWidget->bindCaller(this);
 
    //以下的布局内容或许会更改
-    QWidget *workStateWidget = new QWidget();
-    QVBoxLayout *vlayout = new QVBoxLayout();
-    vlayout->setContentsMargins(1,1,1,1);
-    vlayout->addWidget(mWorkStateWidget);
-    vlayout->addWidget(mSwPgWidget);
-    workStateWidget->setLayout(vlayout);
+    QWidget * workStateWidget = new QWidget();
+    mWorkStateWidget->setObjectName("mainWidget");
+
+    QVBoxLayout * workStateLayout = new QVBoxLayout();
+    workStateLayout->setContentsMargins(1,1,1,1);
+    workStateLayout->setSpacing(2);
+    workStateLayout->addWidget(mWorkStateWidget);
+    workStateLayout->addWidget(mSwPgWidget);
+    workStateWidget->setLayout(workStateLayout);
 
     msubMachWidget = new QStackedWidget;
+    msubMachWidget->setStyleSheet("background-color: rgba(0,0,0,0)");
+
     msubMachList = new QListWidget();
+    msubMachList->setObjectName("healthManager_sublist");
     msubMachList->setFixedWidth(100);
     connect(msubMachList,SIGNAL(clicked(QModelIndex)),this,SLOT(choooseComponent(QModelIndex)));
     StateLamp::initColorMap();
 
-    QWidget *subStateInfoWidget = new QWidget();
+    QWidget * subStateInfoWidget = new QWidget();
     subStateInfoWidget->setObjectName("mainWidget");
-    QHBoxLayout *hlayout1 = new QHBoxLayout();
-    hlayout1->setContentsMargins(0,0,0,0);
-    hlayout1->addWidget(msubMachList);
-    hlayout1->addWidget(msubMachWidget);
-    subStateInfoWidget->setLayout(hlayout1);
+    QHBoxLayout * subStateLayout = new QHBoxLayout();
+    subStateLayout->setContentsMargins(0,0,0,0);
+    subStateLayout->addWidget(msubMachList);
+    subStateLayout->addWidget(msubMachWidget);
+    subStateInfoWidget->setLayout(subStateLayout);
 
     tabWidget = new QTabWidget();
     tabWidget->addTab(workStateWidget,tr("WorkState"));

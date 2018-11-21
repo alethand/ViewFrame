@@ -99,7 +99,8 @@ SOURCES += main.cpp \
     widgets/datadisplay/datadisplay.cpp \
     network/netparseinfo.cpp \
     widgets/datadisplay/DisplayModel/dateview_superstruct.cpp \
-    file/layoutparsemethod.cpp
+    file/layoutparsemethod.cpp \
+    selfwidget/networksettingdialog.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
@@ -172,7 +173,8 @@ HEADERS  += \
     widgets/datadisplay/DisplayModel/model_history.h \
     widgets/datadisplay/datadisplay.h \
     network/netparseinfo.h \
-    file/layoutparsemethod.h
+    file/layoutparsemethod.h \
+    selfwidget/networksettingdialog.h
 
 FORMS    += mainwindow.ui \
     widgets/datadisplay/mfacquisitiongraphics.ui \
