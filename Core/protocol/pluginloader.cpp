@@ -25,4 +25,17 @@ bool PluginLoader::saveConfigFile()
     return file.startSave();
 }
 
+Datastruct::NetworkInfo PluginLoader::getNetwork(QString networkId, bool &existed)
+{
+    existed = false;
+    Datastruct::NetworkInfo info;
+
+    NetworkMap * networkMap = parsemethod->getNetworks();
+    if(networkMap && networkMap->contains(networkId)){
+        info = networkMap->value(networkId);
+        existed = true;
+    }
+    return info;
+}
+
 }

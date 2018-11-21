@@ -18,7 +18,6 @@ ProtocolParseThread::ProtocolParseThread()
 ProtocolParseThread::~ProtocolParseThread()
 {
     runningFlag = false;
-    G_ProtocolQueueCondition.notify_one();
     wait();
 }
 
@@ -54,6 +53,7 @@ void ProtocolParseThread::stopMe()
 {
     RTask::stopMe();
     runningFlag = false;
+    G_ProtocolQueueCondition.notify_all();
 }
 
 void ProtocolParseThread::run()

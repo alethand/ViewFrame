@@ -13,5 +13,10 @@ std::mutex G_ProtocolQueueMutex;
 std::condition_variable G_ProtocolQueueCondition;
 Datastruct::ProtocolQueue G_ProtoQueue;
 
+//Udp
+std::mutex G_Udp_ProtocolQueueMutex;
+std::condition_variable G_Udp_ProtocolQueueCondition;
+Datastruct::ProtocolQueue G_Udp_ProtoQueue;
+
 }
 

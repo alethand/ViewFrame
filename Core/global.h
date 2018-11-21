@@ -19,9 +19,15 @@ extern DBFeature G_DB_FEATURE;                 /*!< 当前数据库驱动支持�
 
 extern GlobalConfigFile * G_GlobalConfigFile;
 
+//Tcp
 extern std::mutex G_ProtocolQueueMutex;
 extern std::condition_variable G_ProtocolQueueCondition;
 extern Datastruct::ProtocolQueue G_ProtoQueue;
+
+//Udp
+extern std::mutex G_Udp_ProtocolQueueMutex;
+extern std::condition_variable G_Udp_ProtocolQueueCondition;
+extern Datastruct::ProtocolQueue G_Udp_ProtoQueue;
 
 }
 

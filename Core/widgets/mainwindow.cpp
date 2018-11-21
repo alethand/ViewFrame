@@ -32,6 +32,8 @@
 #include "widgets/taskcontrol/taskcontrolpanel.h"
 #include "shortcutsettings.h"
 #include "network/tcpserver.h"
+#include "network/udpclient.h"
+#include "network/udpserver.h"
 #include "network/taskmanager.h"
 
 #include "selfwidget/modulesetting.h"
@@ -83,8 +85,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    RSingleton<Core::ProtocolParseThread>::instance()->stopMe();
-
     delete ui;
 }
 
@@ -266,7 +266,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
  */
 void MainWindow::programExit()
 {
-    emit close();
+    RSingleton<Core::ProtocolParseThread>::instance()->stopMe();
+    RSingleton<Core::TaskManager>::instance()->releaseTask();
+
+    close();
 }
 
 /*!
@@ -523,10 +526,12 @@ void MainWindow::importView()
         Core::Widget::WidgetMap maps = Core::Widget::getAllWidgets();
         std::for_each(items.begin(),items.end(),[&](Core::LayoutItem & item){
             Core::Widget * tmpWidget = maps.value(item.objName);
-            tmpWidget->setExpanded(item.expanded);
-            tmpWidget->setGeometry(item.geometry);
+            if(tmpWidget){
+                tmpWidget->setExpanded(item.expanded);
+                tmpWidget->setGeometry(item.geometry);
 
-            tmpWidget->setWidgetFeatures(static_cast<Core::Widget::WidgetFeature>(item.feature));
+                tmpWidget->setWidgetFeatures(static_cast<Core::Widget::WidgetFeature>(item.feature));
+            }
         });
     }
 }
@@ -610,6 +615,9 @@ void MainWindow::loadCmponent()
  * @details 1.加载可用的插件 @n
  *          2.解析plugins.xml文件 @n
  *          3.初始化网路接收、网络解析模块 @n
+ *              a)Tcp服务器：每个网络Id为一个独立的线程 @n
+ *              b)Udp服务器：每个网络Id为一个独立的线程 @n
+ *              c)Udp客户端：【所有】网络Id共用一个线程，应用层指定数据从哪个网络口出去即可。 @n
  *          4.初始化配置的模块
  */
 void MainWindow::initComponent()
@@ -637,11 +645,46 @@ void MainWindow::initComponent()
     Core::NetworkMap::iterator niter = networkMap->begin();
     while(niter != networkMap->end()){
         Datastruct::NetworkInfo ninfo = niter.value();
-        if(ninfo.protocol == Datastruct::N_TCP && ninfo.baseInfo.connectionType == Datastruct::N_Server){
-            std::shared_ptr<Core::TcpServer> server(new Core::TcpServer());
-            server->init(ninfo);
-            server->startMe();
-            RSingleton<Core::TaskManager>::instance()->addTask(ninfo.id,server);
+
+        //Tcp
+        if(ninfo.protocol == Datastruct::N_TCP){
+            if(ninfo.baseInfo.connectionType == Datastruct::N_Server)
+            {
+                std::shared_ptr<Core::TcpServer> server(new Core::TcpServer());
+                if(server->init(ninfo)){
+                    server->startMe();
+                    RSingleton<Core::TaskManager>::instance()->addTask(ninfo.id,server);
+                }
+            }
+            else if(ninfo.baseInfo.connectionType == Datastruct::N_Client)
+            {
+                //TODO 20181121待扩展
+            }
+        }
+        //Udp
+        else if(ninfo.protocol == Datastruct::N_UDP){
+            if(ninfo.baseInfo.connectionType == Datastruct::N_Server)
+            {
+                std::shared_ptr<Core::UdpServer> server(new Core::UdpServer());
+                if(server->init(ninfo)){
+                    server->startMe();
+                    RSingleton<Core::TaskManager>::instance()->addTask(ninfo.id,server);
+                }
+            }
+            else if(ninfo.baseInfo.connectionType == Datastruct::N_Client)
+            {
+                Core::TaskPtr ptr = RSingleton<Core::TaskManager>::instance()->getTask("udp");
+
+                std::shared_ptr<Core::UdpClient> uptr = std::dynamic_pointer_cast<Core::UdpClient>(ptr);
+                if(uptr == NULL){
+                   uptr = std::shared_ptr<Core::UdpClient>(new Core::UdpClient());
+                   RSingleton<Core::TaskManager>::instance()->addTask("udp",uptr);
+                   if(uptr->init()){
+                       uptr->startMe();
+                   }
+                }
+                uptr->registNetworkDestination(ninfo);
+            }
         }
         niter++;
     }
@@ -657,17 +700,34 @@ void MainWindow::initComponent()
 
         Core::RComponent * plugin = RSingleton<Core::PluginManager>::instance()->getAvailblePlugin(mm.pluginId);
         if(plugin){
-
             plugin = plugin->clone();
 
-            //2.1 向网络接收模块注册需要数据信息
-            Core::TaskPtr tptr = RSingleton<Core::TaskManager>::instance()->getTask(mm.networkId);
-            if(tptr){
-                std::shared_ptr<Core::TcpServer> tcpPtr = std::dynamic_pointer_cast<Core::TcpServer>(tptr);
-                if(tcpPtr){
-                    tcpPtr->registNetworkObserver(plugin->id().toString(),mm.protocols);
-                    //2.2 向网络解析模块注册需要解析的协议
-                    RSingleton<Core::ProtocolParseThread>::instance()->registNetworkObserver(plugin->id().toString(),mm.protocols,Datastruct::N_TCP);
+            bool networkExisted = false;
+
+            //【2.1】向网络接收模块注册需要数据信息
+            Datastruct::NetworkInfo info = RSingleton<Core::PluginLoader>::instance()->getNetwork(mm.networkId,networkExisted);
+            if(networkExisted){
+                if(info.protocol == Datastruct::N_TCP)
+                {
+                    if(info.baseInfo.connectionType == Datastruct::N_Server)
+                    {
+                        Core::TaskPtr tptr = RSingleton<Core::TaskManager>::instance()->getTask(mm.networkId);
+                        if(tptr){
+                            std::shared_ptr<Core::TcpServer> tcpPtr = std::dynamic_pointer_cast<Core::TcpServer>(tptr);
+                            if(tcpPtr){
+                                tcpPtr->registNetworkObserver(plugin->id().toString(),mm.protocols);
+                                //【2.2】向网络解析模块注册需要解析的协议
+                                RSingleton<Core::ProtocolParseThread>::instance()->registNetworkObserver(plugin->id().toString(),mm.protocols,Datastruct::N_TCP);
+                            }
+                        }
+                    }
+                }
+                else if(info.protocol == Datastruct::N_UDP)
+                {
+                    if(info.baseInfo.connectionType == Datastruct::N_Client)
+                    {
+
+                    }
                 }
             }
 

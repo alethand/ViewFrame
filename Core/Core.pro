@@ -100,7 +100,9 @@ SOURCES += main.cpp \
     network/netparseinfo.cpp \
     widgets/datadisplay/DisplayModel/dateview_superstruct.cpp \
     file/layoutparsemethod.cpp \
-    selfwidget/networksettingdialog.cpp
+    selfwidget/networksettingdialog.cpp \
+    network/udpserver.cpp \
+    network/udpclient.cpp
 
 HEADERS  += \
     widgets/mainwindow.h \
@@ -174,7 +176,9 @@ HEADERS  += \
     widgets/datadisplay/datadisplay.h \
     network/netparseinfo.h \
     file/layoutparsemethod.h \
-    selfwidget/networksettingdialog.h
+    selfwidget/networksettingdialog.h \
+    network/udpserver.h \
+    network/udpclient.h
 
 FORMS    += mainwindow.ui \
     widgets/datadisplay/mfacquisitiongraphics.ui \

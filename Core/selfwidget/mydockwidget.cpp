@@ -44,7 +44,7 @@ public:
     bool mouseDoubleClickEvent(QMouseEvent * event);
     bool contextMenu(QContextMenuEvent * event);
 
-    void setExpand(bool expandable);
+    void setExpand(bool expanded);
 
     QString fixedWindowTitle;
     QPoint mouseStartPoint;     /*!< 鼠标按下位置 */
@@ -123,6 +123,7 @@ void DockLayout::setGeometry(const QRect &geometry)
             item->setGeometry(geometry);
     } else {
         int titleHeight = this->titleHeight();
+
         q->setMinimumSize(minimumTitleWidth(),titleHeight);
 
         if (verticalTitleBar) {
@@ -140,28 +141,55 @@ void DockLayout::setGeometry(const QRect &geometry)
             q->initStyleOption(&opt);
 
             int leftPos = _titleArea.width();
+            int topPos = 0;
             int itemSpace = 1;
 
             if (QLayoutItem *item = items[MyDockWidget::CloseButton]) {
                 if (!item->isEmpty()) {
+                    if(verticalTitleBar){
+                        item->setGeometry(QRect(0,topPos,item->widget()->width(),item->widget()->height()));
+                        topPos += item->widget()->height();
+                        topPos += itemSpace;
+                    }
+                    else
+                    {
                         leftPos -= item->widget()->width();
                         leftPos -= itemSpace;
                         item->setGeometry(QRect(leftPos,0,item->widget()->width(),item->widget()->height()));
+                    }
                 }
             }
 
             if (QLayoutItem *item = items[MyDockWidget::MoveButton]) {
                 if (!item->isEmpty()) {
-                    leftPos -= item->widget()->width();
-                    leftPos -= itemSpace;
-                    item->setGeometry(QRect(leftPos,0,item->widget()->width(),item->widget()->height()));
+                    if(verticalTitleBar){
+                        item->setGeometry(QRect(0,topPos,item->widget()->width(),item->widget()->height()));
+                        topPos += item->widget()->height();
+                        topPos += itemSpace;
+                    }
+                    else
+                    {
+                        leftPos -= item->widget()->width();
+                        leftPos -= itemSpace;
+                        item->setGeometry(QRect(leftPos,0,item->widget()->width(),item->widget()->height()));
+                    }
                 }
             }
 
             if(QLayoutItem *item = items[MyDockWidget::TitleLabel]){
                 if (!item->isEmpty()) {
-                    leftPos -= itemSpace;
-                     item->setGeometry(QRect(0,0,leftPos,_titleArea.height()));
+                    QLabel * label = dynamic_cast<QLabel *>(item->widget());
+                    if(label)
+                        label->setWordWrap(verticalTitleBar);
+
+                    if(verticalTitleBar){
+                        item->setGeometry(QRect(0,topPos,_titleArea.width(),_titleArea.height() - topPos));
+                    }
+                    else
+                    {
+                        leftPos -= itemSpace;
+                        item->setGeometry(QRect(0,0,leftPos,_titleArea.height()));
+                    }
                 }
             }
         }
@@ -255,6 +283,25 @@ int DockLayout::titleHeight() const
     return qMax(buttonHeight , titleFontMetrics.height() + 2*mw);
 }
 
+int DockLayout::titleWidth() const
+{
+    MyDockWidget *q = qobject_cast<MyDockWidget*>(parentWidget());
+
+    if (QWidget *title = getWidget(MyDockWidget::TitleBar))
+        return perp(verticalTitleBar, title->sizeHint());
+
+    QSize closeSize(0, 0);
+    QSize floatSize(0, 0);
+    if (QLayoutItem *item = items[MyDockWidget::CloseButton])
+        closeSize = item->widget()->sizeHint();
+    if (QLayoutItem *item = items[MyDockWidget::MoveButton])
+        floatSize = item->widget()->sizeHint();
+
+    int buttonWidth = qMax(perp(verticalTitleBar, closeSize),
+                            perp(verticalTitleBar, floatSize));
+    return buttonWidth;
+}
+
 QSize DockLayout::sizeFromContent(const QSize &content, bool floating) const
 {
     QSize result = content;
@@ -327,6 +374,11 @@ QSize DockLayout::sizeHint() const
         content = items[MyDockWidget::Content]->sizeHint();
 
     return sizeFromContent(content, w->isFloating());
+}
+
+void DockLayout::setVertical(bool flag)
+{
+    verticalTitleBar = flag;
 }
 
 QLayoutItem *DockLayout::itemAt(int index) const
@@ -501,10 +553,18 @@ bool MyDockWidgetPrivate::mousePress(QMouseEvent *event)
     if(event->button() == Qt::LeftButton){
         mouseStartPoint = event->pos();
         if(q_ptr->testFeatures(Widget::WidgetMovable)){
-            if(dockLayout->titleHeight() >= event->pos().y()){
-                mouseMoveable = true;
+            if(q_ptr->testFeatures(Widget::WidgetVerticalTitleBar)){
+                if(dockLayout->titleWidth() >= event->pos().x()){
+                    mouseMoveable = true;
+                }else{
+                    mouseMoveable = false;
+                }
             }else{
-                mouseMoveable = false;
+                if(dockLayout->titleHeight() >= event->pos().y()){
+                    mouseMoveable = true;
+                }else{
+                    mouseMoveable = false;
+                }
             }
         }
     }
@@ -593,7 +653,7 @@ bool MyDockWidgetPrivate::contextMenu(QContextMenuEvent *event)
  *              a.若未移动，则直接在原地展开；
  *              b.若移动后，先判断若直接展开其尺寸是否会超过屏幕，若超过则在超过的方向反向减去一定值；
  */
-void MyDockWidgetPrivate::setExpand(bool expandable)
+void MyDockWidgetPrivate::setExpand(bool expanded)
 {
     QWidget * content = dockLayout->getWidget(MyDockWidget::Content);
     if(!content || !q_ptr->testFeatures(Widget::WidgetExpanable))
@@ -604,7 +664,7 @@ void MyDockWidgetPrivate::setExpand(bool expandable)
 
     QRect screenSize = RUtil::screenGeometry();
 
-    if(expandable){
+    if(expanded){
         QPoint newPoint = q_ptr->pos();
         QSize newSize(currentGeometry.width(),newPoint.y() + currentGeometry.height());
         if(newSize.height() > screenSize.height()){
@@ -614,37 +674,70 @@ void MyDockWidgetPrivate::setExpand(bool expandable)
 
     }else{
         int hotArea = 10;
-        paris.push_back({W_Bottom,abs(screenSize.bottom() - q_ptr->geometry().bottom())});
-        paris.push_back({W_Left,abs(screenSize.left() - q_ptr->geometry().left())});
-        paris.push_back({W_Right,abs(screenSize.right() - q_ptr->geometry().right())});
 
-        auto index = std::min_element(paris.begin(),paris.end(),[&](DirPair & a,DirPair & b){
-            return a.second < b.second;
-        });
-        DirPair minDir = *index;
-        QPoint pos;
+        if(dockLayout->verticalTitleBar){
+            paris.push_back({W_Bottom,abs(screenSize.bottom() - q_ptr->geometry().bottom())});
+            paris.push_back({W_Left,abs(screenSize.left() - q_ptr->geometry().left())});
+            paris.push_back({W_Right,abs(screenSize.right() - q_ptr->geometry().right())});
 
-        //靠边停靠
-        if(minDir.second - hotArea <= 0 ){
-            switch(minDir.first){
-                case W_Left:
-                        pos = QPoint(screenSize.left(),q_ptr->y());
-                    break;
-                case W_Right:
-                        pos = QPoint(screenSize.right() - q_ptr->width(),q_ptr->y());
-                    break;
-                case W_Bottom:
-                        pos = QPoint(q_ptr->x(),screenSize.bottom()-q_ptr->minimumHeight());
-                    break;
-                default:
-                    break;
+            auto index = std::min_element(paris.begin(),paris.end(),[&](DirPair & a,DirPair & b){
+                return a.second < b.second;
+            });
+            DirPair minDir = *index;
+            QPoint pos;
+
+            //靠边停靠
+            if(minDir.second - hotArea <= 0 ){
+                switch(minDir.first){
+                    case W_Left:
+                            pos = QPoint(screenSize.left(),q_ptr->y());
+                        break;
+                    case W_Right:
+                            pos = QPoint(screenSize.right() - q_ptr->width(),q_ptr->y());
+                        break;
+                    case W_Bottom:
+                            pos = QPoint(q_ptr->x(),screenSize.bottom()-q_ptr->minimumHeight());
+                        break;
+                    default:
+                        break;
+                }
+            }else{
+                pos = q_ptr->pos();
             }
+            q_ptr->setGeometry(QRect(pos,QSize(q_ptr->width(),q_ptr->minimumHeight())));
         }else{
-            pos = q_ptr->pos();
+            paris.push_back({W_Bottom,abs(screenSize.bottom() - q_ptr->geometry().bottom())});
+            paris.push_back({W_Left,abs(screenSize.left() - q_ptr->geometry().left())});
+            paris.push_back({W_Right,abs(screenSize.right() - q_ptr->geometry().right())});
+
+            auto index = std::min_element(paris.begin(),paris.end(),[&](DirPair & a,DirPair & b){
+                return a.second < b.second;
+            });
+            DirPair minDir = *index;
+            QPoint pos;
+
+            //靠边停靠
+            if(minDir.second - hotArea <= 0 ){
+                switch(minDir.first){
+                    case W_Left:
+                            pos = QPoint(screenSize.left(),q_ptr->y());
+                        break;
+                    case W_Right:
+                            pos = QPoint(screenSize.right() - q_ptr->width(),q_ptr->y());
+                        break;
+                    case W_Bottom:
+                            pos = QPoint(q_ptr->x(),screenSize.bottom()-q_ptr->minimumHeight());
+                        break;
+                    default:
+                        break;
+                }
+            }else{
+                pos = q_ptr->pos();
+            }
+            q_ptr->setGeometry(QRect(pos,QSize(q_ptr->width(),q_ptr->minimumHeight())));
         }
-        q_ptr->setGeometry(QRect(pos,QSize(q_ptr->width(),q_ptr->minimumHeight())));
     }
-    content->setVisible(expandable);
+    content->setVisible(expanded);
 }
 
 MyDockWidget::MyDockWidget(QWidget * parent):Widget(parent),d_ptr(new MyDockWidgetPrivate(this))
@@ -652,6 +745,7 @@ MyDockWidget::MyDockWidget(QWidget * parent):Widget(parent),d_ptr(new MyDockWidg
     d_ptr->init();
     setFocusPolicy(Qt::ClickFocus);
     setWidgetFeatures(currentFeatures |= WidgetRangeLimit);
+//    setWidgetFeatures(currentFeatures |= WidgetVerticalTitleBar );
 }
 
 MyDockWidget::~MyDockWidget()
@@ -763,7 +857,7 @@ void MyDockWidget::updateFeatures()
     d->popActions[Widget::WidgetExpanable]->setChecked(widgetExpanded);
 
     d->setExpand(widgetExpanded);
-
+    d->dockLayout->setVertical(testFeatures(WidgetVerticalTitleBar));
     d->updateButtons();
 }
 

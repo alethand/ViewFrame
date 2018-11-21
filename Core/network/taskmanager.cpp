@@ -1,5 +1,7 @@
 ﻿#include "taskmanager.h"
 
+#include "rtask.h"
+
 namespace Core{
 
 TaskManager::TaskManager()
@@ -24,6 +26,17 @@ TaskPtr TaskManager::getTask(QString id)
         return NULL;
 
     return taskMap.value(id);
+}
+
+void TaskManager::releaseTask()
+{
+    std::lock_guard<std::mutex> lg(t_mutex);
+    TaskMap::iterator iter = taskMap.begin();
+    while(iter != taskMap.end()){
+        iter.value()->stopMe();
+        iter.value().reset();
+        iter++;
+    }
 }
 
 }

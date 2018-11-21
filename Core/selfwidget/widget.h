@@ -38,7 +38,7 @@ public:
         WidgetClosable    = 0x0001,
         WidgetMovable     = 0x0002,
         WidgetFloatable   = 0x0004,
-        WidgetVerticalTitleBar = 0x0008,
+        WidgetVerticalTitleBar = 0x0008,    /*!< dock窗口中有效 */
         WidgetExpanable = 0x0010,           /*!< 窗口是否展开，titlebar、modulesetting窗口是否隐藏 */
         WidgetResizeable = 0x0020,
         WidgetVisible = 0x0040,

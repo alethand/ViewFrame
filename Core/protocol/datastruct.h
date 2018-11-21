@@ -25,6 +25,8 @@
 #include "calculater/commonalgorithms.h"
 using namespace Calculator;
 
+#define RECV_BUFF 1024*64       /*!< 网络接收缓冲区空间，Tcp、Udp使用 */
+
 namespace Protocol
 {
 
@@ -944,6 +946,17 @@ struct ModuleInfo{
     QStringList protocols;  /*!< 协议id， @see  ProtocolInfo */
     QString pluginId;       /*!< 内部插件ID @see PluginInfo */
     QString networkId;      /*!< 网络模块id， @see BaseProtocol */
+};
+
+/*!
+ * @brief Tcp/Udp注册待需处理数据结构信息
+ */
+struct ModuleProtocol{
+    int startCode;      /*!< 开始标志码 */
+    int type;           /*!< 协议类型 */
+    int length;         /*!< 整包数据长度 */
+    int endCode;        /*!< 结束标志码 */
+    QString moduleId;   /*!< 模块Id */
 };
 
 } //namespace Datastruct

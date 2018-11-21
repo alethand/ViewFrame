@@ -1,15 +1,15 @@
 ﻿/*!
- *  @brief     TCP服务器
- *  @details   v0.1:实现基础功能,待以后再做调整
+ *  @brief     UDP服务器
+ *  @details   监听端口，接收udp数据
  *  @author    wey
  *  @version   1.0
- *  @date      2018.11.08
+ *  @date      2018.11.21
  *  @warning
  *  @copyright NanJing RenGu.
  *  @note
  */
-#ifndef TCPSERVER_H
-#define TCPSERVER_H
+#ifndef UDPSERVER_H
+#define UDPSERVER_H
 
 #include "protocol/datastruct.h"
 #include "rtask.h"
@@ -20,14 +20,13 @@ class RSocket;
 
 namespace Core{
 
-class TcpServer : public RTask
+class UdpServer : public RTask
 {
 public:
-    explicit TcpServer();
-    ~TcpServer();
+    explicit UdpServer();
+    ~UdpServer();
 
     bool init(Datastruct::NetworkInfo & info);
-
     void registNetworkObserver(QString mid,QStringList protos);
 
     void startMe();
@@ -38,12 +37,11 @@ protected:
 
 private:
     Network::RSocket * server;
-    QList<Network::RSocket *> clients;
     Datastruct::NetworkInfo netinfo;
 
     QHash<int,Datastruct::ModuleProtocol> observeredProtocol;
 };
 
-}
+} //namespace Core
 
-#endif // TCPSERVER_H
+#endif // UDPSERVER_H

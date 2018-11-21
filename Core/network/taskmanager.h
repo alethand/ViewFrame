@@ -28,6 +28,8 @@ public:
     void addTask(QString id, TaskPtr ptr);
     TaskPtr getTask(QString id);
 
+    void releaseTask();
+
 private:
     typedef QMap<QString,std::shared_ptr<RTask>> TaskMap;
 

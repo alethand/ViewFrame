@@ -11,14 +11,11 @@
 
 #include <climits>
 
-
 #ifdef Q_OS_WIN
 #include <winsock2.h>
 #include <windows.h>
 #pragma  comment(lib,"ws2_32.lib")
 #endif
-
-#define RECV_BUFF 1024*64
 
 namespace Core{
 
@@ -66,14 +63,13 @@ bool TcpServer::init(Datastruct::NetworkInfo &info)
  * @param[in] mid 组件id
  * @param[in] protos 需订阅的协议id集合
  */
-//TODO 20181113将数据解析从此文件中提取至单独文件
 void TcpServer::registNetworkObserver(QString mid, QStringList protos)
 {
     std::for_each(protos.begin(),protos.end(),[&](QString protocol){
         bool existed = false;
         const Datastruct::BaseProtocol *prot =RSingleton<Core::ProtocolManager>::instance()->getProtocol(protocol.toInt(),&existed);
         if(existed && prot != NULL){
-            ModuleProtocol mprotocol;
+            Datastruct::ModuleProtocol mprotocol;
             mprotocol.startCode = prot->startCode;
             mprotocol.endCode = prot->endCode;
             mprotocol.type = prot->type;
@@ -92,7 +88,8 @@ void TcpServer::startMe()
 
 void TcpServer::stopMe()
 {
-
+    RTask::stopMe();
+    runningFlag = false;
 }
 
 void TcpServer::run()

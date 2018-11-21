@@ -104,9 +104,12 @@ public:
 
     QRect titleArea() const { return _titleArea; }
 
+    void setVertical(bool flag);
+
 private:
     void removeWidget(QWidget *widget);
     int titleHeight() const;
+    int titleWidth() const;
     int minimumTitleWidth() const;
     bool nativeWindowDeco() const;
     bool nativeWindowDeco(bool floating) const;

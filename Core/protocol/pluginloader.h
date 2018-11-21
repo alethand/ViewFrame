@@ -27,6 +27,8 @@ public:
     NetworkMap * getNetworks(){return parsemethod->getNetworks();}
     PluginMap * getPlugins(){return parsemethod->getPlugins();}
 
+    Datastruct::NetworkInfo getNetwork(QString networkId,bool & existed);
+
 private:
     PluginXmlParse * parsemethod;
 
